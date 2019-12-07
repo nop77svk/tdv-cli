@@ -1,0 +1,67 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net5.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <RootNamespace>NoP77svk.TibcoDV.CLI</RootNamespace>
+        <Product>Tibco Data Virtualization Utilities</Product>
+        <Authors>Peter Hraško</Authors>
+        <Company>Open source community</Company>
+        <Copyright>Copyleft</Copyright>
+        <Description>Tibco Data Virtualization Comand-Line Interface</Description>
+        <AssemblyName>tdvcli</AssemblyName>
+		<NoWarn>1701;1702;AD0001</NoWarn>
+        <PackageId>tdvcli</PackageId>
+        <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+        <RuntimeIdentifiers>win-x86;win-x64;win-arm;linux-x64;linux-arm</RuntimeIdentifiers>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+        <DefineConstants>TRACE;DEBUG</DefineConstants>
+        <DebugType>portable</DebugType>
+        <DebugSymbols>true</DebugSymbols>
+        <UserSecretsId>bfb38ff8-6cfe-4680-883a-cef8d6fd7a42</UserSecretsId>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+        <DebugType>none</DebugType>
+        <DebugSymbols>false</DebugSymbols>
+    </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="H:\_projects\NET Commons\analyzer-settings\GlobalSuppressions.cs" Link="GlobalSuppressions.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommandLineParser" Version="2.8.0" />
+    <PackageReference Include="CsvHelper" Version="27.1.1" />
+    <PackageReference Include="log4net" Version="2.0.13" />
+    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="6.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="6.0.0" />
+    <PackageReference Include="NoP77svk.ConnectionStringParsers" Version="1.1.3" />
+    <PackageReference Include="NoP77svk.Linq" Version="1.1.3" />
+    <PackageReference Include="NoP77svk.LinqOuterJoins" Version="1.1.3" />
+    <PackageReference Include="NoP77svk.MiscellaneousHelpers" Version="1.1.3" />
+    <PackageReference Include="NoP77svk.WebServiceClient" Version="1.1.3" />
+    <PackageReference Include="Pegasus" Version="4.1.0" />
+    <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="System.Linq.Async" Version="5.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\tdv_cli_commons\tdv_cli_commons.csproj" />
+    <ProjectReference Include="..\tdv_ws_api\tdv_ws_api.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PegGrammar Include="parser\PierresTibcoSQL.peg" />
+  </ItemGroup>
+
+</Project>

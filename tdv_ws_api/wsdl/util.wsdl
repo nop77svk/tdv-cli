@@ -1,0 +1,2498 @@
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ns2="http://www.compositesw.com/services/system/util/common" xmlns:ns1="http://www.compositesw.com/services/system/util" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:ns4="http://www.compositesw.com/services/system/util/session" xmlns:ns3="http://www.compositesw.com/services/system/util/security" targetNamespace="http://www.compositesw.com/services/system/util">
+  <wsdl:types>
+    <xs:schema xmlns:ns1="http://www.compositesw.com/services/system/util/common" xmlns:xs="http://www.w3.org/2001/XMLSchema" attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://www.compositesw.com/services/system/util/common">
+      <xs:complexType name="attribute">
+        <xs:sequence>
+          <xs:element name="name" type="xs:string"/>
+          <xs:element name="type" type="ns1:attributeType"/>
+          <xs:element minOccurs="0" name="value" type="ns1:attributeSimpleValue"/>
+          <xs:element minOccurs="0" name="valueList" type="ns1:attributeTypeValueList"/>
+          <xs:element minOccurs="0" name="valueMap" type="ns1:attributeTypeValueMap"/>
+          <xs:element minOccurs="0" name="valueArray" type="ns1:attributeSimpleValueList"/>
+          <xs:element minOccurs="0" name="unset" type="xs:boolean"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="attributeDefList">
+        <xs:sequence>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="attributeDef" type="ns1:attributeDef"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:simpleType name="attributeSimpleValue">
+        <xs:restriction base="xs:string"/>
+      </xs:simpleType>
+      <xs:complexType name="principalList">
+        <xs:sequence>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="principal" type="xs:string"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="serverTaskRequest">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseRequest"/>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="serverTaskResponse">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseResponse">
+            <xs:sequence>
+              <xs:element name="taskId" type="ns1:taskId"/>
+              <xs:element minOccurs="0" name="totalResults" type="xs:integer"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:simpleType name="attributeType">
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="NULL"/>
+          <xs:enumeration value="BOOLEAN"/>
+          <xs:enumeration value="BYTE"/>
+          <xs:enumeration value="BYTE_ARRAY"/>
+          <xs:enumeration value="DATE"/>
+          <xs:enumeration value="DOUBLE"/>
+          <xs:enumeration value="FLOAT"/>
+          <xs:enumeration value="INTEGER"/>
+          <xs:enumeration value="LONG"/>
+          <xs:enumeration value="OBJECT"/>
+          <xs:enumeration value="SHORT"/>
+          <xs:enumeration value="STRING"/>
+          <xs:enumeration value="BOOLEAN_ARRAY"/>
+          <xs:enumeration value="DATE_ARRAY"/>
+          <xs:enumeration value="DOUBLE_ARRAY"/>
+          <xs:enumeration value="FLOAT_ARRAY"/>
+          <xs:enumeration value="LONG_ARRAY"/>
+          <xs:enumeration value="INT_ARRAY"/>
+          <xs:enumeration value="SHORT_ARRAY"/>
+          <xs:enumeration value="STRING_ARRAY"/>
+          <xs:enumeration value="FILE_PATH_STRING"/>
+          <xs:enumeration value="PATH_STRING"/>
+          <xs:enumeration value="PASSWORD_STRING"/>
+          <xs:enumeration value="GUID"/>
+          <xs:enumeration value="LIST"/>
+          <xs:enumeration value="MAP"/>
+          <xs:enumeration value="SET"/>
+          <xs:enumeration value="FOLDER"/>
+          <xs:enumeration value="UNKNOWN"/>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:complexType name="serverTaskResultRequest">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseRequest">
+            <xs:sequence>
+              <xs:element name="taskId" type="ns1:taskId"/>
+              <xs:element minOccurs="0" name="block" type="xs:boolean"/>
+              <xs:element minOccurs="0" name="page" type="ns1:page"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="baseResponse"/>
+      <xs:complexType name="attributeSimpleValueList">
+        <xs:complexContent>
+          <xs:extension base="ns1:attributeComplexValue">
+            <xs:sequence>
+              <xs:element maxOccurs="unbounded" minOccurs="0" name="item" type="ns1:attributeSimpleValue"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:simpleType name="attributeEditorHint">
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="CHECK"/>
+          <xs:enumeration value="CHOICE"/>
+          <xs:enumeration value="EDITABLE_CHOICE"/>
+          <xs:enumeration value="LABEL"/>
+          <xs:enumeration value="PASSWORD"/>
+          <xs:enumeration value="RADIO"/>
+          <xs:enumeration value="TEXT"/>
+          <xs:enumeration value="TEXT_PANE"/>
+          <xs:enumeration value="RADIO_TEXT"/>
+          <xs:enumeration value="RADIO_SCHEMA"/>
+          <xs:enumeration value="ENTRY_LABEL"/>
+          <xs:enumeration value="CONNECTOR"/>
+          <xs:enumeration value="DATA_SOURCE"/>
+          <xs:enumeration value="DS_FILTER"/>
+          <xs:enumeration value="FILE"/>
+          <xs:enumeration value="JDBC_PROPERTIES"/>
+          <xs:enumeration value="KEY_STORE"/>
+          <xs:enumeration value="PATH"/>
+          <xs:enumeration value="PIPELINE_PROCEDURE"/>
+          <xs:enumeration value="PROCEDURE"/>
+          <xs:enumeration value="PROCEDURE_PARAMETER"/>
+          <xs:enumeration value="PROCEDURE_VIEW"/>
+          <xs:enumeration value="SCHEMA"/>
+          <xs:enumeration value="TABLE_VIEW"/>
+          <xs:enumeration value="VALUE_COLUMN"/>
+          <xs:enumeration value="BUTTON_GROUP"/>
+          <xs:enumeration value="GROUP"/>
+          <xs:enumeration value="TAB_GROUP"/>
+          <xs:enumeration value="TAB"/>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:simpleType name="detailLevel">
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="FULL"/>
+          <xs:enumeration value="SIMPLE"/>
+          <xs:enumeration value="NONE"/>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:simpleType name="pseudoType">
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="ANY"/>
+          <xs:enumeration value="DATE_OR_TIME"/>
+          <xs:enumeration value="FLOATING_POINT"/>
+          <xs:enumeration value="NUMBER"/>
+          <xs:enumeration value="STRING"/>
+          <xs:enumeration value="WHOLE_NUMBER"/>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:complexType name="attributeComplexValue"/>
+      <xs:complexType name="messageEntry">
+        <xs:sequence>
+          <xs:element name="code" type="xs:string"/>
+          <xs:element name="name" type="xs:string"/>
+          <xs:element minOccurs="0" name="message" type="xs:string"/>
+          <xs:element minOccurs="0" name="detail" type="xs:string"/>
+          <xs:element minOccurs="0" name="severity" type="ns1:messageSeverity"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:simpleType name="operationStatus">
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="CANCELED"/>
+          <xs:enumeration value="FAIL"/>
+          <xs:enumeration value="INCOMPLETE"/>
+          <xs:enumeration value="SUCCESS"/>
+          <xs:enumeration value="WAITING"/>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:complexType name="baseRequest"/>
+      <xs:complexType name="attributeTypeValue">
+        <xs:sequence>
+          <xs:element name="type" type="ns1:attributeType"/>
+          <xs:element minOccurs="0" name="value" type="ns1:attributeSimpleValue"/>
+          <xs:element minOccurs="0" name="valueList" type="ns1:attributeTypeValueList"/>
+          <xs:element minOccurs="0" name="valueMap" type="ns1:attributeTypeValueMap"/>
+          <xs:element minOccurs="0" name="valueArray" type="ns1:attributeSimpleValueList"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="attributeTypeValueMap">
+        <xs:complexContent>
+          <xs:extension base="ns1:attributeComplexValue">
+            <xs:sequence>
+              <xs:element maxOccurs="unbounded" minOccurs="0" name="entry">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="key" type="ns1:attributeTypeValue"/>
+                    <xs:element name="value" type="ns1:attributeTypeValue"/>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="attributeList">
+        <xs:sequence>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="attribute" type="ns1:attribute"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="messageEntryList">
+        <xs:sequence>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="entry" type="ns1:messageEntry"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="page">
+        <xs:sequence>
+          <xs:element name="size" type="xs:int"/>
+          <xs:element default="0" name="start" type="xs:int"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="nameList">
+        <xs:sequence>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="name" type="xs:string"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="cancelServerTaskResponse">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseResponse"/>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:simpleType name="taskId">
+        <xs:restriction base="xs:string"/>
+      </xs:simpleType>
+      <xs:complexType name="attributeTypeValueList">
+        <xs:complexContent>
+          <xs:extension base="ns1:attributeComplexValue">
+            <xs:sequence>
+              <xs:element maxOccurs="unbounded" minOccurs="0" name="item" type="ns1:attributeTypeValue"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:simpleType name="marker">
+        <xs:restriction base="xs:boolean"/>
+      </xs:simpleType>
+      <xs:complexType name="messageList">
+        <xs:sequence>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="message" type="xs:string"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="fault">
+        <xs:sequence>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="errorEntry" type="ns1:messageEntry"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="attributeDef">
+        <xs:sequence>
+          <xs:element name="name" type="xs:string"/>
+          <xs:element name="type" type="ns1:attributeType"/>
+          <xs:element name="updateRule" type="ns1:attributeUpdateRule"/>
+          <xs:element minOccurs="0" name="annotation" type="xs:string"/>
+          <xs:element minOccurs="0" name="required" type="xs:boolean"/>
+          <xs:element minOccurs="0" name="defaultValue" type="ns1:attributeSimpleValue"/>
+          <xs:element minOccurs="0" name="pattern" type="xs:string"/>
+          <xs:element minOccurs="0" name="minValue" type="ns1:attributeSimpleValue"/>
+          <xs:element minOccurs="0" name="maxValue" type="ns1:attributeSimpleValue"/>
+          <xs:element minOccurs="0" name="allowedValues" type="ns1:attributeSimpleValueList"/>
+          <xs:element minOccurs="0" name="suggestedValues" type="ns1:attributeSimpleValueList"/>
+          <xs:element minOccurs="0" name="condition" type="xs:string"/>
+          <xs:element minOccurs="0" name="displayName" type="xs:string"/>
+          <xs:element minOccurs="0" name="unitName" type="xs:string"/>
+          <xs:element minOccurs="0" name="parentName" type="xs:string"/>
+          <xs:element minOccurs="0" name="visible" type="xs:boolean"/>
+          <xs:element minOccurs="0" name="editorHint" type="ns1:attributeEditorHint"/>
+          <xs:element minOccurs="0" name="dependencyExpression" type="xs:string"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="cancelServerTaskRequest">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseRequest">
+            <xs:sequence>
+              <xs:element name="taskId" type="ns1:taskId"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="dataType">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="sqlType">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="definition" type="xs:string"/>
+                <xs:element minOccurs="0" name="nativeType" type="xs:string"/>
+                <xs:element minOccurs="0" name="referencePath" type="xs:string"/>
+                <xs:element minOccurs="0" name="referenceTypeName" type="xs:string"/>
+                <xs:element minOccurs="0" name="proprietaryModel" type="xs:base64Binary"/>
+                <xs:element minOccurs="0" name="name" type="xs:string"/>
+                <xs:element minOccurs="0" name="trailingSpaces" type="xs:boolean"/>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element minOccurs="0" name="xmlType">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="name" type="xs:string"/>
+                <xs:element name="namespace" type="xs:string"/>
+                <xs:element minOccurs="0" name="schema" type="xs:string"/>
+                <xs:element minOccurs="0" name="referencePath" type="xs:string"/>
+                <xs:element minOccurs="0" name="proprietaryModel" type="xs:base64Binary"/>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element minOccurs="0" name="pseudoType">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="definition" type="ns1:pseudoType"/>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:simpleType name="attributeUpdateRule">
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="READ_ONLY"/>
+          <xs:enumeration value="READ_WRITE"/>
+          <xs:enumeration value="WRITE_ON_CREATE"/>
+          <xs:enumeration value="WRITE_ON_EDIT"/>
+          <xs:enumeration value="WRITE_ON_IMPORT"/>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:complexType name="serverTaskResultResponse">
+        <xs:complexContent>
+          <xs:extension base="ns1:serverTaskResponse">
+            <xs:sequence>
+              <xs:element name="completed" type="xs:boolean"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:simpleType name="messageSeverity">
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="DEBUG"/>
+          <xs:enumeration value="INFO"/>
+          <xs:enumeration value="WARNING"/>
+          <xs:enumeration value="ERROR"/>
+          <xs:enumeration value="CRITICAL"/>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:element name="cancelServerTaskResponse" type="ns1:cancelServerTaskResponse"/>
+      <xs:element name="fault" type="ns1:fault"/>
+      <xs:element name="cancelServerTask" type="ns1:cancelServerTaskRequest"/>
+    </xs:schema>
+    <xs:schema xmlns:ns2="http://www.compositesw.com/services/system/util/security" xmlns:ns1="http://www.compositesw.com/services/system/util/common" xmlns:xs="http://www.w3.org/2001/XMLSchema" attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://www.compositesw.com/services/system/util/security">
+      <xs:import namespace="http://www.compositesw.com/services/system/util/common"/>
+      <xs:complexType name="getSecurityBundleRequest">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseRequest">
+            <xs:sequence>
+              <xs:element name="id" type="xs:string"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="cbsParamListType">
+        <xs:sequence>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="cbsParam" type="ns2:cbsParamType"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="getAvailableLoginModuleNamesResponse">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseResponse">
+            <xs:sequence>
+              <xs:element maxOccurs="unbounded" minOccurs="0" name="loginModuleName" type="xs:string"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="rbsGetFilterPolicyResponse">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseResponse">
+            <xs:sequence>
+              <xs:element name="policy" type="ns2:rbsPolicyType"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="rbsDeleteFilterPolicyRequest">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseRequest">
+            <xs:sequence>
+              <xs:element name="name" type="xs:string"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="updateLoginModuleResponse">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseResponse">
+            <xs:sequence>
+              <xs:element name="id" type="xs:string"/>
+              <xs:element name="name" type="xs:string"/>
+              <xs:element name="bundleName" type="xs:string"/>
+              <xs:element minOccurs="0" name="group" type="xs:string"/>
+              <xs:element minOccurs="0" name="enabled" type="xs:boolean"/>
+              <xs:element minOccurs="0" name="bundleEnabled" type="xs:boolean"/>
+              <xs:element minOccurs="0" name="properties" type="ns2:loginModulePropertiesType"/>
+              <xs:element minOccurs="0" name="annotation" type="xs:string"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="cbsEditPolicyListType">
+        <xs:sequence>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="policy" type="ns2:cbsEditPolicyType"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="updateSecurityBundleResponse">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseResponse">
+            <xs:sequence>
+              <xs:element name="id" type="xs:string"/>
+              <xs:element name="projectRoot" type="xs:string"/>
+              <xs:element name="bundleName" type="xs:string"/>
+              <xs:element name="isEnabled" type="xs:boolean"/>
+              <xs:element name="isUpdateable" type="xs:boolean"/>
+              <xs:element name="instanceCount" type="xs:integer"/>
+              <xs:element minOccurs="0" name="annotation" type="xs:string"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="cbsMaskingRuleListType">
+        <xs:sequence>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="maskingRule" type="ns2:cbsMaskingRuleType"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="rbsFilterPolicySummaryType">
+        <xs:sequence>
+          <xs:element name="name" type="xs:string"/>
+          <xs:element name="procedure" type="xs:string"/>
+          <xs:element name="enabled" type="xs:boolean"/>
+          <xs:element name="assignmentList" type="ns2:rbsAssignmentListType"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:simpleType name="rbsFilterType">
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="ALL"/>
+          <xs:enumeration value="NONE"/>
+          <xs:enumeration value="PREDICATE"/>
+          <xs:enumeration value="PROCEDURE"/>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:complexType name="cbsUpdateAssignmentsResponse">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseResponse"/>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="removePrincipalMappingRequest">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseRequest">
+            <xs:sequence>
+              <xs:element name="id" type="xs:string"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:simpleType name="groupMappingType">
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="X500_DN"/>
+          <xs:enumeration value="KRB_REALM"/>
+          <xs:enumeration value="NAME_MATCH"/>
+          <xs:enumeration value="NAME_REGEX"/>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:complexType name="addPrincipalMappingRequest">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseRequest">
+            <xs:sequence>
+              <xs:element name="type" type="ns2:groupMappingType"/>
+              <xs:element name="identifier" type="xs:string"/>
+              <xs:element name="group" type="xs:string"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="rbsPolicyGroupType">
+        <xs:sequence>
+          <xs:element name="joinType" type="ns2:rbsGroupJoinType"/>
+          <xs:element name="policyList" type="ns2:rbsPolicyListType"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="cbsEditPolicyType">
+        <xs:sequence>
+          <xs:element name="policyPath" type="xs:string"/>
+          <xs:element minOccurs="0" name="newPolicyPath" type="xs:string"/>
+          <xs:element minOccurs="0" name="dataType" type="xs:string"/>
+          <xs:element minOccurs="0" name="maskingRuleList" type="ns2:cbsMaskingRuleListType"/>
+          <xs:element name="enabled" type="xs:boolean"/>
+          <xs:element minOccurs="0" name="annotation" type="xs:string"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="cbsPolicyReturnType">
+        <xs:sequence>
+          <xs:element name="policyPath" type="xs:string"/>
+          <xs:element name="dateType" type="xs:string"/>
+          <xs:element name="maskingRuleList" type="ns2:cbsMaskingRuleListType"/>
+          <xs:element name="enabled" type="xs:boolean"/>
+          <xs:element name="annotation" type="xs:string"/>
+          <xs:element name="assignmentList" type="ns2:cbsAssignmentWithResourcePathTypeListType"/>
+          <xs:element name="impactMessage" type="xs:string"/>
+          <xs:element name="impactLevel" type="xs:string"/>
+          <xs:element name="parameters" type="ns2:cbsParameterListType"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="cbsSetEnabledResponse">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseResponse"/>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="cbsGetAssignmentsResponse">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseResponse">
+            <xs:sequence>
+              <xs:element name="assignmentList" type="ns2:cbsAssignmentStandaloneListType"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="rbsDeleteFilterPolicyResponse">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseResponse"/>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:simpleType name="rbsAssignmentOperationType">
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="ASSIGN"/>
+          <xs:enumeration value="REMOVE"/>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:complexType name="rbsAssignmentListType">
+        <xs:sequence>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="assignment" type="xs:string"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="cbsCreatePoliciesRequest">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseRequest">
+            <xs:sequence>
+              <xs:element name="policyList" type="ns2:cbsPolicyListType"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="cbsEditPoliciesResponse">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseResponse"/>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="cbsGetPoliciesResponse">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseResponse">
+            <xs:sequence>
+              <xs:element name="policyList" type="ns2:cbsPolicyListReturnType"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="rbsGetFilterPolicyListRequest">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseRequest"/>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="cbsMaskingRuleType">
+        <xs:sequence>
+          <xs:element name="domainName" type="xs:string"/>
+          <xs:element name="userGroupName" type="xs:string"/>
+          <xs:element name="isGroup" type="xs:boolean"/>
+          <xs:element name="isDefaultRule" type="xs:boolean"/>
+          <xs:element name="selectableString" type="xs:string"/>
+          <xs:element name="ruleType" type="xs:string"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:simpleType name="sessionToken">
+        <xs:restriction base="xs:string"/>
+      </xs:simpleType>
+      <xs:complexType name="getGeneralSettingsRequest">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseRequest"/>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="cbsIsEnabledRequest">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseRequest"/>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="getPrincipalMappingListRequest">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseRequest"/>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="removePrincipalMappingResponse">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseResponse"/>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="updateSystemEncryptionResponse">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseResponse"/>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="cbsGetAssignmentsRequest">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseRequest">
+            <xs:sequence>
+              <xs:element minOccurs="0" name="policyPath" type="xs:string"/>
+              <xs:element minOccurs="0" name="resourcePath" type="xs:string"/>
+              <xs:element minOccurs="0" name="resourceType" type="xs:string"/>
+              <xs:element minOccurs="0" name="columnName" type="xs:string"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="cbsAssignmentStandaloneType">
+        <xs:sequence>
+          <xs:element name="policyPath" type="xs:string"/>
+          <xs:element name="resourcePath" type="xs:string"/>
+          <xs:element name="resourceType" type="xs:string"/>
+          <xs:element name="columnName" type="xs:string"/>
+          <xs:element name="paramList" type="ns2:cbsParamListType"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="addLoginModuleRequest">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseRequest">
+            <xs:sequence>
+              <xs:element name="name" type="xs:string"/>
+              <xs:element minOccurs="0" name="group" type="xs:string"/>
+              <xs:element minOccurs="0" name="enabled" type="xs:boolean"/>
+              <xs:element minOccurs="0" name="properties" type="ns2:loginModulePropertiesType"/>
+              <xs:element minOccurs="0" name="annotation" type="xs:string"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="cbsParameterListType">
+        <xs:sequence>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="parameter" type="xs:string"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:simpleType name="rbsGroupJoinType">
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="ALL"/>
+          <xs:enumeration value="ANY"/>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:complexType name="getSecurityBundleResponse">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseResponse">
+            <xs:sequence>
+              <xs:element name="id" type="xs:string"/>
+              <xs:element name="projectRoot" type="xs:string"/>
+              <xs:element name="bundleName" type="xs:string"/>
+              <xs:element name="isEnabled" type="xs:boolean"/>
+              <xs:element name="isUpdateable" type="xs:boolean"/>
+              <xs:element name="instanceCount" type="xs:integer"/>
+              <xs:element minOccurs="0" name="annotation" type="xs:string"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="rbsSetEnabledResponse">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseResponse"/>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:simpleType name="rbsPolicyFormType">
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="CODE"/>
+          <xs:enumeration value="RULE"/>
+          <xs:enumeration value="GROUP"/>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:complexType name="removeSecurityBundleResponse">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseResponse"/>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="cbsDeletePoliciesRequest">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseRequest">
+            <xs:sequence>
+              <xs:element minOccurs="0" name="policyPath" type="xs:string"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="rbsGetFilterPolicyListResponse">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseResponse">
+            <xs:sequence>
+              <xs:element name="filterPolicyList" type="ns2:rbsFilterPolicySummaryListType"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="cbsAssignmentWithResourcePathTypeListType">
+        <xs:sequence>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="assignment" type="ns2:cbsAssignmentWithResourcePathTypeType"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="cbsDeletePoliciesResponse">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseResponse"/>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="rbsSetEnabledRequest">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseRequest">
+            <xs:sequence>
+              <xs:element name="enabled" type="xs:boolean"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="getPrincipalMappingRequest">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseRequest">
+            <xs:sequence>
+              <xs:element name="id" type="xs:string"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="rbsWriteFilterPolicyRequest">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseRequest">
+            <xs:sequence>
+              <xs:element name="policy" type="ns2:rbsPolicyType"/>
+              <xs:element minOccurs="0" name="originalPath" type="xs:string"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="getSystemEncryptionResponse">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseResponse">
+            <xs:sequence>
+              <xs:element name="algorithm" type="xs:string"/>
+              <xs:element name="keySize" type="xs:integer"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="rbsMemberRuleType">
+        <xs:sequence>
+          <xs:element name="member" type="ns2:rbsMatchingIdType"/>
+          <xs:element name="filter" type="ns2:rbsFilterType"/>
+          <xs:element minOccurs="0" name="data" type="xs:string"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="rbsDefaultRuleType">
+        <xs:sequence>
+          <xs:element name="filter" type="ns2:rbsFilterType"/>
+          <xs:element minOccurs="0" name="data" type="xs:string"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="addPrincipalMappingResponse">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseResponse">
+            <xs:sequence>
+              <xs:element name="id" type="xs:string"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:simpleType name="licenseToken">
+        <xs:restriction base="xs:string"/>
+      </xs:simpleType>
+      <xs:complexType name="getSecurityBundleListResponse">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseResponse">
+            <xs:sequence>
+              <xs:element maxOccurs="unbounded" minOccurs="0" name="id" type="xs:string"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="updateSecurityBundleRequest">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseRequest">
+            <xs:sequence>
+              <xs:element name="id" type="xs:string"/>
+              <xs:element minOccurs="0" name="isEnabled" type="xs:boolean"/>
+              <xs:element minOccurs="0" name="isUpdateable" type="xs:boolean"/>
+              <xs:element minOccurs="0" name="annotation" type="xs:string"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="updateLoginModuleListResponse">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseResponse"/>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="removeSecurityBundleRequest">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseRequest">
+            <xs:sequence>
+              <xs:element name="id" type="xs:string"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="cbsSetEnabledRequest">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseRequest">
+            <xs:sequence>
+              <xs:element name="enabled" type="xs:boolean"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="rbsFilterPolicySummaryListType">
+        <xs:sequence>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="filterPolicy" type="ns2:rbsFilterPolicySummaryType"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="rbsIsEnabledResponse">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseResponse">
+            <xs:sequence>
+              <xs:element name="enabled" type="xs:boolean"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="removeLoginModuleResponse">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseResponse"/>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="getSystemEncryptionRequest">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseRequest"/>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="rbsMatchingIdType">
+        <xs:sequence>
+          <xs:element name="domain" type="xs:string"/>
+          <xs:element name="name" type="xs:string"/>
+          <xs:element name="type" type="ns2:memberIdType"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="cbsGetPoliciesRequest">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseRequest">
+            <xs:sequence>
+              <xs:element minOccurs="0" name="policyPath" type="xs:string"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="cbsRemoveAssignmentsResponse">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseResponse"/>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="updatePrincipalMappingResponse">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseResponse">
+            <xs:sequence>
+              <xs:element name="id" type="xs:string"/>
+              <xs:element name="type" type="ns2:groupMappingType"/>
+              <xs:element name="identifier" type="xs:string"/>
+              <xs:element name="group" type="xs:string"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="getLoginModuleListResponse">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseResponse">
+            <xs:sequence>
+              <xs:element maxOccurs="unbounded" minOccurs="0" name="id" type="xs:string"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="rbsIsEnabledRequest">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseRequest"/>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="cbsIsEnabledResponse">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseResponse">
+            <xs:sequence>
+              <xs:element name="enabled" type="xs:boolean"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="getLoginModuleResponse">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseResponse">
+            <xs:sequence>
+              <xs:element name="id" type="xs:string"/>
+              <xs:element name="name" type="xs:string"/>
+              <xs:element name="bundleName" type="xs:string"/>
+              <xs:element minOccurs="0" name="group" type="xs:string"/>
+              <xs:element minOccurs="0" name="enabled" type="xs:boolean"/>
+              <xs:element minOccurs="0" name="bundleEnabled" type="xs:boolean"/>
+              <xs:element minOccurs="0" name="properties" type="ns2:loginModulePropertiesType"/>
+              <xs:element minOccurs="0" name="annotation" type="xs:string"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="cbsAssignmentStandaloneListType">
+        <xs:sequence>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="assignment" type="ns2:cbsAssignmentStandaloneType"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="updateGeneralSettingsResponse">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseResponse">
+            <xs:sequence>
+              <xs:element name="enablePAM" type="xs:boolean"/>
+              <xs:element name="mayDisallowUser" type="xs:boolean"/>
+              <xs:element name="logAuthFailures" type="xs:boolean"/>
+              <xs:element name="logPerformance" type="xs:boolean"/>
+              <xs:element name="assignModuleGroups" type="xs:boolean"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="cbsPolicyListType">
+        <xs:sequence>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="policy" type="ns2:cbsPolicyType"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="getAvailableLoginModuleNamesRequest">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseRequest"/>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="cbsUpdateAssignmentsRequest">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseRequest">
+            <xs:sequence>
+              <xs:element name="assignmentList" type="ns2:cbsAssignmentStandaloneListType"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="rbsMemberRuleListType">
+        <xs:sequence>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="memberRule" type="ns2:rbsMemberRuleType"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="rbsWriteFilterPolicyResponse">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseResponse"/>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="rbsAssignFilterPolicyRequest">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseRequest">
+            <xs:sequence>
+              <xs:element name="name" type="xs:string"/>
+              <xs:element name="target" type="xs:string"/>
+              <xs:element minOccurs="0" name="operation" type="ns2:rbsAssignmentOperationType"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="cbsAddAssignmentsRequest">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseRequest">
+            <xs:sequence>
+              <xs:element name="assignmentList" type="ns2:cbsAssignmentStandaloneListType"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="updateGeneralSettingsRequest">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseRequest">
+            <xs:sequence>
+              <xs:element minOccurs="0" name="enablePAM" type="xs:boolean"/>
+              <xs:element minOccurs="0" name="mayDisallowUser" type="xs:boolean"/>
+              <xs:element minOccurs="0" name="logAuthFailures" type="xs:boolean"/>
+              <xs:element minOccurs="0" name="logPerformance" type="xs:boolean"/>
+              <xs:element minOccurs="0" name="assignModuleGroups" type="xs:boolean"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="getPrincipalMappingListResponse">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseResponse">
+            <xs:sequence>
+              <xs:element maxOccurs="unbounded" minOccurs="0" name="id" type="xs:string"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="cbsPolicyType">
+        <xs:sequence>
+          <xs:element name="policyPath" type="xs:string"/>
+          <xs:element minOccurs="0" name="dataType" type="xs:string"/>
+          <xs:element minOccurs="0" name="maskingRuleList" type="ns2:cbsMaskingRuleListType"/>
+          <xs:element name="enabled" type="xs:boolean"/>
+          <xs:element minOccurs="0" name="annotation" type="xs:string"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="getPrincipalMappingResponse">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseResponse">
+            <xs:sequence>
+              <xs:element name="id" type="xs:string"/>
+              <xs:element name="type" type="ns2:groupMappingType"/>
+              <xs:element name="identifier" type="xs:string"/>
+              <xs:element name="group" type="xs:string"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="getLoginModuleRequest">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseRequest">
+            <xs:sequence>
+              <xs:element name="id" type="xs:string"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="updateLoginModuleListRequest">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseRequest">
+            <xs:sequence>
+              <xs:element maxOccurs="unbounded" minOccurs="0" name="id" type="xs:string"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="updateSystemEncryptionRequest">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseRequest">
+            <xs:sequence>
+              <xs:element minOccurs="0" name="algorithm" type="xs:string"/>
+              <xs:element name="password" type="xs:string"/>
+              <xs:element name="uuid" type="xs:string"/>
+              <xs:element minOccurs="0" name="keySize" type="xs:integer"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="getGeneralSettingsResponse">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseResponse">
+            <xs:sequence>
+              <xs:element name="enablePAM" type="xs:boolean"/>
+              <xs:element name="mayDisallowUser" type="xs:boolean"/>
+              <xs:element name="logAuthFailures" type="xs:boolean"/>
+              <xs:element name="logPerformance" type="xs:boolean"/>
+              <xs:element name="assignModuleGroups" type="xs:boolean"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="loginModulePropertiesType">
+        <xs:sequence>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="property" type="ns2:loginModuleAttributeType"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="rbsGetFilterPolicyRequest">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseRequest">
+            <xs:sequence>
+              <xs:element name="name" type="xs:string"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="cbsParamType">
+        <xs:sequence>
+          <xs:element name="name" type="xs:string"/>
+          <xs:element name="value" type="xs:string"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="getLoginModuleDefaultPropertiesResponse">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseResponse">
+            <xs:sequence>
+              <xs:element maxOccurs="unbounded" minOccurs="0" name="properties" type="ns2:loginModulePropertiesType"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="updateLoginModuleRequest">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseRequest">
+            <xs:sequence>
+              <xs:element name="id" type="xs:string"/>
+              <xs:element minOccurs="0" name="group" type="xs:string"/>
+              <xs:element minOccurs="0" name="enabled" type="xs:boolean"/>
+              <xs:element minOccurs="0" name="properties" type="ns2:loginModulePropertiesType"/>
+              <xs:element minOccurs="0" name="annotation" type="xs:string"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="removeLoginModuleRequest">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseRequest">
+            <xs:sequence>
+              <xs:element name="id" type="xs:string"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="cbsCreatePoliciesResponse">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseResponse"/>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="cbsAddAssignmentsResponse">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseResponse"/>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="cbsEditPoliciesRequest">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseRequest">
+            <xs:sequence>
+              <xs:element name="policyList" type="ns2:cbsEditPolicyListType"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="addLoginModuleResponse">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseResponse">
+            <xs:sequence>
+              <xs:element name="id" type="xs:string"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="updatePrincipalMappingRequest">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseRequest">
+            <xs:sequence>
+              <xs:element name="id" type="xs:string"/>
+              <xs:element minOccurs="0" name="type" type="ns2:groupMappingType"/>
+              <xs:element minOccurs="0" name="identifier" type="xs:string"/>
+              <xs:element minOccurs="0" name="group" type="xs:string"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="rbsAssignFilterPolicyResponse">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseResponse"/>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="loginModuleAttributeType">
+        <xs:sequence>
+          <xs:element name="name" type="xs:string"/>
+          <xs:element name="value" type="xs:string"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="rbsPolicyListType">
+        <xs:sequence>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="policyProcedurePath" type="xs:string"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="rbsPolicyType">
+        <xs:sequence>
+          <xs:element name="name" type="xs:string"/>
+          <xs:element name="folder" type="xs:string"/>
+          <xs:element default="false" name="enabled" type="xs:boolean"/>
+          <xs:element name="form" type="ns2:rbsPolicyFormType"/>
+          <xs:element minOccurs="0" name="policyGroup" type="ns2:rbsPolicyGroupType"/>
+          <xs:element minOccurs="0" name="defaultRule" type="ns2:rbsDefaultRuleType"/>
+          <xs:element name="memberRuleList" type="ns2:rbsMemberRuleListType"/>
+          <xs:element name="assignmentList" type="ns2:rbsAssignmentListType"/>
+          <xs:element minOccurs="0" name="notes" type="xs:string"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="cbsRemoveAssignmentsRequest">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseRequest">
+            <xs:sequence>
+              <xs:element minOccurs="0" name="resourcePath" type="xs:string"/>
+              <xs:element minOccurs="0" name="resourceType" type="xs:string"/>
+              <xs:element minOccurs="0" name="columnName" type="xs:string"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="getSecurityBundleListRequest">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseRequest"/>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="getLoginModuleDefaultPropertiesRequest">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseRequest">
+            <xs:sequence>
+              <xs:element name="name" type="xs:string"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="cbsAssignmentWithResourcePathTypeType">
+        <xs:sequence>
+          <xs:element name="resourcePath" type="xs:string"/>
+          <xs:element name="resourceType" type="xs:string"/>
+          <xs:element name="columnName" type="xs:string"/>
+          <xs:element name="paramList" type="ns2:cbsParamListType"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:simpleType name="memberIdType">
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="USER"/>
+          <xs:enumeration value="GROUP"/>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:complexType name="getLoginModuleListRequest">
+        <xs:complexContent>
+          <xs:extension base="ns1:baseRequest"/>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="cbsPolicyListReturnType">
+        <xs:sequence>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="policy" type="ns2:cbsPolicyReturnType"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:element name="addPrincipalMappingResponse" type="ns2:addPrincipalMappingResponse"/>
+      <xs:element name="licenseToken" type="ns2:licenseToken"/>
+      <xs:element name="getSecurityBundleListResponse" type="ns2:getSecurityBundleListResponse"/>
+      <xs:element name="getAvailableLoginModuleNamesResponse" type="ns2:getAvailableLoginModuleNamesResponse"/>
+      <xs:element name="rbsGetFilterPolicyResponse" type="ns2:rbsGetFilterPolicyResponse"/>
+      <xs:element name="getSystemEncryption" type="ns2:getSystemEncryptionRequest"/>
+      <xs:element name="updateLoginModuleListResponse" type="ns2:updateLoginModuleListResponse"/>
+      <xs:element name="updateLoginModuleResponse" type="ns2:updateLoginModuleResponse"/>
+      <xs:element name="rbsGetFilterPolicy" type="ns2:rbsGetFilterPolicyRequest"/>
+      <xs:element name="updateSecurityBundle" type="ns2:updateSecurityBundleRequest"/>
+      <xs:element name="rbsIsEnabledResponse" type="ns2:rbsIsEnabledResponse"/>
+      <xs:element name="cbsDeletePolicies" type="ns2:cbsDeletePoliciesRequest"/>
+      <xs:element name="updateSecurityBundleResponse" type="ns2:updateSecurityBundleResponse"/>
+      <xs:element name="removeLoginModuleResponse" type="ns2:removeLoginModuleResponse"/>
+      <xs:element name="addPrincipalMapping" type="ns2:addPrincipalMappingRequest"/>
+      <xs:element name="cbsRemoveAssignmentsResponse" type="ns2:cbsRemoveAssignmentsResponse"/>
+      <xs:element name="updatePrincipalMappingResponse" type="ns2:updatePrincipalMappingResponse"/>
+      <xs:element name="getLoginModuleListResponse" type="ns2:getLoginModuleListResponse"/>
+      <xs:element name="rbsIsEnabled" type="ns2:rbsIsEnabledRequest"/>
+      <xs:element name="getPrincipalMappingList" type="ns2:getPrincipalMappingListRequest"/>
+      <xs:element name="cbsUpdateAssignmentsResponse" type="ns2:cbsUpdateAssignmentsResponse"/>
+      <xs:element name="cbsIsEnabledResponse" type="ns2:cbsIsEnabledResponse"/>
+      <xs:element name="getLoginModuleResponse" type="ns2:getLoginModuleResponse"/>
+      <xs:element name="cbsGetPolicies" type="ns2:cbsGetPoliciesRequest"/>
+      <xs:element name="rbsGetFilterPolicyList" type="ns2:rbsGetFilterPolicyListRequest"/>
+      <xs:element name="updateGeneralSettingsResponse" type="ns2:updateGeneralSettingsResponse"/>
+      <xs:element name="updatePrincipalMapping" type="ns2:updatePrincipalMappingRequest"/>
+      <xs:element name="cbsSetEnabled" type="ns2:cbsSetEnabledRequest"/>
+      <xs:element name="rbsWriteFilterPolicyResponse" type="ns2:rbsWriteFilterPolicyResponse"/>
+      <xs:element name="removeLoginModule" type="ns2:removeLoginModuleRequest"/>
+      <xs:element name="cbsIsEnabled" type="ns2:cbsIsEnabledRequest"/>
+      <xs:element name="cbsSetEnabledResponse" type="ns2:cbsSetEnabledResponse"/>
+      <xs:element name="updateGeneralSettings" type="ns2:updateGeneralSettingsRequest"/>
+      <xs:element name="getPrincipalMappingListResponse" type="ns2:getPrincipalMappingListResponse"/>
+      <xs:element name="cbsGetAssignmentsResponse" type="ns2:cbsGetAssignmentsResponse"/>
+      <xs:element name="removeSecurityBundle" type="ns2:removeSecurityBundleRequest"/>
+      <xs:element name="rbsSetEnabled" type="ns2:rbsSetEnabledRequest"/>
+      <xs:element name="rbsDeleteFilterPolicyResponse" type="ns2:rbsDeleteFilterPolicyResponse"/>
+      <xs:element name="getAvailableLoginModuleNames" type="ns2:getAvailableLoginModuleNamesRequest"/>
+      <xs:element name="getPrincipalMappingResponse" type="ns2:getPrincipalMappingResponse"/>
+      <xs:element name="addLoginModule" type="ns2:addLoginModuleRequest"/>
+      <xs:element name="cbsEditPoliciesResponse" type="ns2:cbsEditPoliciesResponse"/>
+      <xs:element name="cbsGetPoliciesResponse" type="ns2:cbsGetPoliciesResponse"/>
+      <xs:element name="getGeneralSettings" type="ns2:getGeneralSettingsRequest"/>
+      <xs:element name="getSecurityBundleList" type="ns2:getSecurityBundleListRequest"/>
+      <xs:element name="rbsDeleteFilterPolicy" type="ns2:rbsDeleteFilterPolicyRequest"/>
+      <xs:element name="cbsRemoveAssignments" type="ns2:cbsRemoveAssignmentsRequest"/>
+      <xs:element name="rbsWriteFilterPolicy" type="ns2:rbsWriteFilterPolicyRequest"/>
+      <xs:element name="getGeneralSettingsResponse" type="ns2:getGeneralSettingsResponse"/>
+      <xs:element name="sessionToken" type="ns2:sessionToken"/>
+      <xs:element name="cbsCreatePolicies" type="ns2:cbsCreatePoliciesRequest"/>
+      <xs:element name="getLoginModuleDefaultPropertiesResponse" type="ns2:getLoginModuleDefaultPropertiesResponse"/>
+      <xs:element name="updateSystemEncryption" type="ns2:updateSystemEncryptionRequest"/>
+      <xs:element name="removePrincipalMappingResponse" type="ns2:removePrincipalMappingResponse"/>
+      <xs:element name="rbsAssignFilterPolicy" type="ns2:rbsAssignFilterPolicyRequest"/>
+      <xs:element name="updateSystemEncryptionResponse" type="ns2:updateSystemEncryptionResponse"/>
+      <xs:element name="cbsCreatePoliciesResponse" type="ns2:cbsCreatePoliciesResponse"/>
+      <xs:element name="cbsAddAssignmentsResponse" type="ns2:cbsAddAssignmentsResponse"/>
+      <xs:element name="getPrincipalMapping" type="ns2:getPrincipalMappingRequest"/>
+      <xs:element name="cbsEditPolicies" type="ns2:cbsEditPoliciesRequest"/>
+      <xs:element name="getLoginModuleList" type="ns2:getLoginModuleListRequest"/>
+      <xs:element name="cbsUpdateAssignments" type="ns2:cbsUpdateAssignmentsRequest"/>
+      <xs:element name="getSecurityBundle" type="ns2:getSecurityBundleRequest"/>
+      <xs:element name="addLoginModuleResponse" type="ns2:addLoginModuleResponse"/>
+      <xs:element name="getSecurityBundleResponse" type="ns2:getSecurityBundleResponse"/>
+      <xs:element name="rbsSetEnabledResponse" type="ns2:rbsSetEnabledResponse"/>
+      <xs:element name="cbsGetAssignments" type="ns2:cbsGetAssignmentsRequest"/>
+      <xs:element name="cbsAddAssignments" type="ns2:cbsAddAssignmentsRequest"/>
+      <xs:element name="removeSecurityBundleResponse" type="ns2:removeSecurityBundleResponse"/>
+      <xs:element name="removePrincipalMapping" type="ns2:removePrincipalMappingRequest"/>
+      <xs:element name="rbsAssignFilterPolicyResponse" type="ns2:rbsAssignFilterPolicyResponse"/>
+      <xs:element name="rbsGetFilterPolicyListResponse" type="ns2:rbsGetFilterPolicyListResponse"/>
+      <xs:element name="getLoginModule" type="ns2:getLoginModuleRequest"/>
+      <xs:element name="getLoginModuleDefaultProperties" type="ns2:getLoginModuleDefaultPropertiesRequest"/>
+      <xs:element name="cbsDeletePoliciesResponse" type="ns2:cbsDeletePoliciesResponse"/>
+      <xs:element name="updateLoginModule" type="ns2:updateLoginModuleRequest"/>
+      <xs:element name="updateLoginModuleList" type="ns2:updateLoginModuleListRequest"/>
+      <xs:element name="getSystemEncryptionResponse" type="ns2:getSystemEncryptionResponse"/>
+    </xs:schema>
+    <xs:schema xmlns:ns1="http://www.compositesw.com/services/system/util/session" xmlns:xs="http://www.w3.org/2001/XMLSchema" attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://www.compositesw.com/services/system/util/session">
+      <xs:import namespace="http://www.compositesw.com/services/system/util/common"/>
+      <xs:import namespace="http://www.compositesw.com/services/system/util/security"/>
+      <xs:simpleType name="transactionMode">
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="BEST_EFFORT"/>
+          <xs:enumeration value="COMPENSATE"/>
+          <xs:enumeration value="NO_COMPENSATE"/>
+          <xs:enumeration value="IGNORE_INTERRUPT"/>
+          <xs:enumeration value="LOG_INTERRUPT"/>
+          <xs:enumeration value="FAIL_INTERRUPT"/>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:complexType name="closeSessionResponse">
+        <xs:complexContent>
+          <xs:extension base="ns2:baseResponse"/>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="getServerInfoResponse">
+        <xs:complexContent>
+          <xs:extension base="ns2:baseResponse">
+            <xs:sequence>
+              <xs:element name="attributes" type="ns2:attributeList"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="beginSessionResponse">
+        <xs:complexContent>
+          <xs:extension base="ns2:baseResponse">
+            <xs:sequence>
+              <xs:element name="sessionToken" type="ns3:sessionToken"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="getServerInfoRequest">
+        <xs:complexContent>
+          <xs:extension base="ns2:baseRequest"/>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:simpleType name="commitAction">
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="COMMIT"/>
+          <xs:enumeration value="ROLLBACK"/>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:complexType name="closeSessionRequest">
+        <xs:complexContent>
+          <xs:extension base="ns2:baseRequest"/>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="beginSessionRequest">
+        <xs:complexContent>
+          <xs:extension base="ns2:baseRequest">
+            <xs:sequence>
+              <xs:element minOccurs="0" name="sessionTimeout" type="xs:int"/>
+              <xs:element minOccurs="0" name="sessionName" type="xs:string"/>
+              <xs:element minOccurs="0" name="parentSessionId" type="xs:string"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:simpleType name="transactionModeList">
+        <xs:restriction base="xs:string"/>
+      </xs:simpleType>
+      <xs:complexType name="beginTransactionResponse">
+        <xs:complexContent>
+          <xs:extension base="ns2:baseResponse"/>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="closeTransactionRequest">
+        <xs:complexContent>
+          <xs:extension base="ns2:baseRequest">
+            <xs:sequence>
+              <xs:element name="action" type="ns1:commitAction"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="closeTransactionResponse">
+        <xs:complexContent>
+          <xs:extension base="ns2:baseResponse"/>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:simpleType name="versionList">
+        <xs:restriction base="xs:string"/>
+      </xs:simpleType>
+      <xs:simpleType name="protocolVersion">
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="1.0"/>
+          <xs:enumeration value="1.1"/>
+          <xs:enumeration value="1.2"/>
+          <xs:enumeration value="2.0"/>
+          <xs:enumeration value="3.0"/>
+          <xs:enumeration value="3.1"/>
+          <xs:enumeration value="4.0"/>
+          <xs:enumeration value="5.0"/>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:complexType name="beginTransactionRequest">
+        <xs:complexContent>
+          <xs:extension base="ns2:baseRequest">
+            <xs:sequence>
+              <xs:element minOccurs="0" name="transactionMode" type="ns1:transactionModeList"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:element name="beginTransaction" type="ns1:beginTransactionRequest"/>
+      <xs:element name="closeTransaction" type="ns1:closeTransactionRequest"/>
+      <xs:element name="closeSessionResponse" type="ns1:closeSessionResponse"/>
+      <xs:element name="getServerInfoResponse" type="ns1:getServerInfoResponse"/>
+      <xs:element name="getServerInfo" type="ns1:getServerInfoRequest"/>
+      <xs:element name="beginSessionResponse" type="ns1:beginSessionResponse"/>
+      <xs:element name="beginTransactionResponse" type="ns1:beginTransactionResponse"/>
+      <xs:element name="closeTransactionResponse" type="ns1:closeTransactionResponse"/>
+      <xs:element name="beginSession" type="ns1:beginSessionRequest"/>
+      <xs:element name="closeSession" type="ns1:closeSessionRequest"/>
+    </xs:schema>
+  </wsdl:types>
+  <wsdl:message name="sessionPortbeginTransactionSoapIn">
+    <wsdl:part name="inputParameters" element="ns4:beginTransaction"/>
+  </wsdl:message>
+  <wsdl:message name="updateLoginModuleSoapFault">
+    <wsdl:part name="fault" element="ns2:fault"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortupdateLoginModuleSoapOut">
+    <wsdl:part name="outputParameters" element="ns3:updateLoginModuleResponse"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortupdateLoginModuleSoapIn">
+    <wsdl:part name="inputParameters" element="ns3:updateLoginModule"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortremoveLoginModuleSoapIn">
+    <wsdl:part name="inputParameters" element="ns3:removeLoginModule"/>
+  </wsdl:message>
+  <wsdl:message name="getGeneralSettingsSoapFault">
+    <wsdl:part name="fault" element="ns2:fault"/>
+  </wsdl:message>
+  <wsdl:message name="getPrincipalMappingListSoapFault">
+    <wsdl:part name="fault" element="ns2:fault"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortcbsCreatePoliciesSoapOut">
+    <wsdl:part name="outputParameters" element="ns3:cbsCreatePoliciesResponse"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortcbsAddAssignmentsSoapIn">
+    <wsdl:part name="inputParameters" element="ns3:cbsAddAssignments"/>
+  </wsdl:message>
+  <wsdl:message name="sessionPortbeginSessionSoapIn">
+    <wsdl:part name="inputParameters" element="ns4:beginSession"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortrbsDeleteFilterPolicySoapOut">
+    <wsdl:part name="outputParameters" element="ns3:rbsDeleteFilterPolicyResponse"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortaddLoginModuleSoapIn">
+    <wsdl:part name="inputParameters" element="ns3:addLoginModule"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortgetLoginModuleSoapOut">
+    <wsdl:part name="outputParameters" element="ns3:getLoginModuleResponse"/>
+  </wsdl:message>
+  <wsdl:message name="cbsDeletePoliciesSoapFault">
+    <wsdl:part name="fault" element="ns2:fault"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortcbsEditPoliciesSoapIn">
+    <wsdl:part name="inputParameters" element="ns3:cbsEditPolicies"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortrbsWriteFilterPolicySoapIn">
+    <wsdl:part name="inputParameters" element="ns3:rbsWriteFilterPolicy"/>
+  </wsdl:message>
+  <wsdl:message name="getServerInfoSoapFault">
+    <wsdl:part name="fault" element="ns2:fault"/>
+  </wsdl:message>
+  <wsdl:message name="updateGeneralSettingsSoapFault">
+    <wsdl:part name="fault" element="ns2:fault"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortrbsGetFilterPolicySoapIn">
+    <wsdl:part name="inputParameters" element="ns3:rbsGetFilterPolicy"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortremovePrincipalMappingSoapIn">
+    <wsdl:part name="inputParameters" element="ns3:removePrincipalMapping"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortgetGeneralSettingsSoapOut">
+    <wsdl:part name="outputParameters" element="ns3:getGeneralSettingsResponse"/>
+  </wsdl:message>
+  <wsdl:message name="beginSessionSoapFault">
+    <wsdl:part name="fault" element="ns2:fault"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortremovePrincipalMappingSoapOut">
+    <wsdl:part name="outputParameters" element="ns3:removePrincipalMappingResponse"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortcbsDeletePoliciesSoapIn">
+    <wsdl:part name="inputParameters" element="ns3:cbsDeletePolicies"/>
+  </wsdl:message>
+  <wsdl:message name="cbsCreatePoliciesSoapFault">
+    <wsdl:part name="fault" element="ns2:fault"/>
+  </wsdl:message>
+  <wsdl:message name="cbsGetAssignmentsSoapFault">
+    <wsdl:part name="fault" element="ns2:fault"/>
+  </wsdl:message>
+  <wsdl:message name="getLoginModuleDefaultPropertiesSoapFault">
+    <wsdl:part name="fault" element="ns2:fault"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortcbsRemoveAssignmentsSoapIn">
+    <wsdl:part name="inputParameters" element="ns3:cbsRemoveAssignments"/>
+  </wsdl:message>
+  <wsdl:message name="cbsAddAssignmentsSoapFault">
+    <wsdl:part name="fault" element="ns2:fault"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortupdateSystemEncryptionSoapOut">
+    <wsdl:part name="outputParameters" element="ns3:updateSystemEncryptionResponse"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortcbsAddAssignmentsSoapOut">
+    <wsdl:part name="outputParameters" element="ns3:cbsAddAssignmentsResponse"/>
+  </wsdl:message>
+  <wsdl:message name="getPrincipalMappingSoapFault">
+    <wsdl:part name="fault" element="ns2:fault"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortgetAvailableLoginModuleNamesSoapIn">
+    <wsdl:part name="inputParameters" element="ns3:getAvailableLoginModuleNames"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortupdatePrincipalMappingSoapIn">
+    <wsdl:part name="inputParameters" element="ns3:updatePrincipalMapping"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortcbsCreatePoliciesSoapIn">
+    <wsdl:part name="inputParameters" element="ns3:cbsCreatePolicies"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortgetSystemEncryptionSoapIn">
+    <wsdl:part name="inputParameters" element="ns3:getSystemEncryption"/>
+  </wsdl:message>
+  <wsdl:message name="rbsGetFilterPolicySoapFault">
+    <wsdl:part name="fault" element="ns2:fault"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortgetSystemEncryptionSoapOut">
+    <wsdl:part name="outputParameters" element="ns3:getSystemEncryptionResponse"/>
+  </wsdl:message>
+  <wsdl:message name="cbsSetEnabledSoapFault">
+    <wsdl:part name="fault" element="ns2:fault"/>
+  </wsdl:message>
+  <wsdl:message name="getSystemEncryptionSoapFault">
+    <wsdl:part name="fault" element="ns2:fault"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortgetPrincipalMappingSoapIn">
+    <wsdl:part name="inputParameters" element="ns3:getPrincipalMapping"/>
+  </wsdl:message>
+  <wsdl:message name="getAvailableLoginModuleNamesSoapFault">
+    <wsdl:part name="fault" element="ns2:fault"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortcbsIsEnabledSoapIn">
+    <wsdl:part name="inputParameters" element="ns3:cbsIsEnabled"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortcbsEditPoliciesSoapOut">
+    <wsdl:part name="outputParameters" element="ns3:cbsEditPoliciesResponse"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortgetLoginModuleDefaultPropertiesSoapIn">
+    <wsdl:part name="inputParameters" element="ns3:getLoginModuleDefaultProperties"/>
+  </wsdl:message>
+  <wsdl:message name="commonPortcancelServerTaskSoapOut">
+    <wsdl:part name="outputParameters" element="ns2:cancelServerTaskResponse"/>
+  </wsdl:message>
+  <wsdl:message name="cbsEditPoliciesSoapFault">
+    <wsdl:part name="fault" element="ns2:fault"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortremoveLoginModuleSoapOut">
+    <wsdl:part name="outputParameters" element="ns3:removeLoginModuleResponse"/>
+  </wsdl:message>
+  <wsdl:message name="closeSessionSoapFault">
+    <wsdl:part name="fault" element="ns2:fault"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortrbsIsEnabledSoapOut">
+    <wsdl:part name="outputParameters" element="ns3:rbsIsEnabledResponse"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortcbsUpdateAssignmentsSoapOut">
+    <wsdl:part name="outputParameters" element="ns3:cbsUpdateAssignmentsResponse"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortcbsGetPoliciesSoapIn">
+    <wsdl:part name="inputParameters" element="ns3:cbsGetPolicies"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortcbsGetPoliciesSoapOut">
+    <wsdl:part name="outputParameters" element="ns3:cbsGetPoliciesResponse"/>
+  </wsdl:message>
+  <wsdl:message name="sessionPortcloseSessionSoapIn">
+    <wsdl:part name="inputParameters" element="ns4:closeSession"/>
+  </wsdl:message>
+  <wsdl:message name="updateLoginModuleListSoapFault">
+    <wsdl:part name="fault" element="ns2:fault"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortrbsDeleteFilterPolicySoapIn">
+    <wsdl:part name="inputParameters" element="ns3:rbsDeleteFilterPolicy"/>
+  </wsdl:message>
+  <wsdl:message name="removeLoginModuleSoapFault">
+    <wsdl:part name="fault" element="ns2:fault"/>
+  </wsdl:message>
+  <wsdl:message name="rbsIsEnabledSoapFault">
+    <wsdl:part name="fault" element="ns2:fault"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortaddLoginModuleSoapOut">
+    <wsdl:part name="outputParameters" element="ns3:addLoginModuleResponse"/>
+  </wsdl:message>
+  <wsdl:message name="rbsGetFilterPolicyListSoapFault">
+    <wsdl:part name="fault" element="ns2:fault"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortcbsDeletePoliciesSoapOut">
+    <wsdl:part name="outputParameters" element="ns3:cbsDeletePoliciesResponse"/>
+  </wsdl:message>
+  <wsdl:message name="cbsGetPoliciesSoapFault">
+    <wsdl:part name="fault" element="ns2:fault"/>
+  </wsdl:message>
+  <wsdl:message name="sessionPortcloseTransactionSoapOut">
+    <wsdl:part name="outputParameters" element="ns4:closeTransactionResponse"/>
+  </wsdl:message>
+  <wsdl:message name="sessionPortgetServerInfoSoapOut">
+    <wsdl:part name="outputParameters" element="ns4:getServerInfoResponse"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortaddPrincipalMappingSoapIn">
+    <wsdl:part name="inputParameters" element="ns3:addPrincipalMapping"/>
+  </wsdl:message>
+  <wsdl:message name="addPrincipalMappingSoapFault">
+    <wsdl:part name="fault" element="ns2:fault"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortcbsSetEnabledSoapIn">
+    <wsdl:part name="inputParameters" element="ns3:cbsSetEnabled"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortrbsGetFilterPolicySoapOut">
+    <wsdl:part name="outputParameters" element="ns3:rbsGetFilterPolicyResponse"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortrbsIsEnabledSoapIn">
+    <wsdl:part name="inputParameters" element="ns3:rbsIsEnabled"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortrbsGetFilterPolicyListSoapIn">
+    <wsdl:part name="inputParameters" element="ns3:rbsGetFilterPolicyList"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortcbsGetAssignmentsSoapOut">
+    <wsdl:part name="outputParameters" element="ns3:cbsGetAssignmentsResponse"/>
+  </wsdl:message>
+  <wsdl:message name="sessionPortcloseSessionSoapOut">
+    <wsdl:part name="outputParameters" element="ns4:closeSessionResponse"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortgetLoginModuleDefaultPropertiesSoapOut">
+    <wsdl:part name="outputParameters" element="ns3:getLoginModuleDefaultPropertiesResponse"/>
+  </wsdl:message>
+  <wsdl:message name="getLoginModuleListSoapFault">
+    <wsdl:part name="fault" element="ns2:fault"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortgetPrincipalMappingSoapOut">
+    <wsdl:part name="outputParameters" element="ns3:getPrincipalMappingResponse"/>
+  </wsdl:message>
+  <wsdl:message name="rbsDeleteFilterPolicySoapFault">
+    <wsdl:part name="fault" element="ns2:fault"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortgetPrincipalMappingListSoapIn">
+    <wsdl:part name="inputParameters" element="ns3:getPrincipalMappingList"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortrbsAssignFilterPolicySoapIn">
+    <wsdl:part name="inputParameters" element="ns3:rbsAssignFilterPolicy"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortcbsSetEnabledSoapOut">
+    <wsdl:part name="outputParameters" element="ns3:cbsSetEnabledResponse"/>
+  </wsdl:message>
+  <wsdl:message name="rbsSetEnabledSoapFault">
+    <wsdl:part name="fault" element="ns2:fault"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortupdateGeneralSettingsSoapIn">
+    <wsdl:part name="inputParameters" element="ns3:updateGeneralSettings"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortupdateSystemEncryptionSoapIn">
+    <wsdl:part name="inputParameters" element="ns3:updateSystemEncryption"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortgetAvailableLoginModuleNamesSoapOut">
+    <wsdl:part name="outputParameters" element="ns3:getAvailableLoginModuleNamesResponse"/>
+  </wsdl:message>
+  <wsdl:message name="removePrincipalMappingSoapFault">
+    <wsdl:part name="fault" element="ns2:fault"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortgetLoginModuleListSoapOut">
+    <wsdl:part name="outputParameters" element="ns3:getLoginModuleListResponse"/>
+  </wsdl:message>
+  <wsdl:message name="getLoginModuleSoapFault">
+    <wsdl:part name="fault" element="ns2:fault"/>
+  </wsdl:message>
+  <wsdl:message name="cbsRemoveAssignmentsSoapFault">
+    <wsdl:part name="fault" element="ns2:fault"/>
+  </wsdl:message>
+  <wsdl:message name="closeTransactionSoapFault">
+    <wsdl:part name="fault" element="ns2:fault"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortrbsGetFilterPolicyListSoapOut">
+    <wsdl:part name="outputParameters" element="ns3:rbsGetFilterPolicyListResponse"/>
+  </wsdl:message>
+  <wsdl:message name="cancelServerTaskSoapFault">
+    <wsdl:part name="fault" element="ns2:fault"/>
+  </wsdl:message>
+  <wsdl:message name="cbsUpdateAssignmentsSoapFault">
+    <wsdl:part name="fault" element="ns2:fault"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortgetGeneralSettingsSoapIn">
+    <wsdl:part name="inputParameters" element="ns3:getGeneralSettings"/>
+  </wsdl:message>
+  <wsdl:message name="sessionPortbeginSessionSoapOut">
+    <wsdl:part name="outputParameters" element="ns4:beginSessionResponse"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortgetPrincipalMappingListSoapOut">
+    <wsdl:part name="outputParameters" element="ns3:getPrincipalMappingListResponse"/>
+  </wsdl:message>
+  <wsdl:message name="beginTransactionSoapFault">
+    <wsdl:part name="fault" element="ns2:fault"/>
+  </wsdl:message>
+  <wsdl:message name="cbsIsEnabledSoapFault">
+    <wsdl:part name="fault" element="ns2:fault"/>
+  </wsdl:message>
+  <wsdl:message name="updateSystemEncryptionSoapFault">
+    <wsdl:part name="fault" element="ns2:fault"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortcbsGetAssignmentsSoapIn">
+    <wsdl:part name="inputParameters" element="ns3:cbsGetAssignments"/>
+  </wsdl:message>
+  <wsdl:message name="addLoginModuleSoapFault">
+    <wsdl:part name="fault" element="ns2:fault"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortgetLoginModuleListSoapIn">
+    <wsdl:part name="inputParameters" element="ns3:getLoginModuleList"/>
+  </wsdl:message>
+  <wsdl:message name="sessionPortbeginTransactionSoapOut">
+    <wsdl:part name="outputParameters" element="ns4:beginTransactionResponse"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortcbsUpdateAssignmentsSoapIn">
+    <wsdl:part name="inputParameters" element="ns3:cbsUpdateAssignments"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortgetLoginModuleSoapIn">
+    <wsdl:part name="inputParameters" element="ns3:getLoginModule"/>
+  </wsdl:message>
+  <wsdl:message name="rbsWriteFilterPolicySoapFault">
+    <wsdl:part name="fault" element="ns2:fault"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortrbsWriteFilterPolicySoapOut">
+    <wsdl:part name="outputParameters" element="ns3:rbsWriteFilterPolicyResponse"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortrbsSetEnabledSoapIn">
+    <wsdl:part name="inputParameters" element="ns3:rbsSetEnabled"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortrbsAssignFilterPolicySoapOut">
+    <wsdl:part name="outputParameters" element="ns3:rbsAssignFilterPolicyResponse"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortupdatePrincipalMappingSoapOut">
+    <wsdl:part name="outputParameters" element="ns3:updatePrincipalMappingResponse"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortupdateLoginModuleListSoapOut">
+    <wsdl:part name="outputParameters" element="ns3:updateLoginModuleListResponse"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortupdateGeneralSettingsSoapOut">
+    <wsdl:part name="outputParameters" element="ns3:updateGeneralSettingsResponse"/>
+  </wsdl:message>
+  <wsdl:message name="sessionPortgetServerInfoSoapIn">
+    <wsdl:part name="inputParameters" element="ns4:getServerInfo"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortupdateLoginModuleListSoapIn">
+    <wsdl:part name="inputParameters" element="ns3:updateLoginModuleList"/>
+  </wsdl:message>
+  <wsdl:message name="updatePrincipalMappingSoapFault">
+    <wsdl:part name="fault" element="ns2:fault"/>
+  </wsdl:message>
+  <wsdl:message name="sessionPortcloseTransactionSoapIn">
+    <wsdl:part name="inputParameters" element="ns4:closeTransaction"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortcbsRemoveAssignmentsSoapOut">
+    <wsdl:part name="outputParameters" element="ns3:cbsRemoveAssignmentsResponse"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortaddPrincipalMappingSoapOut">
+    <wsdl:part name="outputParameters" element="ns3:addPrincipalMappingResponse"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortrbsSetEnabledSoapOut">
+    <wsdl:part name="outputParameters" element="ns3:rbsSetEnabledResponse"/>
+  </wsdl:message>
+  <wsdl:message name="rbsAssignFilterPolicySoapFault">
+    <wsdl:part name="fault" element="ns2:fault"/>
+  </wsdl:message>
+  <wsdl:message name="securityPortcbsIsEnabledSoapOut">
+    <wsdl:part name="outputParameters" element="ns3:cbsIsEnabledResponse"/>
+  </wsdl:message>
+  <wsdl:message name="commonPortcancelServerTaskSoapIn">
+    <wsdl:part name="inputParameters" element="ns2:cancelServerTask"/>
+  </wsdl:message>
+  <wsdl:portType name="commonPortType">
+    <wsdl:operation name="cancelServerTask">
+      <wsdl:input message="ns1:commonPortcancelServerTaskSoapIn"/>
+      <wsdl:output message="ns1:commonPortcancelServerTaskSoapOut"/>
+      <wsdl:fault name="cancelServerTaskSoapFault" message="ns1:cancelServerTaskSoapFault"/>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:portType name="sessionPortType">
+    <wsdl:operation name="beginSession">
+      <wsdl:input message="ns1:sessionPortbeginSessionSoapIn"/>
+      <wsdl:output message="ns1:sessionPortbeginSessionSoapOut"/>
+      <wsdl:fault name="beginSessionSoapFault" message="ns1:beginSessionSoapFault"/>
+    </wsdl:operation>
+    <wsdl:operation name="beginTransaction">
+      <wsdl:input message="ns1:sessionPortbeginTransactionSoapIn"/>
+      <wsdl:output message="ns1:sessionPortbeginTransactionSoapOut"/>
+      <wsdl:fault name="beginTransactionSoapFault" message="ns1:beginTransactionSoapFault"/>
+    </wsdl:operation>
+    <wsdl:operation name="closeSession">
+      <wsdl:input message="ns1:sessionPortcloseSessionSoapIn"/>
+      <wsdl:output message="ns1:sessionPortcloseSessionSoapOut"/>
+      <wsdl:fault name="closeSessionSoapFault" message="ns1:closeSessionSoapFault"/>
+    </wsdl:operation>
+    <wsdl:operation name="closeTransaction">
+      <wsdl:input message="ns1:sessionPortcloseTransactionSoapIn"/>
+      <wsdl:output message="ns1:sessionPortcloseTransactionSoapOut"/>
+      <wsdl:fault name="closeTransactionSoapFault" message="ns1:closeTransactionSoapFault"/>
+    </wsdl:operation>
+    <wsdl:operation name="getServerInfo">
+      <wsdl:input message="ns1:sessionPortgetServerInfoSoapIn"/>
+      <wsdl:output message="ns1:sessionPortgetServerInfoSoapOut"/>
+      <wsdl:fault name="getServerInfoSoapFault" message="ns1:getServerInfoSoapFault"/>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:portType name="securityPortType">
+    <wsdl:operation name="addLoginModule">
+      <wsdl:input message="ns1:securityPortaddLoginModuleSoapIn"/>
+      <wsdl:output message="ns1:securityPortaddLoginModuleSoapOut"/>
+      <wsdl:fault name="addLoginModuleSoapFault" message="ns1:addLoginModuleSoapFault"/>
+    </wsdl:operation>
+    <wsdl:operation name="addPrincipalMapping">
+      <wsdl:input message="ns1:securityPortaddPrincipalMappingSoapIn"/>
+      <wsdl:output message="ns1:securityPortaddPrincipalMappingSoapOut"/>
+      <wsdl:fault name="addPrincipalMappingSoapFault" message="ns1:addPrincipalMappingSoapFault"/>
+    </wsdl:operation>
+    <wsdl:operation name="cbsAddAssignments">
+      <wsdl:input message="ns1:securityPortcbsAddAssignmentsSoapIn"/>
+      <wsdl:output message="ns1:securityPortcbsAddAssignmentsSoapOut"/>
+      <wsdl:fault name="cbsAddAssignmentsSoapFault" message="ns1:cbsAddAssignmentsSoapFault"/>
+    </wsdl:operation>
+    <wsdl:operation name="cbsCreatePolicies">
+      <wsdl:input message="ns1:securityPortcbsCreatePoliciesSoapIn"/>
+      <wsdl:output message="ns1:securityPortcbsCreatePoliciesSoapOut"/>
+      <wsdl:fault name="cbsCreatePoliciesSoapFault" message="ns1:cbsCreatePoliciesSoapFault"/>
+    </wsdl:operation>
+    <wsdl:operation name="cbsDeletePolicies">
+      <wsdl:input message="ns1:securityPortcbsDeletePoliciesSoapIn"/>
+      <wsdl:output message="ns1:securityPortcbsDeletePoliciesSoapOut"/>
+      <wsdl:fault name="cbsDeletePoliciesSoapFault" message="ns1:cbsDeletePoliciesSoapFault"/>
+    </wsdl:operation>
+    <wsdl:operation name="cbsEditPolicies">
+      <wsdl:input message="ns1:securityPortcbsEditPoliciesSoapIn"/>
+      <wsdl:output message="ns1:securityPortcbsEditPoliciesSoapOut"/>
+      <wsdl:fault name="cbsEditPoliciesSoapFault" message="ns1:cbsEditPoliciesSoapFault"/>
+    </wsdl:operation>
+    <wsdl:operation name="cbsGetAssignments">
+      <wsdl:input message="ns1:securityPortcbsGetAssignmentsSoapIn"/>
+      <wsdl:output message="ns1:securityPortcbsGetAssignmentsSoapOut"/>
+      <wsdl:fault name="cbsGetAssignmentsSoapFault" message="ns1:cbsGetAssignmentsSoapFault"/>
+    </wsdl:operation>
+    <wsdl:operation name="cbsGetPolicies">
+      <wsdl:input message="ns1:securityPortcbsGetPoliciesSoapIn"/>
+      <wsdl:output message="ns1:securityPortcbsGetPoliciesSoapOut"/>
+      <wsdl:fault name="cbsGetPoliciesSoapFault" message="ns1:cbsGetPoliciesSoapFault"/>
+    </wsdl:operation>
+    <wsdl:operation name="cbsIsEnabled">
+      <wsdl:input message="ns1:securityPortcbsIsEnabledSoapIn"/>
+      <wsdl:output message="ns1:securityPortcbsIsEnabledSoapOut"/>
+      <wsdl:fault name="cbsIsEnabledSoapFault" message="ns1:cbsIsEnabledSoapFault"/>
+    </wsdl:operation>
+    <wsdl:operation name="cbsRemoveAssignments">
+      <wsdl:input message="ns1:securityPortcbsRemoveAssignmentsSoapIn"/>
+      <wsdl:output message="ns1:securityPortcbsRemoveAssignmentsSoapOut"/>
+      <wsdl:fault name="cbsRemoveAssignmentsSoapFault" message="ns1:cbsRemoveAssignmentsSoapFault"/>
+    </wsdl:operation>
+    <wsdl:operation name="cbsSetEnabled">
+      <wsdl:input message="ns1:securityPortcbsSetEnabledSoapIn"/>
+      <wsdl:output message="ns1:securityPortcbsSetEnabledSoapOut"/>
+      <wsdl:fault name="cbsSetEnabledSoapFault" message="ns1:cbsSetEnabledSoapFault"/>
+    </wsdl:operation>
+    <wsdl:operation name="cbsUpdateAssignments">
+      <wsdl:input message="ns1:securityPortcbsUpdateAssignmentsSoapIn"/>
+      <wsdl:output message="ns1:securityPortcbsUpdateAssignmentsSoapOut"/>
+      <wsdl:fault name="cbsUpdateAssignmentsSoapFault" message="ns1:cbsUpdateAssignmentsSoapFault"/>
+    </wsdl:operation>
+    <wsdl:operation name="getAvailableLoginModuleNames">
+      <wsdl:input message="ns1:securityPortgetAvailableLoginModuleNamesSoapIn"/>
+      <wsdl:output message="ns1:securityPortgetAvailableLoginModuleNamesSoapOut"/>
+      <wsdl:fault name="getAvailableLoginModuleNamesSoapFault" message="ns1:getAvailableLoginModuleNamesSoapFault"/>
+    </wsdl:operation>
+    <wsdl:operation name="getGeneralSettings">
+      <wsdl:input message="ns1:securityPortgetGeneralSettingsSoapIn"/>
+      <wsdl:output message="ns1:securityPortgetGeneralSettingsSoapOut"/>
+      <wsdl:fault name="getGeneralSettingsSoapFault" message="ns1:getGeneralSettingsSoapFault"/>
+    </wsdl:operation>
+    <wsdl:operation name="getLoginModule">
+      <wsdl:input message="ns1:securityPortgetLoginModuleSoapIn"/>
+      <wsdl:output message="ns1:securityPortgetLoginModuleSoapOut"/>
+      <wsdl:fault name="getLoginModuleSoapFault" message="ns1:getLoginModuleSoapFault"/>
+    </wsdl:operation>
+    <wsdl:operation name="getLoginModuleDefaultProperties">
+      <wsdl:input message="ns1:securityPortgetLoginModuleDefaultPropertiesSoapIn"/>
+      <wsdl:output message="ns1:securityPortgetLoginModuleDefaultPropertiesSoapOut"/>
+      <wsdl:fault name="getLoginModuleDefaultPropertiesSoapFault" message="ns1:getLoginModuleDefaultPropertiesSoapFault"/>
+    </wsdl:operation>
+    <wsdl:operation name="getLoginModuleList">
+      <wsdl:input message="ns1:securityPortgetLoginModuleListSoapIn"/>
+      <wsdl:output message="ns1:securityPortgetLoginModuleListSoapOut"/>
+      <wsdl:fault name="getLoginModuleListSoapFault" message="ns1:getLoginModuleListSoapFault"/>
+    </wsdl:operation>
+    <wsdl:operation name="getPrincipalMapping">
+      <wsdl:input message="ns1:securityPortgetPrincipalMappingSoapIn"/>
+      <wsdl:output message="ns1:securityPortgetPrincipalMappingSoapOut"/>
+      <wsdl:fault name="getPrincipalMappingSoapFault" message="ns1:getPrincipalMappingSoapFault"/>
+    </wsdl:operation>
+    <wsdl:operation name="getPrincipalMappingList">
+      <wsdl:input message="ns1:securityPortgetPrincipalMappingListSoapIn"/>
+      <wsdl:output message="ns1:securityPortgetPrincipalMappingListSoapOut"/>
+      <wsdl:fault name="getPrincipalMappingListSoapFault" message="ns1:getPrincipalMappingListSoapFault"/>
+    </wsdl:operation>
+    <wsdl:operation name="getSystemEncryption">
+      <wsdl:input message="ns1:securityPortgetSystemEncryptionSoapIn"/>
+      <wsdl:output message="ns1:securityPortgetSystemEncryptionSoapOut"/>
+      <wsdl:fault name="getSystemEncryptionSoapFault" message="ns1:getSystemEncryptionSoapFault"/>
+    </wsdl:operation>
+    <wsdl:operation name="rbsAssignFilterPolicy">
+      <wsdl:input message="ns1:securityPortrbsAssignFilterPolicySoapIn"/>
+      <wsdl:output message="ns1:securityPortrbsAssignFilterPolicySoapOut"/>
+      <wsdl:fault name="rbsAssignFilterPolicySoapFault" message="ns1:rbsAssignFilterPolicySoapFault"/>
+    </wsdl:operation>
+    <wsdl:operation name="rbsDeleteFilterPolicy">
+      <wsdl:input message="ns1:securityPortrbsDeleteFilterPolicySoapIn"/>
+      <wsdl:output message="ns1:securityPortrbsDeleteFilterPolicySoapOut"/>
+      <wsdl:fault name="rbsDeleteFilterPolicySoapFault" message="ns1:rbsDeleteFilterPolicySoapFault"/>
+    </wsdl:operation>
+    <wsdl:operation name="rbsGetFilterPolicy">
+      <wsdl:input message="ns1:securityPortrbsGetFilterPolicySoapIn"/>
+      <wsdl:output message="ns1:securityPortrbsGetFilterPolicySoapOut"/>
+      <wsdl:fault name="rbsGetFilterPolicySoapFault" message="ns1:rbsGetFilterPolicySoapFault"/>
+    </wsdl:operation>
+    <wsdl:operation name="rbsGetFilterPolicyList">
+      <wsdl:input message="ns1:securityPortrbsGetFilterPolicyListSoapIn"/>
+      <wsdl:output message="ns1:securityPortrbsGetFilterPolicyListSoapOut"/>
+      <wsdl:fault name="rbsGetFilterPolicyListSoapFault" message="ns1:rbsGetFilterPolicyListSoapFault"/>
+    </wsdl:operation>
+    <wsdl:operation name="rbsIsEnabled">
+      <wsdl:input message="ns1:securityPortrbsIsEnabledSoapIn"/>
+      <wsdl:output message="ns1:securityPortrbsIsEnabledSoapOut"/>
+      <wsdl:fault name="rbsIsEnabledSoapFault" message="ns1:rbsIsEnabledSoapFault"/>
+    </wsdl:operation>
+    <wsdl:operation name="rbsSetEnabled">
+      <wsdl:input message="ns1:securityPortrbsSetEnabledSoapIn"/>
+      <wsdl:output message="ns1:securityPortrbsSetEnabledSoapOut"/>
+      <wsdl:fault name="rbsSetEnabledSoapFault" message="ns1:rbsSetEnabledSoapFault"/>
+    </wsdl:operation>
+    <wsdl:operation name="rbsWriteFilterPolicy">
+      <wsdl:input message="ns1:securityPortrbsWriteFilterPolicySoapIn"/>
+      <wsdl:output message="ns1:securityPortrbsWriteFilterPolicySoapOut"/>
+      <wsdl:fault name="rbsWriteFilterPolicySoapFault" message="ns1:rbsWriteFilterPolicySoapFault"/>
+    </wsdl:operation>
+    <wsdl:operation name="removeLoginModule">
+      <wsdl:input message="ns1:securityPortremoveLoginModuleSoapIn"/>
+      <wsdl:output message="ns1:securityPortremoveLoginModuleSoapOut"/>
+      <wsdl:fault name="removeLoginModuleSoapFault" message="ns1:removeLoginModuleSoapFault"/>
+    </wsdl:operation>
+    <wsdl:operation name="removePrincipalMapping">
+      <wsdl:input message="ns1:securityPortremovePrincipalMappingSoapIn"/>
+      <wsdl:output message="ns1:securityPortremovePrincipalMappingSoapOut"/>
+      <wsdl:fault name="removePrincipalMappingSoapFault" message="ns1:removePrincipalMappingSoapFault"/>
+    </wsdl:operation>
+    <wsdl:operation name="updateGeneralSettings">
+      <wsdl:input message="ns1:securityPortupdateGeneralSettingsSoapIn"/>
+      <wsdl:output message="ns1:securityPortupdateGeneralSettingsSoapOut"/>
+      <wsdl:fault name="updateGeneralSettingsSoapFault" message="ns1:updateGeneralSettingsSoapFault"/>
+    </wsdl:operation>
+    <wsdl:operation name="updateLoginModule">
+      <wsdl:input message="ns1:securityPortupdateLoginModuleSoapIn"/>
+      <wsdl:output message="ns1:securityPortupdateLoginModuleSoapOut"/>
+      <wsdl:fault name="updateLoginModuleSoapFault" message="ns1:updateLoginModuleSoapFault"/>
+    </wsdl:operation>
+    <wsdl:operation name="updateLoginModuleList">
+      <wsdl:input message="ns1:securityPortupdateLoginModuleListSoapIn"/>
+      <wsdl:output message="ns1:securityPortupdateLoginModuleListSoapOut"/>
+      <wsdl:fault name="updateLoginModuleListSoapFault" message="ns1:updateLoginModuleListSoapFault"/>
+    </wsdl:operation>
+    <wsdl:operation name="updatePrincipalMapping">
+      <wsdl:input message="ns1:securityPortupdatePrincipalMappingSoapIn"/>
+      <wsdl:output message="ns1:securityPortupdatePrincipalMappingSoapOut"/>
+      <wsdl:fault name="updatePrincipalMappingSoapFault" message="ns1:updatePrincipalMappingSoapFault"/>
+    </wsdl:operation>
+    <wsdl:operation name="updateSystemEncryption">
+      <wsdl:input message="ns1:securityPortupdateSystemEncryptionSoapIn"/>
+      <wsdl:output message="ns1:securityPortupdateSystemEncryptionSoapOut"/>
+      <wsdl:fault name="updateSystemEncryptionSoapFault" message="ns1:updateSystemEncryptionSoapFault"/>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="securityPortBinding" type="ns1:securityPortType">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="addLoginModule">
+      <soap:operation soapAction="addLoginModule" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="addLoginModuleSoapFault">
+        <soap:fault name="addLoginModuleSoapFault" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="addPrincipalMapping">
+      <soap:operation soapAction="addPrincipalMapping" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="addPrincipalMappingSoapFault">
+        <soap:fault name="addPrincipalMappingSoapFault" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="cbsAddAssignments">
+      <soap:operation soapAction="cbsAddAssignments" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="cbsAddAssignmentsSoapFault">
+        <soap:fault name="cbsAddAssignmentsSoapFault" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="cbsCreatePolicies">
+      <soap:operation soapAction="cbsCreatePolicies" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="cbsCreatePoliciesSoapFault">
+        <soap:fault name="cbsCreatePoliciesSoapFault" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="cbsDeletePolicies">
+      <soap:operation soapAction="cbsDeletePolicies" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="cbsDeletePoliciesSoapFault">
+        <soap:fault name="cbsDeletePoliciesSoapFault" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="cbsEditPolicies">
+      <soap:operation soapAction="cbsEditPolicies" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="cbsEditPoliciesSoapFault">
+        <soap:fault name="cbsEditPoliciesSoapFault" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="cbsGetAssignments">
+      <soap:operation soapAction="cbsGetAssignments" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="cbsGetAssignmentsSoapFault">
+        <soap:fault name="cbsGetAssignmentsSoapFault" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="cbsGetPolicies">
+      <soap:operation soapAction="cbsGetPolicies" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="cbsGetPoliciesSoapFault">
+        <soap:fault name="cbsGetPoliciesSoapFault" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="cbsIsEnabled">
+      <soap:operation soapAction="cbsIsEnabled" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="cbsIsEnabledSoapFault">
+        <soap:fault name="cbsIsEnabledSoapFault" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="cbsRemoveAssignments">
+      <soap:operation soapAction="cbsRemoveAssignments" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="cbsRemoveAssignmentsSoapFault">
+        <soap:fault name="cbsRemoveAssignmentsSoapFault" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="cbsSetEnabled">
+      <soap:operation soapAction="cbsSetEnabled" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="cbsSetEnabledSoapFault">
+        <soap:fault name="cbsSetEnabledSoapFault" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="cbsUpdateAssignments">
+      <soap:operation soapAction="cbsUpdateAssignments" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="cbsUpdateAssignmentsSoapFault">
+        <soap:fault name="cbsUpdateAssignmentsSoapFault" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="getAvailableLoginModuleNames">
+      <soap:operation soapAction="getAvailableLoginModuleNames" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="getAvailableLoginModuleNamesSoapFault">
+        <soap:fault name="getAvailableLoginModuleNamesSoapFault" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="getGeneralSettings">
+      <soap:operation soapAction="getGeneralSettings" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="getGeneralSettingsSoapFault">
+        <soap:fault name="getGeneralSettingsSoapFault" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="getLoginModule">
+      <soap:operation soapAction="getLoginModule" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="getLoginModuleSoapFault">
+        <soap:fault name="getLoginModuleSoapFault" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="getLoginModuleDefaultProperties">
+      <soap:operation soapAction="getLoginModuleDefaultProperties" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="getLoginModuleDefaultPropertiesSoapFault">
+        <soap:fault name="getLoginModuleDefaultPropertiesSoapFault" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="getLoginModuleList">
+      <soap:operation soapAction="getLoginModuleList" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="getLoginModuleListSoapFault">
+        <soap:fault name="getLoginModuleListSoapFault" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="getPrincipalMapping">
+      <soap:operation soapAction="getPrincipalMapping" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="getPrincipalMappingSoapFault">
+        <soap:fault name="getPrincipalMappingSoapFault" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="getPrincipalMappingList">
+      <soap:operation soapAction="getPrincipalMappingList" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="getPrincipalMappingListSoapFault">
+        <soap:fault name="getPrincipalMappingListSoapFault" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="getSystemEncryption">
+      <soap:operation soapAction="getSystemEncryption" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="getSystemEncryptionSoapFault">
+        <soap:fault name="getSystemEncryptionSoapFault" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="rbsAssignFilterPolicy">
+      <soap:operation soapAction="rbsAssignFilterPolicy" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="rbsAssignFilterPolicySoapFault">
+        <soap:fault name="rbsAssignFilterPolicySoapFault" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="rbsDeleteFilterPolicy">
+      <soap:operation soapAction="rbsDeleteFilterPolicy" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="rbsDeleteFilterPolicySoapFault">
+        <soap:fault name="rbsDeleteFilterPolicySoapFault" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="rbsGetFilterPolicy">
+      <soap:operation soapAction="rbsGetFilterPolicy" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="rbsGetFilterPolicySoapFault">
+        <soap:fault name="rbsGetFilterPolicySoapFault" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="rbsGetFilterPolicyList">
+      <soap:operation soapAction="rbsGetFilterPolicyList" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="rbsGetFilterPolicyListSoapFault">
+        <soap:fault name="rbsGetFilterPolicyListSoapFault" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="rbsIsEnabled">
+      <soap:operation soapAction="rbsIsEnabled" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="rbsIsEnabledSoapFault">
+        <soap:fault name="rbsIsEnabledSoapFault" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="rbsSetEnabled">
+      <soap:operation soapAction="rbsSetEnabled" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="rbsSetEnabledSoapFault">
+        <soap:fault name="rbsSetEnabledSoapFault" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="rbsWriteFilterPolicy">
+      <soap:operation soapAction="rbsWriteFilterPolicy" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="rbsWriteFilterPolicySoapFault">
+        <soap:fault name="rbsWriteFilterPolicySoapFault" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="removeLoginModule">
+      <soap:operation soapAction="removeLoginModule" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="removeLoginModuleSoapFault">
+        <soap:fault name="removeLoginModuleSoapFault" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="removePrincipalMapping">
+      <soap:operation soapAction="removePrincipalMapping" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="removePrincipalMappingSoapFault">
+        <soap:fault name="removePrincipalMappingSoapFault" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="updateGeneralSettings">
+      <soap:operation soapAction="updateGeneralSettings" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="updateGeneralSettingsSoapFault">
+        <soap:fault name="updateGeneralSettingsSoapFault" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="updateLoginModule">
+      <soap:operation soapAction="updateLoginModule" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="updateLoginModuleSoapFault">
+        <soap:fault name="updateLoginModuleSoapFault" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="updateLoginModuleList">
+      <soap:operation soapAction="updateLoginModuleList" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="updateLoginModuleListSoapFault">
+        <soap:fault name="updateLoginModuleListSoapFault" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="updatePrincipalMapping">
+      <soap:operation soapAction="updatePrincipalMapping" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="updatePrincipalMappingSoapFault">
+        <soap:fault name="updatePrincipalMappingSoapFault" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="updateSystemEncryption">
+      <soap:operation soapAction="updateSystemEncryption" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="updateSystemEncryptionSoapFault">
+        <soap:fault name="updateSystemEncryptionSoapFault" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="commonPortBinding" type="ns1:commonPortType">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="cancelServerTask">
+      <soap:operation soapAction="cancelServerTask" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="cancelServerTaskSoapFault">
+        <soap:fault name="cancelServerTaskSoapFault" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="sessionPortBinding" type="ns1:sessionPortType">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="beginSession">
+      <soap:operation soapAction="beginSession" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="beginSessionSoapFault">
+        <soap:fault name="beginSessionSoapFault" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="beginTransaction">
+      <soap:operation soapAction="beginTransaction" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="beginTransactionSoapFault">
+        <soap:fault name="beginTransactionSoapFault" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="closeSession">
+      <soap:operation soapAction="closeSession" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="closeSessionSoapFault">
+        <soap:fault name="closeSessionSoapFault" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="closeTransaction">
+      <soap:operation soapAction="closeTransaction" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="closeTransactionSoapFault">
+        <soap:fault name="closeTransactionSoapFault" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="getServerInfo">
+      <soap:operation soapAction="getServerInfo" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="getServerInfoSoapFault">
+        <soap:fault name="getServerInfoSoapFault" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="common">
+    <wsdl:port name="commonPort" binding="ns1:commonPortBinding">
+      <soap:address location="http://datavirt.eb.lan.at:9400/services/system/util/common/commonPort.ws"/>
+    </wsdl:port>
+  </wsdl:service>
+  <wsdl:service name="session">
+    <wsdl:port name="sessionPort" binding="ns1:sessionPortBinding">
+      <soap:address location="http://datavirt.eb.lan.at:9400/services/system/util/session/sessionPort.ws"/>
+    </wsdl:port>
+  </wsdl:service>
+  <wsdl:service name="security">
+    <wsdl:port name="securityPort" binding="ns1:securityPortBinding">
+      <soap:address location="http://datavirt.eb.lan.at:9400/services/system/util/security/securityPort.ws"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

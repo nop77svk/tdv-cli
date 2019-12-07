@@ -1,0 +1,407 @@
+﻿@namespace NoP77svk.TibcoDV.CLI
+@accessibility internal
+@classname PierresTibcoSqlParser
+@ignorecase true
+@start start
+@trace true
+@using NoP77svk.TibcoDV.API
+@members
+{
+	#nullable disable
+}
+
+start<object>
+	= _ result:statement _ EOF
+	{ result }
+
+statement<object>
+	= clientSideStatement / grantStatement / createResourceStatement / dropResourceStatement / assignStatement / describeStatement / #ERROR{ "Unrecognized statement" }
+
+clientSideStatement<object> = "#" v:clientSideStatementWhat { v }
+
+clientSideStatementWhat<object> = clientSidePrompt / clientSideTimer / clientSideConnectionTimeout / clientSideSet / #ERROR{ "Unrecognized client-side statement" }
+
+// ------------------------------------------------------------------------------------------------
+
+clientSideSet<AST.ClientSet> = "set" __ var:resourceIdentifier _ "=" _ value:clientSideSetValue
+{
+	new AST.ClientSet(var, value)
+}
+
+clientSideSetValue<object>
+	= v:numericLiteral { v }
+	/ v:stringLiteral { v }
+	/ v:booleanLiteral { v }
+	/ v:timeLiteral { v }
+	/ #ERROR{ "Unrecognized value" }
+
+// 2do! pragmaRequestTimeout<AST.TimeSpan> = "timeout" __ v:timeLiteral { v }
+
+// ------------------------------------------------------------------------------------------------
+
+clientSideConnectionTimeout<AST.ClientConnectionTimeout> = "timeout" __ v:timeLiteral
+{
+	new AST.ClientConnectionTimeout(v)
+}
+
+// ------------------------------------------------------------------------------------------------
+
+clientSideTimer<AST.ClientTimer> = "timer" __ v:booleanLiteral
+{
+	new AST.ClientTimer(v)
+}
+
+// ------------------------------------------------------------------------------------------------
+
+clientSidePrompt<AST.ClientPrompt> = "prompt" __ v:stringLiteral
+{
+	new AST.ClientPrompt(v)
+}
+
+// ------------------------------------------------------------------------------------------------
+
+createResourceStatement<object> = "create" __
+	soifnx:statementOptionIfNotExistsWithWhitespace
+	ddl:( createViewDDL / #ERROR{ "Unrecognized resource type to be created" } )
+{
+	new AST.CreateResource()
+	{
+		IfNotExists = soifnx,
+		ResourceDDL = ddl
+	}
+}
+
+createViewDDL<object> = ("view" / "dataview") __ res:resourcePath __
+	"as" __
+	q:sqlQuery
+{
+	new AST.ViewDDL()
+	{
+		ResourcePath = res,
+		ViewQuery = q
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+
+dropResourceStatement<object> = "drop" __
+	sorec:statementOptionRecursiveWithWhitespace
+	soifx:statementOptionIfExistsWithWhitespace
+	res:listOfFullResourceSpecifiers
+{
+	new AST.DropResource()
+	{
+		IfExists = soifx,
+		Recursive = sorec,
+		Resources = res
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+
+grantStatement<object> = "grant" __
+	modusOperandi:grantOptionAppendOrSetWithWhitespace
+	isRec:statementOptionRecursiveWithWhitespace
+	priv:listOfResourcePrivileges __
+	"on" __ res:listOfFullResourceSpecifiers __
+	"to" __ who:liberalListOfPrincipals
+{
+	new AST.Grant()
+	{
+		IsRecursive = isRec,
+		ModusOperandi = modusOperandi,
+		Privileges = priv,
+		Resources = res,
+		Principals = who
+	}
+}
+
+grantOptionAppendOrSetWithWhitespace<NoP77svk.TibcoDV.API.WSDL.Admin.updatePrivilegesMode>
+	= v:grantOptionAppendOrSet __ { v }
+	/ { NoP77svk.TibcoDV.API.WSDL.Admin.updatePrivilegesMode.OVERWRITE_APPEND }
+
+grantOptionAppendOrSet<NoP77svk.TibcoDV.API.WSDL.Admin.updatePrivilegesMode>
+	= "append" { NoP77svk.TibcoDV.API.WSDL.Admin.updatePrivilegesMode.OVERWRITE_APPEND }
+	/ "set" { NoP77svk.TibcoDV.API.WSDL.Admin.updatePrivilegesMode.SET_EXACTLY }
+
+listOfResourcePrivileges<IList<TdvPrivilegeEnum>>
+	= resourcePrivilege<1,,_ "," _>
+	/ #ERROR{ "Cannot parse the list of privileges" }
+
+resourcePrivilege<TdvPrivilegeEnum>
+	= "read" { TdvPrivilegeEnum.Read }
+	/ "write" { TdvPrivilegeEnum.Write }
+	/ "select" { TdvPrivilegeEnum.Select }
+	/ "insert" { TdvPrivilegeEnum.Insert }
+	/ "update" { TdvPrivilegeEnum.Update }
+	/ "delete" { TdvPrivilegeEnum.Delete }
+	/ "grant" { TdvPrivilegeEnum.Grant }
+	/ #ERROR{ "Unrecognized privilege" }
+
+
+// ------------------------------------------------------------------------------------------------
+
+assignStatement<object> =
+	action:assignOrUnassign __
+	what:assignWhat
+{
+	new AST.Assign()
+	{
+		Action = action,
+		What = what
+	}
+}
+
+assignOrUnassign<NoP77svk.TibcoDV.API.WSDL.Admin.rbsAssignmentOperationType>
+	= "assign" { NoP77svk.TibcoDV.API.WSDL.Admin.rbsAssignmentOperationType.ASSIGN }
+	/ "unassign" { NoP77svk.TibcoDV.API.WSDL.Admin.rbsAssignmentOperationType.REMOVE }
+
+assignWhat<AST.AssignWhat>
+	= v:assignRbsPolicy { v }
+	/ v:assignCbsPolicy { v }
+
+// ------------------------------------------------------------------------------------------------
+
+assignRbsPolicy<AST.AssignRbsPolicy> = ("rbs" / "rls") __ ( ("pol" "icy"?) / #ERROR{ "Missing \"policy\" keyword"} ) __
+	policy:filterPolicyFunctionName __
+	"to" __
+	res:listOfFullResourceSpecifiers
+{
+	new AST.AssignRbsPolicy()
+	{
+		Policy = policy,
+		Resources = res
+	}
+}
+
+filterPolicyFunctionName<string> = (("func" ("t" "ion"?)?) / ("proc" "edure"?)) __ policyResource:resourcePath { policyResource }
+
+// ------------------------------------------------------------------------------------------------
+
+assignCbsPolicy<AST.AssignWhat> = ("cbs" / "cls") __ ( ("pol" "icy"?) / #ERROR{ "Expected \"policy\" keyword"} ) __
+	policy:filterPolicyFunctionName __
+	"to" __
+	res:listOfFullResourceSpecifiers
+	#ERROR{ "CBS policy PEG not yet implemented" }
+
+// ------------------------------------------------------------------------------------------------
+
+describeStatement<object>
+	= describeCommand __
+	v:listOfPartialResourceSpecifiers
+{
+	new AST.Describe()
+	{
+		Resources = v
+	}
+}
+
+describeCommand = "desc" ("r" ("ibe")?)?
+
+// ================================================================================================
+// general language elements
+// ================================================================================================
+
+// ------------------------------------------------------------------------------------------------
+// general language elements - resource
+
+listOfFullResourceSpecifiers<IList<AST.ResourceSpecifier>>
+	= v:fullResourceSpecifier<1,,_ "," _>
+	{ v }
+
+fullResourceSpecifier<AST.ResourceSpecifier>
+	= typ:resourceType __ res:resourcePath
+	{
+		new AST.ResourceSpecifier()
+		{
+			Type = typ,
+			Path = res
+		}
+	}
+	/ #ERROR{ "Invalid resource specifier" }
+
+listOfPartialResourceSpecifiers<IList<AST.ResourceSpecifier>>
+	= v:partialResourceSpecifier<1,,_ "," _>
+	{ v }
+
+partialResourceSpecifier<AST.ResourceSpecifier>
+	= typ:resourceTypeWithWhitespace res:resourcePath
+	{
+		new AST.ResourceSpecifier()
+		{
+			Type = typ,
+			Path = res
+		}
+	}
+
+resourceTypeWithWhitespace<NoP77svk.TibcoDV.API.WSDL.Admin.resourceType>
+	= v:resourceType __ { v }
+	/ { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.NONE }
+
+resourceType<NoP77svk.TibcoDV.API.WSDL.Admin.resourceType>
+	= "adapter" { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.ADAPTER }
+	/ "container" { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.CONTAINER }
+	/ "datasource" { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.DATA_SOURCE }
+	/ "data_source" { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.DATA_SOURCE }
+	/ "data" __ "source" { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.DATA_SOURCE }
+	/ "definitionset" { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.DEFINITION_SET }
+	/ "definition_set" { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.DEFINITION_SET }
+	/ "definition" __ "set" { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.DEFINITION_SET }
+	/ "extension" { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.EXTENSION }
+	/ "folder" { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.CONTAINER }
+	/ "function" { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.PROCEDURE }
+	/ "link" { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.LINK }
+	/ "model" { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.MODEL }
+	/ "policy" { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.POLICY }
+	/ "procedure" { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.PROCEDURE }
+	/ "relationship" { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.RELATIONSHIP }
+	/ "table" { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.TABLE }
+	/ "tree" { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.TREE }
+	/ "trigger" { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.TRIGGER }
+
+resourcePath<string>
+	= thePath:("" ("/" resourceIdentifier)+)
+	{ thePath }
+	/ #ERROR{ "Invalid resource path" }
+
+// ------------------------------------------------------------------------------------------------
+// general language elements - principal
+
+liberalListOfPrincipals<IList<AST.Principal>>
+	= v:liberalPrincipal<1,,_ "," _>
+	{ v }
+
+liberalPrincipal<AST.Principal>
+	= v:simplePrincipalIdentifier { v }
+	/ v:matchingPrincipalIdentifier { v }
+	/ #ERROR{ "Incorrect principal specifier" }
+
+/*
+conservativeListOfPrincipals<IList<AST.Principal>>
+	= v:simplePrincipalIdentifier<1,,_ "," _>
+	{ v }
+*/
+
+simplePrincipalIdentifier<AST.Principal> = typ:principalType __ name:resourceIdentifier "@" dom:resourceIdentifier	
+{
+	new AST.Principal()
+	{
+		Type = typ,
+		Name = name,
+		Domain = dom,
+		LookupOperator = AST.LookupOperatorEnum.EqualTo
+	}
+}
+
+matchingPrincipalIdentifier<AST.Principal> = dom:resourceIdentifier __ typ:principalType __ op:principalIdentifierMatch
+{
+	new AST.Principal()
+	{
+		Type = typ,
+		Name = op.Name,
+		Domain = dom,
+		LookupOperator = op.LookupOperator
+	}
+}
+
+principalIdentifierMatch<AST.Principal>
+	= v:principalIdentifierMatchByRegexp { v }
+	/ v:principalIdentifierMatchByEquality { v }
+	/ name:resourceIdentifier
+		{
+			new AST.Principal()
+			{
+				Name = name,
+				LookupOperator = AST.LookupOperatorEnum.EqualTo
+			}
+		}
+	/ #ERROR{ "Unrecognized principal identifier format"}
+
+principalIdentifierMatchByEquality<AST.Principal> = "equal" __ ("to" __)? name:resourceIdentifier
+{
+	new AST.Principal()
+	{
+		Name = name,
+		LookupOperator = AST.LookupOperatorEnum.EqualTo
+	}
+}
+
+principalIdentifierMatchByRegexp<AST.Principal> = ("rlike" / "rxlike" / "regexlike" / "regexplike" / "matching") __ name:regexp
+{
+	new AST.Principal()
+	{
+		Name = name,
+		LookupOperator = AST.LookupOperatorEnum.RegexpLike
+	}
+}
+
+principalType<NoP77svk.TibcoDV.API.WSDL.Admin.userNameType>
+	= "user" { NoP77svk.TibcoDV.API.WSDL.Admin.userNameType.USER }
+	/ "group" { NoP77svk.TibcoDV.API.WSDL.Admin.userNameType.GROUP }
+
+// ------------------------------------------------------------------------------------------------
+// general language elements - commons
+
+resourceIdentifier<string>
+	= v:([a-z][^/@, \t\r\n]*) { v }
+	/ #ERROR{ "Invalid resource identifier" }
+
+sqlQuery<string> = v:("" .*) { v.TrimEnd() }
+
+statementOptionRecursive = "recursive"
+
+statementOptionRecursiveWithWhitespace<bool>
+	= statementOptionRecursive __ { true }
+	/ { false }
+
+statementOptionIfExists = "if" __ ( "exists" / #ERROR{ "\"exists\" expected" } )
+
+statementOptionIfExistsWithWhitespace<bool>
+	= statementOptionIfExists __ { true }
+	/ { false }
+
+statementOptionIfNotExists = "if" __ ( "not" __ "exists" / #ERROR{ "\"not exists\" expected" } )
+
+statementOptionIfNotExistsWithWhitespace<bool>
+	= statementOptionIfNotExists __ { true }
+	/ { false }
+
+numericLiteral<double> = v:( "" [+-]? ( numericLiteralIntegerAndFraction / numericLiteralFractionOnly ) ([eE] [+-]? numericLiteralPositiveInteger) ) { double.Parse(v) }
+numericLiteralPositiveInteger<string> = v:("" [0-9]+) { v }
+numericLiteralIntegerAndFraction<string> = v:( "" numericLiteralPositiveInteger ( "." numericLiteralPositiveInteger )? ) { v }
+numericLiteralFractionOnly<string> = v:( "." numericLiteralPositiveInteger ) { v }
+
+stringLiteral<string>
+	= '"' v:("" [^"]*) '"' { v }
+	/ "'" v:("" [^']*) "'" { v }
+	/ #ERROR{ "String literal value expected" }
+
+regexp<string> = v:("\/" ("\\\/" / [^/])* "\/" [a-zA-Z]*) { v }
+
+booleanLiteral<bool>
+	= "on" { true }
+	/ "off" { false }
+	/ "true" { true }
+	/ "false" { false }
+	/ "yes" { true }
+	/ "no" { false }
+	/ "1" { true }
+	/ "0" { false }
+	/ #ERROR{ "Boolean literal value expected" }
+
+timeLiteral<AST.TimeSpan> = value:numericLiteral __ unit:timeUnit { new AST.TimeSpan(value, unit) }
+
+timeUnit<NoP77svk.TibcoDV.CLI.AST.TimeUnitEnum>
+	= ("ms" / ("millisec" ("ond" "s"?)?)) { NoP77svk.TibcoDV.CLI.AST.TimeUnitEnum.Millisecond }
+	/ "s" ("ec" ("ond" "s"?)?)? { NoP77svk.TibcoDV.CLI.AST.TimeUnitEnum.Second }
+	/ "min" ("ute" "s"?)? { NoP77svk.TibcoDV.CLI.AST.TimeUnitEnum.Minute }
+	/ "h" ("our" "s"?)? { NoP77svk.TibcoDV.CLI.AST.TimeUnitEnum.Hour }
+	/ "d" ("ay" "s"?)? { NoP77svk.TibcoDV.CLI.AST.TimeUnitEnum.Day }
+	/ "w" "eek"? { NoP77svk.TibcoDV.CLI.AST.TimeUnitEnum.Week }
+	/ #ERROR{ "Unrecognized time unit" }
+
+_ = whiteSpaceCharacter*
+__ = whiteSpaceCharacter+
+whiteSpaceCharacter = [ \t\r\n]
+
+EOF = !. / c:("" .*) #ERROR{ "Unexpected trailing \"" + c.Trim() + "\"" }
