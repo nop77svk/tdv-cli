@@ -2,4 +2,6 @@
 
 A command-line interface client to Tibco Data Virtualization server.
 
-See Wiki for full documentation.
+## Spawn
+
+Run `tdvcli --help` and inspect the output.
