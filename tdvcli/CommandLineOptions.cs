@@ -7,8 +7,8 @@
     internal class CommandLineOptions
         : BaseCLI
     {
-        [Option('f', "privilege-scripts", Required = true, Separator = ',', HelpText = "\n"
-            + "A comma-delimited list of privilege assignment CSVs")]
+        [Option('f', "script", Required = true, Separator = ',', HelpText = "\n"
+            + "A comma-delimited list of \"SQL\" scripts")]
         public IEnumerable<string?>? PrivilegeDefinitionFiles { get; set; }
     }
 }
