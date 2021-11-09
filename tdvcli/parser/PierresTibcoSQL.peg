@@ -15,11 +15,22 @@ start<object>
 	{ result }
 
 statement<object>
-	= clientSideStatement / grantStatement / createResourceStatement / dropResourceStatement / assignStatement / describeStatement / #ERROR{ "Unrecognized statement" }
+	= clientSideStatement
+	/ grantStatement
+	/ createResourceStatement
+	/ dropResourceStatement
+	/ assignStatement
+	/ describeStatement
+	/ #ERROR{ "Unrecognized statement" }
 
 clientSideStatement<object> = "#" v:clientSideStatementWhat { v }
 
-clientSideStatementWhat<object> = clientSidePrompt / clientSideTimer / clientSideConnectionTimeout / clientSideSet / #ERROR{ "Unrecognized client-side statement" }
+clientSideStatementWhat<object>
+	= clientSidePrompt
+	/ clientSideTimer
+	/ clientSideConnectionTimeout
+	/ clientSideSet
+	/ #ERROR{ "Unrecognized client-side statement" }
 
 // ------------------------------------------------------------------------------------------------
 
