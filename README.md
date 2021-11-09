@@ -1,6 +1,6 @@
 # Tibco Data Virtualization CLI Client
 
-A command-line interface client to Tibco Data Virtualization server.
+A command-line interface client to Tibco Data Virtualization server since Tibco (says) does not have anything similar.
 
 Run `tdvcli --help` to get the overview on available command line parameters.
 
