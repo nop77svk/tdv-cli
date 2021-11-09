@@ -1,3 +1,5 @@
-# TDV-CLI
+# Tibco Data Virtualization CLI Client
 
-Tibco Data Virtualization CLI Client (+ WS API library)
+(+ WS API library)
+
+Description pending.
