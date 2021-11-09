@@ -89,7 +89,8 @@ The command displays info on the resources specified by the supplied resource pa
 
 <_resource path_> is a path to a resource starting with `/`, with levels of hierarchy delimited by `/`.
 
-**Example** of a list of resource specifiers:
+#### Example of a list of resource specifiers
+
 ```
 container /shared/L1_Physical,
     container /shared/L3_Application,
@@ -107,7 +108,9 @@ container /shared/L1_Physical,
 
 <_principal name_> and <_principal domain_> is a valid user/group name and domain name, resp.
 
-**Example:** ```
+#### Examples
+
+```
 user jose@composite, user maria@composite, group administrators@composite, group all@dynamic
 ```
 
@@ -121,7 +124,9 @@ user jose@composite, user maria@composite, group administrators@composite, group
 
 <_principal name_> and <_principal domain_> is a valid user/group name and domain name, resp.
 
-**Example:** ```
+#### Examples
+
+```
 composite user jose, composite user equal to maria, composite group administrators, dynamic group equal to all
 ```
 
@@ -137,7 +142,8 @@ composite user jose, composite user equal to maria, composite group administrato
 
 <_regular expression_> is a regular expression against which all available <_principal domain_> users/groups will be matched (case-insensitively). The regular expression must be enclosed between `/` and `/` characters.
 
-**Examples:**
+#### Examples
+
 * `composite user rlike /^jose_/` will match all user names starting with `jose_` from domain `composite`,
 * `composite user rxlike /_the_mighty$/` will match all user names ending with `_the_mighty` from domain `composite`,
 * `composite group matching /^ro_.*_\d+$/` will match all group names starting with `ro_` and ending with a nonnegative integer number from domain `composite`.
