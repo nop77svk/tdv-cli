@@ -12,6 +12,8 @@ Run `tdvcli --help` to get the overview on available command line parameters.
 
 The `if not exists` option instructs the server to not return error when such a view already exists on the sever.
 
+**Note:** Implementation pending!
+
 ### Drop object(s)
 
 `drop [recursive] [if exists] `<_comma-delimited list of resource specifiers_>`;`
