@@ -1,5 +1,5 @@
 # Tibco Data Virtualization CLI Client
 
-(+ WS API library)
+A command-line interface client to Tibco Data Virtualization server.
 
-Description pending.
+See Wiki for full documentation.
