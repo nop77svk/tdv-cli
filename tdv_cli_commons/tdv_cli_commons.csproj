@@ -16,6 +16,7 @@
 		<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
 		<RepositoryUrl>https://github.com/nop77svk/tdv-cli</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 	</PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

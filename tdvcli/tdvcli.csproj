@@ -12,7 +12,7 @@
         <Description>Tibco Data Virtualization Comand-Line Interface</Description>
         <AssemblyName>tdvcli</AssemblyName>
 		<NoWarn>1701;1702;AD0001</NoWarn>
-        <PackageId>NoP77svk.TibcoDV.CLI</PackageId>
+        <PackageId></PackageId>
         <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
         <RuntimeIdentifiers>win-x86;win-x64;win-arm;linux-x64;linux-arm</RuntimeIdentifiers>
 		<RepositoryUrl>https://github.com/nop77svk/tdv-cli</RepositoryUrl>
