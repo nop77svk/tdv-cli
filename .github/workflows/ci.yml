@@ -24,5 +24,5 @@ jobs:
       run: |
         dotnet publish tdvcli -c Release -o ./_publish.portable -p:PublishTrimmed=false
         cd ./_publish.portable
-        tar cv . | gzip -9c > tdvcli.${VERSION}.portable.tgz
+        tar cv . | gzip -9c > ../tdvcli.latest.portable.tgz
         cd ..
