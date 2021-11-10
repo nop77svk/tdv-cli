@@ -40,11 +40,11 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="6.0.0" />
-    <PackageReference Include="NoP77svk.ConnectionStringParsers" Version="1.1.3" />
-    <PackageReference Include="NoP77svk.Linq" Version="1.1.3" />
-    <PackageReference Include="NoP77svk.LinqOuterJoins" Version="1.1.3" />
-    <PackageReference Include="NoP77svk.MiscellaneousHelpers" Version="1.1.3" />
-    <PackageReference Include="NoP77svk.WebServiceClient" Version="1.1.3" />
+    <PackageReference Include="NoP77svk.ConnectionStringParsers" Version="1.1.4" />
+    <PackageReference Include="NoP77svk.Linq" Version="1.1.4" />
+    <PackageReference Include="NoP77svk.LinqOuterJoins" Version="1.1.4" />
+    <PackageReference Include="NoP77svk.MiscellaneousHelpers" Version="1.1.4" />
+    <PackageReference Include="NoP77svk.WebServiceClient" Version="1.1.4" />
     <PackageReference Include="Pegasus" Version="4.1.0" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
       <PrivateAssets>all</PrivateAssets>
