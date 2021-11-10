@@ -34,4 +34,4 @@ jobs:
         prerelease: true
         title: "Development Build"
         files: |
-		  tdv-cli.latest.portable.gz
+          tdv-cli.latest.portable.gz
