@@ -14,11 +14,14 @@
         <NoWarn>1701;1702;AD0001</NoWarn>
         <PackageId>NoP77svk.TibcoDV.API</PackageId>
         <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+		<RepositoryUrl>https://github.com/nop77svk/tdv-cli</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
         <DebugType>none</DebugType>
         <DebugSymbols>false</DebugSymbols>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
