@@ -30,48 +30,33 @@ jobs:
       run: dotnet nuget push NoP77svk.*.${VERSION}.nupkg --source https://nuget.pkg.github.com/nop77svk/index.json --api-key ${GITHUB_TOKEN}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Prepare releases
+      run: |
+        mkdir _publish.all
     - name: Windows x64 Build
       run: |
         dotnet publish tdvcli -c Release -o ./_publish.win-x64 -r win-x64 --self-contained
         cd ./_publish.win-x64
-        tar cv . ../LICENSE | gzip -9c > ../tdv-cli.${VERSION}.win.x64.tgz
+        tar cv . ../LICENSE | gzip -9c > ../_publish.all/tdv-cli.${VERSION}.win.x64.tgz
         cd ..
-    - name: Windows x64 Release
-      uses: marvinpinto/action-automatic-releases@latest
-      with:
-        repo_token: "${{ secrets.GITHUB_TOKEN }}"
-        automatic_release_tag: ${VERSION}
-        prerelease: false
-        title: ${VERSION}
-        files: |
-          ./tdv-cli.${VERSION}.win.x64.tgz
     - name: Linux x64 Build
       run: |
         dotnet publish tdvcli -c Release -o ./_publish.linux-x64 -r linux-x64 --self-contained
         cd ./_publish.linux-x64
-        tar cv . ../LICENSE | gzip -9c > ../tdv-cli.${VERSION}.linux.x64.tgz
+        tar cv . ../LICENSE | gzip -9c > ../_publish.all/tdv-cli.${VERSION}.linux.x64.tgz
         cd ..
-    - name: Linux x64 Release
-      uses: marvinpinto/action-automatic-releases@latest
-      with:
-        repo_token: "${{ secrets.GITHUB_TOKEN }}"
-        automatic_release_tag: ${VERSION}
-        prerelease: false
-        title: ${VERSION}
-        files: |
-          ./tdv-cli.${VERSION}.linux.x64.tgz
     - name: Portable Build
       run: |
         dotnet publish tdvcli -c Release -o ./_publish.portable -p:PublishTrimmed=false
         cd ./_publish.portable
-        tar cv . ../LICENSE | gzip -9c > tdv-cli.${VERSION}.portable.tgz
+        tar cv . ../LICENSE | gzip -9c > ../_publish.all/tdv-cli.${VERSION}.portable.tgz
         cd ..
-    - name: Portable Release
+    - name: Release All Builds
       uses: marvinpinto/action-automatic-releases@latest
       with:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
-        automatic_release_tag: ${VERSION}
+        automatic_release_tag: "${VERSION}"
         prerelease: false
-        title: ${VERSION}
+        title: "${VERSION}"
         files: |
-          ./tdv-cli.${VERSION}.portable.tgz
+          ./_publish.all/tdv-cli.*.tgz
