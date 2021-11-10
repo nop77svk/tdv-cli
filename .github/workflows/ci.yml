@@ -20,3 +20,9 @@ jobs:
       run: dotnet build --configuration Release
     - name: Test
       run: dotnet test --configuration Release
+    - name: Portable Build
+      run: |
+        dotnet publish tdvcli -c Release -o ./_publish.portable -p:PublishTrimmed=false
+        cd ./_publish.portable
+        tar cv . | gzip -9c > tdvcli.${VERSION}.portable.tgz
+        cd ..

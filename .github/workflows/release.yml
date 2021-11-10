@@ -30,3 +30,21 @@ jobs:
       run: dotnet nuget push NoP77svk.*.${VERSION}.nupkg --source https://nuget.pkg.github.com/nop77svk/index.json --api-key ${GITHUB_TOKEN}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Windows x64 Build
+      run: |
+        dotnet publish tdvcli -c Release -o ./_publish.win-x64 -r win-x64 --self-contained
+        cd ./_publish.win-x64
+        tar cv . | gzip -9c > tdvcli.${VERSION}.win.x64.tgz
+        cd ..
+    - name: Linux x64 Build
+      run: |
+        dotnet publish tdvcli -c Release -o ./_publish.linux-x64 -r linux-x64 --self-contained
+        cd ./_publish.linux-x64
+        tar cv . | gzip -9c > tdvcli.${VERSION}.linux.x64.tgz
+        cd ..
+    - name: Portable Build
+      run: |
+        dotnet publish tdvcli -c Release -o ./_publish.portable -p:PublishTrimmed=false
+        cd ./_publish.portable
+        tar cv . | gzip -9c > tdvcli.${VERSION}.portable.tgz
+        cd ..
