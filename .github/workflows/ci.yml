@@ -26,12 +26,13 @@ jobs:
         cd ./_publish.portable
         tar cv . | gzip -9c > ../tdvcli.latest.portable.tgz
         cd ..
-    - uses: "marvinpinto/action-automatic-releases@latest"
-        with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: "latest"
-          prerelease: true
-          title: "Development Build"
-          files: |
-            ./_publish.portable/*
-            ./LICENSE
+    - name: Portable Release
+      - uses: "marvinpinto/action-automatic-releases@latest"
+          with:
+            repo_token: "${{ secrets.GITHUB_TOKEN }}"
+            automatic_release_tag: "latest"
+            prerelease: true
+            title: "Development Build"
+            files: |
+              ./_publish.portable/*
+              ./LICENSE
