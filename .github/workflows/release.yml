@@ -37,19 +37,22 @@ jobs:
       run: |
         dotnet publish tdvcli -c Release -o ./_publish.win-x64 -r win-x64 --self-contained
         cd ./_publish.win-x64
-        tar cv . ../LICENSE | gzip -9c > ../_publish.all/tdv-cli.${VERSION}.win.x64.tgz
+        cp ../LICENSE .
+        zip -r9v ../_publish.all/tdv-cli.${VERSION}.win.x64.zip
         cd ..
     - name: Linux x64 Build
       run: |
         dotnet publish tdvcli -c Release -o ./_publish.linux-x64 -r linux-x64 --self-contained
         cd ./_publish.linux-x64
-        tar cv . ../LICENSE | gzip -9c > ../_publish.all/tdv-cli.${VERSION}.linux.x64.tgz
+        cp ../LICENSE .
+        tar cv . | gzip -9c > ../_publish.all/tdv-cli.${VERSION}.linux.x64.tgz
         cd ..
     - name: Portable Build
       run: |
         dotnet publish tdvcli -c Release -o ./_publish.portable -p:PublishTrimmed=false
         cd ./_publish.portable
-        tar cv . ../LICENSE | gzip -9c > ../_publish.all/tdv-cli.${VERSION}.portable.tgz
+        cp ../LICENSE .
+        zip -r9v ../_publish.all/tdv-cli.${VERSION}.portable.zip
         cd ..
     - name: Release All Builds
       uses: marvinpinto/action-automatic-releases@latest
@@ -57,4 +60,4 @@ jobs:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
         prerelease: false
         files: |
-          ./_publish.all/tdv-cli.*.tgz
+          ./_publish.all/tdv-cli.*
