@@ -38,7 +38,7 @@ jobs:
         dotnet publish tdvcli -c Release -o ./_publish.win-x64 -r win-x64 --self-contained
         cd ./_publish.win-x64
         cp ../LICENSE .
-        zip -r9v ../_publish.all/tdv-cli.${VERSION}.win.x64.zip
+        zip -r9v ../_publish.all/tdv-cli.${VERSION}.win.x64.zip .
         cd ..
     - name: Linux x64 Build
       run: |
@@ -52,7 +52,7 @@ jobs:
         dotnet publish tdvcli -c Release -o ./_publish.portable -p:PublishTrimmed=false
         cd ./_publish.portable
         cp ../LICENSE .
-        zip -r9v ../_publish.all/tdv-cli.${VERSION}.portable.zip
+        zip -r9v ../_publish.all/tdv-cli.${VERSION}.portable.zip .
         cd ..
     - name: Release All Builds
       uses: marvinpinto/action-automatic-releases@latest
