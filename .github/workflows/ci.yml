@@ -24,7 +24,7 @@ jobs:
       run: |
         dotnet publish tdvcli -c Release -o ./_publish.portable -p:PublishTrimmed=false
         cd ./_publish.portable
-        tar cv . ../LICENSE | gzip -9c > ../tdvcli.latest.portable.tgz
+        tar cv . ../LICENSE | gzip -9c > ../tdv-cli.latest.portable.tgz
         cd ..
     - name: Portable Release
       uses: marvinpinto/action-automatic-releases@latest
@@ -33,4 +33,5 @@ jobs:
         automatic_release_tag: "latest"
         prerelease: true
         title: "Development Build"
-        files: tdvcli.latest.portable.gz
+        files: |
+			tdv-cli.latest.portable.gz
