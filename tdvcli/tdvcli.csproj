@@ -32,10 +32,6 @@
     </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="H:\_projects\NET Commons\analyzer-settings\GlobalSuppressions.cs" Link="GlobalSuppressions.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="CommandLineParser" Version="2.8.0" />
     <PackageReference Include="CsvHelper" Version="27.1.1" />
     <PackageReference Include="log4net" Version="2.0.13" />

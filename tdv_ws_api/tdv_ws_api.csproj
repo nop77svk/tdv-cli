@@ -30,10 +30,6 @@
     </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="H:\_projects\NET Commons\analyzer-settings\GlobalSuppressions.cs" Link="GlobalSuppressions.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="log4net" Version="2.0.13" />
     <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="6.0.0">
       <PrivateAssets>all</PrivateAssets>
