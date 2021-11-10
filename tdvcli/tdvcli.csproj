@@ -8,15 +8,16 @@
         <Product>Tibco Data Virtualization Utilities</Product>
         <Authors>Peter Hraško</Authors>
         <Company>Open source community</Company>
-        <Copyright>Copyleft</Copyright>
+        <Copyright>Practically copyleft</Copyright>
         <Description>Tibco Data Virtualization Comand-Line Interface</Description>
         <AssemblyName>tdvcli</AssemblyName>
 		<NoWarn>1701;1702;AD0001</NoWarn>
-        <PackageId>tdvcli</PackageId>
+        <PackageId>NoP77svk.TibcoDV.CLI</PackageId>
         <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
         <RuntimeIdentifiers>win-x86;win-x64;win-arm;linux-x64;linux-arm</RuntimeIdentifiers>
 		<RepositoryUrl>https://github.com/nop77svk/tdv-cli</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
