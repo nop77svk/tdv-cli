@@ -20,10 +20,3 @@ jobs:
       run: dotnet build --configuration Release
     - name: Test
       run: dotnet test --configuration Release
-    - name: Pack
-      run: |
-        dotnet pack --configuration Release /p:Version=LATEST --no-build --output .
-    - name: Push
-      run: dotnet nuget push NoP77svk.*.${VERSION}.nupkg --source https://nuget.pkg.github.com/nop77svk/index.json --api-key ${GITHUB_TOKEN}
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
