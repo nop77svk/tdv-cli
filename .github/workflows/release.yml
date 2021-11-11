@@ -49,7 +49,7 @@ jobs:
         cd ..
     - name: Portable Build
       run: |
-        dotnet publish tdvcli -c Release -o ./_publish.portable -p:PublishTrimmed=false
+        dotnet publish tdvcli -c Release -o ./_publish.portable --no-self-contained -p:PublishTrimmed=false
         cd ./_publish.portable
         cp ../LICENSE .
         zip -r9v ../_publish.all/tdv-cli.${VERSION}.portable.zip .
