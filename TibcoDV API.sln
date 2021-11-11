@@ -15,6 +15,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		nuget.config = nuget.config
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tdvcli.test.parser", "tdvcli.test.parser\tdvcli.test.parser.csproj", "{32939FC4-DCEC-4FC7-96FF-3202DF8C58EF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{4954641B-F582-4F16-9E4D-F2E1D4BDE9A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4954641B-F582-4F16-9E4D-F2E1D4BDE9A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4954641B-F582-4F16-9E4D-F2E1D4BDE9A3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{32939FC4-DCEC-4FC7-96FF-3202DF8C58EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{32939FC4-DCEC-4FC7-96FF-3202DF8C58EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{32939FC4-DCEC-4FC7-96FF-3202DF8C58EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{32939FC4-DCEC-4FC7-96FF-3202DF8C58EF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
