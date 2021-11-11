@@ -77,7 +77,7 @@
             args.ValidateAndCleanUp(null);
 #endif
 
-            _log.Info($"Connecting as {args.TdvServerUserName} to {args.TdvServerScheme}://{args.TdvServerHost}:{args.TdvServerWsApiPort}");
+            _log.Info($"Connecting as {args.TdvServerUserName} to {args.TdvServerWsScheme}://{args.TdvServerHost}:{args.TdvServerWsApiPort}");
             using HttpClient httpClient = InitHttpConnectionPool(args);
 
             TdvWebServiceClient tdvClient = InitTdvRestClient(

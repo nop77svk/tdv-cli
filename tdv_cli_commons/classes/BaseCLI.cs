@@ -10,16 +10,18 @@
 
     public abstract class BaseCLI
     {
+        public const string DefaultPrincipalDomain = "composite";
+
         private static readonly ILog _log = LogManager.GetLogger(typeof(BaseCLI));
 
         [Option('u', "user", Required = true, HelpText = "\n"
             + "Full connection string to TDV server\n"
-            + "<username>[/<password>]/<server_host>[:<server_port>])]")]
+            + "[<user_domain>:]<username>[/<password>]@<server_host>[:<server_port>])]")]
         public string? TdvServerConnectionString { get; set; }
 
         [Option("use-ssl", Required = false, Default = "auto", HelpText = "\n"
             + "Force use HTTPS instead of HTTP (auto|yes|no)\n"
-            + "\"auto\" = Autodetect based on the --port argument (9402 = yes, 9400 = no)")]
+            + "\"auto\" = Autodetect based on the --port argument (9402, 9403 = yes, 9400, 9401 = no)")]
         public string? UseSSL { get; set; }
 
         [Option("ignore-invalid-ssl-certificates", Required = false, Default = false, HelpText = "\n"
@@ -42,11 +44,13 @@
         // ----------------------------------------------------------------------------------------
         // cleaned-up CLI arguments
         // ----------------------------------------------------------------------------------------
+        public string? TdvServerPrincipalDomain { get; set; } = DefaultPrincipalDomain;
         public string? TdvServerUserName { get; set; }
         public string? TdvServerUserPassword { get; set; }
-        public ServerSchemeEnum TdvServerScheme { get; set; }
+        public ServerSchemeEnum TdvServerWsScheme { get; set; }
         public string? TdvServerHost { get; set; }
         public int? TdvServerWsApiPort { get; set; }
+        public int? TdvServerDbApiPort { get; set; }
 
         // ----------------------------------------------------------------------------------------
         // validation and clean up routines
@@ -91,15 +95,15 @@
             }
 
             // choose/autodetect server request scheme (HTTP vs HTTPS) and server port
-            TdvServerScheme = UseSSL?.ToLower() switch
+            TdvServerWsScheme = UseSSL?.ToLower() switch
             {
                 "yes" or "true" or "1" or "y" or null or "" => ServerSchemeEnum.HTTPS,
                 "no" or "false" or "0" or "n" => ServerSchemeEnum.HTTP,
                 "auto" or "autodetect" or "detect" or null or "" => TdvServerWsApiPort switch
                 {
-                    9402 => ServerSchemeEnum.HTTPS,
-                    9400 => ServerSchemeEnum.HTTP,
-                    _ => throw new ArgumentException($"Server request scheme (HTTP vs HTTPS) autodetection from port {TdvServerWsApiPort} failed")
+                    9402 or 9403 => ServerSchemeEnum.HTTPS,
+                    9400 or 9401 => ServerSchemeEnum.HTTP,
+                    _ => throw new ArgumentException($"Server request scheme (Plain vs SSL/TLS) autodetection from port {TdvServerWsApiPort} failed")
                 },
                 _ => throw new ArgumentException($"Unrecognized value \"{UseSSL}\" of --use-ssl parameter")
             };
@@ -107,11 +111,21 @@
             // autodetect server port if not supplied and if possible
             if (TdvServerWsApiPort is null)
             {
-                TdvServerWsApiPort = TdvServerScheme switch
+                TdvServerWsApiPort = TdvServerWsScheme switch
                 {
                     ServerSchemeEnum.HTTP => 9400,
                     ServerSchemeEnum.HTTPS => 9402,
-                    _ => throw new ArgumentException($"Unable to autodetect TDV WS API server port since the connection scheme (HTTP vs HTTPS) was not determined")
+                    _ => throw new ArgumentException($"Unable to autodetect TDV WS API server port since the connection scheme (Plain vs SSL/TLS) was not determined")
+                };
+            }
+
+            if (TdvServerDbApiPort is null)
+            {
+                TdvServerDbApiPort = TdvServerWsScheme switch
+                {
+                    ServerSchemeEnum.HTTP => 9401,
+                    ServerSchemeEnum.HTTPS => 9403,
+                    _ => throw new ArgumentException($"Unable to autodetect TDV DB API server port since the connection scheme (Plain vs SSL/TLS) was not determined")
                 };
             }
 

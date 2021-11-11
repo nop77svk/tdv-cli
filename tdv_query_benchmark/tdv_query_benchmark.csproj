@@ -3,7 +3,30 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+        <DefineConstants>TRACE;DEBUG</DefineConstants>
+        <DebugType>portable</DebugType>
+        <DebugSymbols>true</DebugSymbols>
+        <UserSecretsId>bfb38ff8-6cfe-4680-883a-cef8d6fd7a42</UserSecretsId>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+        <DebugType>none</DebugType>
+        <DebugSymbols>false</DebugSymbols>
+    </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\NET Commons\analyzer-settings\GlobalSuppressions.cs" Link="GlobalSuppressions.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommandLineParser" Version="2.8.0" />
+    <PackageReference Include="log4net" Version="2.0.13" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="6.0.0" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\tdv_cli_commons\tdv_cli_commons.csproj" />
@@ -12,7 +35,7 @@
   <ItemGroup>
     <Reference Include="System.Data.CompositeClient">
       <HintPath>C:\Program Files\TIBCO\ADO.NET Provider for TIBCO(R) Data Virtualization\lib\System.Data.CompositeClient.dll</HintPath>
-      <Private>false</Private>
+      <Private>true</Private>
       <SpecificVersion>false</SpecificVersion>
     </Reference>
   </ItemGroup>

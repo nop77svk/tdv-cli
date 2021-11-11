@@ -54,7 +54,7 @@
 
             HttpWebServiceClient genericRestClient = new HttpWebServiceClient(httpClient, args.TdvServerHost)
             {
-                ServerScheme = args.TdvServerScheme switch
+                ServerScheme = args.TdvServerWsScheme switch
                 {
                     ServerSchemeEnum.HTTP => "http",
                     ServerSchemeEnum.HTTPS => "https",

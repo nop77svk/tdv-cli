@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "benchmark UAT via Agora": {
+      "commandName": "Project",
+      "commandLineArgs": "-u h50suob_temp/qwerty@127.0.0.1:10030 -f d:\\_temp.sql --no-proxy --use-ssl=no --data-source=Erste_DV_TU"
+    }
+  }
+}
