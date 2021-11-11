@@ -8,15 +8,16 @@
         <Product>Tibco Data Virtualization Utilities</Product>
         <Authors>Peter Hraško</Authors>
         <Company>Open source community</Company>
-        <Copyright>Copyleft</Copyright>
+        <Copyright>Practically copyleft</Copyright>
         <Description>Tibco Data Virtualization Comand-Line Interface</Description>
         <AssemblyName>tdvcli</AssemblyName>
 		<NoWarn>1701;1702;AD0001</NoWarn>
-        <PackageId>tdvcli</PackageId>
+        <PackageId></PackageId>
         <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
         <RuntimeIdentifiers>win-x86;win-x64;win-arm;linux-x64;linux-arm</RuntimeIdentifiers>
 		<RepositoryUrl>https://github.com/nop77svk/tdv-cli</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -29,11 +30,8 @@
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
         <DebugType>none</DebugType>
         <DebugSymbols>false</DebugSymbols>
+        <PublishTrimmed>true</PublishTrimmed>
     </PropertyGroup>
-
-  <ItemGroup>
-    <Compile Include="H:\_projects\NET Commons\analyzer-settings\GlobalSuppressions.cs" Link="GlobalSuppressions.cs" />
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="CommandLineParser" Version="2.8.0" />
@@ -44,11 +42,11 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="6.0.0" />
-    <PackageReference Include="NoP77svk.ConnectionStringParsers" Version="1.1.3" />
-    <PackageReference Include="NoP77svk.Linq" Version="1.1.3" />
-    <PackageReference Include="NoP77svk.LinqOuterJoins" Version="1.1.3" />
-    <PackageReference Include="NoP77svk.MiscellaneousHelpers" Version="1.1.3" />
-    <PackageReference Include="NoP77svk.WebServiceClient" Version="1.1.3" />
+    <PackageReference Include="NoP77svk.ConnectionStringParsers" Version="1.1.4" />
+    <PackageReference Include="NoP77svk.Linq" Version="1.1.4" />
+    <PackageReference Include="NoP77svk.LinqOuterJoins" Version="1.1.4" />
+    <PackageReference Include="NoP77svk.MiscellaneousHelpers" Version="1.1.4" />
+    <PackageReference Include="NoP77svk.WebServiceClient" Version="1.1.4" />
     <PackageReference Include="Pegasus" Version="4.1.0" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
       <PrivateAssets>all</PrivateAssets>

@@ -12,6 +12,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{27EE7903-0501-4D7D-BFF4-00EE3A7CAB50}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
+		nuget.config = nuget.config
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tdv_query_benchmark", "tdv_query_benchmark\tdv_query_benchmark.csproj", "{6A84A4D3-312A-4D40-93B7-A451561204F9}"
