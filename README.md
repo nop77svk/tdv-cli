@@ -14,6 +14,12 @@ The `if not exists` option instructs the server to not return error when such a 
 
 Note that `folder` and `container` keywords are interchangeable.
 
+### Create schema
+
+`create [if not exists] schema `<_resource path_>`;`
+
+The `if not exists` option instructs the server to not return error when such a schema already exists on the sever.
+
 ### Create data view
 
 `create [if not exists] view `<_resource path_>` as `<_query_>`;`
