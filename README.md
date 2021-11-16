@@ -6,6 +6,14 @@ Run `tdvcli --help` to get the overview on available command line parameters.
 
 ## "Pierre's Tibco SQL" Script -- Server-side commands
 
+### Create folder
+
+`create [if not exists] <folder|container> `<_resource path_>`;`
+
+The `if not exists` option instructs the server to not return error when such a folder/container already exists on the sever.
+
+Note that `folder` and `container` keywords are interchangeable.
+
 ### Create data view
 
 `create [if not exists] view `<_resource path_>` as `<_query_>`;`
