@@ -15,6 +15,7 @@
     using NoP77svk.Linq;
     using NoP77svk.Text.RegularExpressions;
     using NoP77svk.TibcoDV.API;
+    using NoP77svk.TibcoDV.CLI.AST;
     using NoP77svk.TibcoDV.Commons;
     using NoP77svk.Web.WS;
     using Pegasus.Common;
@@ -135,6 +136,8 @@
 
             if (commandAST is AST.Assign stmtAssign)
                 await ExecuteAssign(tdvClient, stmtAssign);
+            else if (commandAST is AST.CreateResource stmtCreateResource)
+                await ExecuteCreateResource(tdvClient, stmtCreateResource);
             else if (commandAST is AST.Describe stmtDescribe)
                 await ExecuteDescribe(tdvClient, stmtDescribe);
             else if (commandAST is AST.Grant stmtGrant)
@@ -143,6 +146,20 @@
                 ExecuteClientPrompt(stmtClientPrompt);
             else
                 throw new ArgumentOutOfRangeException(nameof(commandAST), commandAST?.GetType() + " :: " + commandAST?.ToString(), "Unrecognized type of parsed statement");
+        }
+
+        private static async Task ExecuteCreateResource(TdvWebServiceClient tdvClient, CreateResource stmt)
+        {
+            using var log = new TraceLog(_log, nameof(ExecuteParsedStatement));
+            _log.Debug(stmt);
+
+            if (stmt.ResourceDDL is null)
+                throw new ArgumentNullException(nameof(stmt) + "." + nameof(stmt.ResourceDDL));
+
+            if (stmt.ResourceDDL is AST.FolderDDL folderDDL)
+                await ExecuteCreateFolder(tdvClient, stmt.IfNotExists, folderDDL);
+            else
+                throw new ArgumentOutOfRangeException(nameof(stmt) + "." + nameof(stmt.ResourceDDL), stmt.ResourceDDL.GetType() + " :: " + stmt.ResourceDDL.ToString(), "Unrecognized type of parsed DDL statement");
         }
 
         private static async Task ExecuteAssign(TdvWebServiceClient tdvClient, AST.Assign stmt)
@@ -220,6 +237,28 @@
 
             if (stmtClientPrompt.PromptText is not null)
                 _log.Info(stmtClientPrompt.PromptText);
+        }
+
+        private static async Task ExecuteCreateFolder(TdvWebServiceClient tdvClient, bool ifNotExists, FolderDDL stmt)
+        {
+            using var log = new TraceLog(_log, nameof(ExecuteDescribe));
+
+            if (string.IsNullOrEmpty(stmt.ResourcePath))
+                throw new ArgumentNullException(nameof(stmt) + "." + nameof(stmt.ResourcePath));
+
+            string folderParentPath = PathExt.TrimLastLevel(stmt.ResourcePath) ?? throw new ArgumentNullException(nameof(folderParentPath));
+            _log.Debug($"{nameof(folderParentPath)} = {folderParentPath}");
+
+            string folderName = PathExt.GetLastLevel(stmt.ResourcePath) ?? throw new ArgumentNullException(nameof(folderName));
+            _log.Debug($"{nameof(folderName)} = {folderName}");
+
+            string result = await tdvClient.CreateFolder(folderParentPath, folderName, ifNotExists: ifNotExists);
+            _log.Debug($"{nameof(result)} = {result}");
+
+            if (ifNotExists)
+                _log.Info($"Folder {stmt.ResourcePath} created (or left intact if there already was one)");
+            else
+                _log.Info($"Folder {stmt.ResourcePath} created");
         }
 
         private static async Task ExecuteDescribe(TdvWebServiceClient tdvClient, AST.Describe stmt)

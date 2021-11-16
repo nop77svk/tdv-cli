@@ -73,7 +73,7 @@ clientSidePrompt<AST.ClientPrompt> = "prompt" __ v:stringLiteral
 
 createResourceStatement<object> = "create" __
 	soifnx:statementOptionIfNotExistsWithWhitespace
-	ddl:( createViewDDL / #ERROR{ "Unrecognized resource type to be created" } )
+	ddl:( createViewDDL / createFolderDDL / #ERROR{ "Unrecognized resource type to be created" } )
 {
 	new AST.CreateResource()
 	{
@@ -91,6 +91,11 @@ createViewDDL<object> = ("view" / "dataview") __ res:resourcePath __
 		ResourcePath = res,
 		ViewQuery = q
 	}
+}
+
+createFolderDDL<object> = ("folder" / "container") __ res:resourcePath
+{
+	new AST.FolderDDL(res)
 }
 
 // ------------------------------------------------------------------------------------------------
