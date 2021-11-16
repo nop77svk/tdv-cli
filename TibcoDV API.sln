@@ -13,9 +13,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 		nuget.config = nuget.config
+		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tdvcli.test.parser", "tdvcli.test.parser\tdvcli.test.parser.csproj", "{32939FC4-DCEC-4FC7-96FF-3202DF8C58EF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "tdvcli.test.parser", "tdvcli.test.parser\tdvcli.test.parser.csproj", "{32939FC4-DCEC-4FC7-96FF-3202DF8C58EF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
