@@ -158,6 +158,8 @@
 
             if (stmt.ResourceDDL is AST.FolderDDL folderDDL)
                 await ExecuteCreateFolder(tdvClient, stmt.IfNotExists, folderDDL);
+            else if (stmt.ResourceDDL is AST.SchemaDDL schemaDDL)
+                await ExecuteCreateSchema(tdvClient, stmt.IfNotExists, schemaDDL);
             else
                 throw new ArgumentOutOfRangeException(nameof(stmt) + "." + nameof(stmt.ResourceDDL), stmt.ResourceDDL.GetType() + " :: " + stmt.ResourceDDL.ToString(), "Unrecognized type of parsed DDL statement");
         }
@@ -259,6 +261,22 @@
                 _log.Info($"Folder {stmt.ResourcePath} created (or left intact if there already was one)");
             else
                 _log.Info($"Folder {stmt.ResourcePath} created");
+        }
+
+        private static async Task ExecuteCreateSchema(TdvWebServiceClient tdvClient, bool ifNotExists, SchemaDDL stmt)
+        {
+            using var log = new TraceLog(_log, nameof(ExecuteDescribe));
+
+            if (string.IsNullOrEmpty(stmt.ResourcePath))
+                throw new ArgumentNullException(nameof(stmt) + "." + nameof(stmt.ResourcePath));
+
+            string result = await tdvClient.CreateSchemas(new string[] { stmt.ResourcePath }, ifNotExists: ifNotExists);
+            _log.Debug($"{nameof(result)} = {result}");
+
+            if (ifNotExists)
+                _log.Info($"Schema {stmt.ResourcePath} created (or left intact if there already was one)");
+            else
+                _log.Info($"Schema {stmt.ResourcePath} created");
         }
 
         private static async Task ExecuteDescribe(TdvWebServiceClient tdvClient, AST.Describe stmt)

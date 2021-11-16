@@ -24,6 +24,20 @@
             );
         }
 
+        public async Task<string> CreateSchemas(IEnumerable<string> schemas, bool ifNotExists = true, string? annotation = null)
+        {
+            IEnumerable<TdvRest_CreateSchema> schemaCreationRequests = schemas
+                .Where(schema => !string.IsNullOrWhiteSpace(schema))
+                .Select(schema => new TdvRest_CreateSchema()
+                {
+                    Path = PathExt.Sanitize(schema, FolderDelimiter),
+                    IfNotExists = ifNotExists,
+                    Annotation = annotation
+                });
+
+            return await CreateSchemas(schemaCreationRequests);
+        }
+
         public async Task<string> DropSchemas(IEnumerable<string> schemas, bool ifExists = true)
         {
             IEnumerable<string> schemasSanitized = schemas
