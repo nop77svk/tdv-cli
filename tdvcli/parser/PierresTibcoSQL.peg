@@ -166,11 +166,7 @@ assignStatement<object> =
 	action:assignOrUnassign __
 	what:assignWhat
 {
-	new AST.Assign()
-	{
-		Action = action,
-		What = what
-	}
+	new AST.Assign(action, what)
 }
 
 assignOrUnassign<NoP77svk.TibcoDV.API.WSDL.Admin.rbsAssignmentOperationType>
