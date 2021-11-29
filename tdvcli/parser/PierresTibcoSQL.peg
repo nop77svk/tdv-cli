@@ -156,6 +156,7 @@ resourcePrivilege<TdvPrivilegeEnum>
 	/ "insert" { TdvPrivilegeEnum.Insert }
 	/ "update" { TdvPrivilegeEnum.Update }
 	/ "delete" { TdvPrivilegeEnum.Delete }
+	/ "execute" { TdvPrivilegeEnum.Execute }
 	/ "grant" { TdvPrivilegeEnum.Grant }
 	/ #ERROR{ "Unrecognized privilege" }
 

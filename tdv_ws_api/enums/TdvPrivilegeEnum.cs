@@ -9,6 +9,7 @@
         Insert,
         Update,
         Delete,
+        Execute,
         Grant
     }
 }
