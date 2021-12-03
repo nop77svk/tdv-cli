@@ -4,9 +4,9 @@ namespace NoP77svk.TibcoDV.API
 {
     using System;
 
-    public record TdvResourceType(string? wsType, string? wsSubType, string? wsTargetType = null)
+    public record TdvResourceType(string? WsType, string? WsSubType, string? WsTargetType = null)
     {
-        public TdvResourceTypeEnumAgr Type { get => CalcResourceType(wsType, wsSubType, wsTargetType); }
+        public TdvResourceTypeEnumAgr Type { get => CalcResourceType(WsType, WsSubType, WsTargetType); }
 
         /// <see cref="https://docs.tibco.com/pub/tdv/8.4.0/doc/html/StudioHelp/index.html#page/StudioHelp/Ch_3_OperationsList.TDV%2520Resource%2520Types%2520and%2520Subtypes.html"/>
         public static TdvResourceTypeEnumAgr CalcResourceType(string? wsType, string? wsSubType, string? wsTargetType)
@@ -17,6 +17,7 @@ namespace NoP77svk.TibcoDV.API
                 (TdvResourceTypeConst.Container, TdvResourceSubtypeConst.FolderContainer, _) => TdvResourceTypeEnumAgr.Folder,
                 (TdvResourceTypeConst.Container, TdvResourceSubtypeConst.CatalogContainer, _) => TdvResourceTypeEnumAgr.PublishedCatalog,
                 (TdvResourceTypeConst.Container, TdvResourceSubtypeConst.SchemaContainer, _) => TdvResourceTypeEnumAgr.PublishedSchema,
+                (TdvResourceTypeConst.Container, _, _) => TdvResourceTypeEnumAgr.UnknownContainer,
                 (TdvResourceTypeConst.DataSource, TdvResourceSubtypeConst.RelationalDataSource, _) => TdvResourceTypeEnumAgr.DataSourceRelational,
                 (TdvResourceTypeConst.DataSource, TdvResourceSubtypeConst.CompositeWebService, _) => TdvResourceTypeEnumAgr.DataSourceCompositeWebService,
                 (TdvResourceTypeConst.DataSource, TdvResourceSubtypeConst.FileDataSource, _) => TdvResourceTypeEnumAgr.DataSourceFile,

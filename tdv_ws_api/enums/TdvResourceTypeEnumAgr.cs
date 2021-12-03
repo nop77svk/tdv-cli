@@ -3,6 +3,7 @@
     public enum TdvResourceTypeEnumAgr
     {
         Unknown,
+        UnknownContainer,
         DataSourceRelational,
         DataSourceCompositeWebService,
         DataSourceExcel,

@@ -83,7 +83,7 @@
             {
                 IEnumerable<string> pathOnlyResources = singleTypeResources.Select(folderItem => folderItem.Path ?? string.Empty);
 
-                if (singleTypeResources.Key == TdvResourceTypeEnumAgr.Folder)
+                if (singleTypeResources.Key is TdvResourceTypeEnumAgr.Folder or TdvResourceTypeEnumAgr.UnknownContainer)
                 {
                     dropTasks.Add(DropFolders(pathOnlyResources, ifExists: ifExists));
                 }
@@ -112,7 +112,7 @@
                     IEnumerable<TdvRest_DeleteLink> massLinkDrop = singleTypeResources
                         .Select(resource => new TdvRest_DeleteLink()
                         {
-                            IsTable = resource.ResourceType.wsTargetType == TdvResourceTypeConst.Table,
+                            IsTable = resource.ResourceType.WsTargetType == TdvResourceTypeConst.Table,
                             Path = resource.Path
                         });
 
