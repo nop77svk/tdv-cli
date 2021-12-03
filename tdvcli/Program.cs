@@ -140,28 +140,14 @@
                 await ExecuteCreateResource(tdvClient, stmtCreateResource);
             else if (commandAST is AST.Describe stmtDescribe)
                 await ExecuteDescribe(tdvClient, stmtDescribe);
+            else if (commandAST is AST.DropResource stmtDropResource)
+                await ExecuteDropResource(tdvClient, stmtDropResource);
             else if (commandAST is AST.Grant stmtGrant)
                 await ExecuteGrant(tdvClient, stmtGrant);
             else if (commandAST is AST.ClientPrompt stmtClientPrompt)
                 ExecuteClientPrompt(stmtClientPrompt);
             else
                 throw new ArgumentOutOfRangeException(nameof(commandAST), commandAST?.GetType() + " :: " + commandAST?.ToString(), "Unrecognized type of parsed statement");
-        }
-
-        private static async Task ExecuteCreateResource(TdvWebServiceClient tdvClient, CreateResource stmt)
-        {
-            using var log = new TraceLog(_log, nameof(ExecuteParsedStatement));
-            _log.Debug(stmt);
-
-            if (stmt.ResourceDDL is null)
-                throw new ArgumentNullException(nameof(stmt) + "." + nameof(stmt.ResourceDDL));
-
-            if (stmt.ResourceDDL is AST.FolderDDL folderDDL)
-                await ExecuteCreateFolder(tdvClient, stmt.IfNotExists, folderDDL);
-            else if (stmt.ResourceDDL is AST.SchemaDDL schemaDDL)
-                await ExecuteCreateSchema(tdvClient, stmt.IfNotExists, schemaDDL);
-            else
-                throw new ArgumentOutOfRangeException(nameof(stmt) + "." + nameof(stmt.ResourceDDL), stmt.ResourceDDL.GetType() + " :: " + stmt.ResourceDDL.ToString(), "Unrecognized type of parsed DDL statement");
         }
 
         private static async Task ExecuteAssign(TdvWebServiceClient tdvClient, AST.Assign stmt)
@@ -241,6 +227,22 @@
                 _log.Info(stmtClientPrompt.PromptText);
         }
 
+        private static async Task ExecuteCreateResource(TdvWebServiceClient tdvClient, CreateResource stmt)
+        {
+            using var log = new TraceLog(_log, nameof(ExecuteParsedStatement));
+            _log.Debug(stmt);
+
+            if (stmt.ResourceDDL is null)
+                throw new ArgumentNullException(nameof(stmt) + "." + nameof(stmt.ResourceDDL));
+
+            if (stmt.ResourceDDL is AST.FolderDDL folderDDL)
+                await ExecuteCreateFolder(tdvClient, stmt.IfNotExists, folderDDL);
+            else if (stmt.ResourceDDL is AST.SchemaDDL schemaDDL)
+                await ExecuteCreateSchema(tdvClient, stmt.IfNotExists, schemaDDL);
+            else
+                throw new ArgumentOutOfRangeException(nameof(stmt) + "." + nameof(stmt.ResourceDDL), stmt.ResourceDDL.GetType() + " :: " + stmt.ResourceDDL.ToString(), "Unrecognized type of parsed DDL statement");
+        }
+
         private static async Task ExecuteCreateFolder(TdvWebServiceClient tdvClient, bool ifNotExists, FolderDDL stmt)
         {
             using var log = new TraceLog(_log, nameof(ExecuteDescribe));
@@ -295,7 +297,7 @@
                 await foreach (WSDL.Admin.resource res in resources)
                 {
                     _log.Info($"resource: {res.path}\n\ttype: {res.type}\n\tsubtype: {res.subtype}\n\towner: {res.ownerName}@{res.ownerDomain}\n\tversion: {res.version}\n\tannotation: {res.annotation}");
-                    /* 2do!
+                    /* 2do! describe also the rest...
                     [System.Xml.Serialization.XmlIncludeAttribute(typeof(tableResource))]
                     [System.Xml.Serialization.XmlIncludeAttribute(typeof(definitionSetResource))]
                     [System.Xml.Serialization.XmlIncludeAttribute(typeof(procedureResource))]
@@ -306,6 +308,31 @@
                     [System.Xml.Serialization.XmlIncludeAttribute(typeof(treeResource))]
                     */
                 }
+            }
+        }
+
+        private static async Task ExecuteDropResource(TdvWebServiceClient tdvClient, DropResource stmt)
+        {
+            using var log = new TraceLog(_log, nameof(ExecuteDropResource));
+
+            if (stmt.Resources is null || !stmt.Resources.Any())
+                throw new ArgumentNullException(nameof(stmt) + "." + nameof(stmt.Resources));
+
+            if (stmt.AlsoDropRootResource)
+            {
+                IEnumerable<TdvResourceSpecifier> resources = stmt.Resources
+                    .Where(resource => !string.IsNullOrWhiteSpace(resource.Path))
+                    .Select(resource => new TdvResourceSpecifier(resource.Path ?? string.Empty, new TdvResourceType(resource.Type.ToString(), null)));
+
+                await tdvClient.DropAnyResources(resources, stmt.IfExists);
+            }
+            else
+            {
+                IEnumerable<Task> purgeTasks = stmt.Resources
+                    .Where(resource => !string.IsNullOrWhiteSpace(resource.Path))
+                    .Select(resource => tdvClient.PurgeContainer(resource.Path, stmt.IfExists));
+
+                await Task.WhenAll(purgeTasks);
             }
         }
 

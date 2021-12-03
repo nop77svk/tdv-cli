@@ -19,6 +19,7 @@ statement<object>
 	/ grantStatement
 	/ createResourceStatement
 	/ dropResourceStatement
+	/ purgeResourceStatement
 	/ assignStatement
 	/ describeStatement
 	/ #ERROR{ "Unrecognized statement" }
@@ -106,15 +107,28 @@ createSchemaDDL<object> = ("schema") __ res:resourcePath
 // ------------------------------------------------------------------------------------------------
 
 dropResourceStatement<object> = "drop" __
-	sorec:statementOptionRecursiveWithWhitespace
 	soifx:statementOptionIfExistsWithWhitespace
 	res:listOfFullResourceSpecifiers
 {
 	new AST.DropResource()
 	{
 		IfExists = soifx,
-		Recursive = sorec,
-		Resources = res
+		Resources = res,
+		AlsoDropRootResource = true
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+
+purgeResourceStatement<object> = "purge" __
+	soifx:statementOptionIfExistsWithWhitespace
+	res:listOfFullResourceSpecifiers
+{
+	new AST.DropResource()
+	{
+		IfExists = soifx,
+		Resources = res,
+		AlsoDropRootResource = false
 	}
 }
 
