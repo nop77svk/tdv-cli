@@ -99,6 +99,10 @@
                 {
                     dropTasks.Add(DropDataViews(pathOnlyResources, ifExists: ifExists));
                 }
+                else if (singleTypeResources.Key is TdvResourceTypeEnumAgr.StoredProcedureSQL or TdvResourceTypeEnumAgr.StoredProcedureOther)
+                {
+                    dropTasks.Add(DropScripts(pathOnlyResources, ifExists: ifExists));
+                }
                 else if (singleTypeResources.Key == TdvResourceTypeEnumAgr.PublishedTableOrView)
                 {
                     IEnumerable<TdvRest_DeleteLink> massLinkDrop = singleTypeResources
