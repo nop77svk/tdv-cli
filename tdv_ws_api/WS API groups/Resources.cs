@@ -103,6 +103,10 @@
                 {
                     dropTasks.Add(DropScripts(pathOnlyResources, ifExists: ifExists));
                 }
+                else if (singleTypeResources.Key is TdvResourceTypeEnumAgr.DataSourceRelational or TdvResourceTypeEnumAgr.DataSourceExcel or TdvResourceTypeEnumAgr.DataSourceFile or TdvResourceTypeEnumAgr.DataSourceWsWsdl or TdvResourceTypeEnumAgr.DataSourceXmlFile)
+                {
+                    dropTasks.Add(DropDataSources(pathOnlyResources, ifExists: ifExists));
+                }
                 else if (singleTypeResources.Key == TdvResourceTypeEnumAgr.PublishedTableOrView)
                 {
                     IEnumerable<TdvRest_DeleteLink> massLinkDrop = singleTypeResources
