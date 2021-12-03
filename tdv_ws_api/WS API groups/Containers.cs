@@ -111,61 +111,19 @@
             );
         }
 
-        public async Task DropFolderRecursive(
-            string? rootNodePath,
-            bool dropSelf,
-            TdvResourceTypeEnumAgr resourceType = TdvResourceTypeEnumAgr.Folder,
-            Action<string>? doneFeedbackCallback = null
-        )
+        public async Task PurgeContainer(string? rootNodePath, bool ifExists = true)
         {
             if (string.IsNullOrWhiteSpace(rootNodePath))
                 throw new ArgumentNullException(nameof(rootNodePath));
 
-            IEnumerable<TdvRest_ContainerContents> folderContents = await RetrieveContainerContents(rootNodePath, resourceType);
-            IEnumerable<TdvRest_ContainerContents> nonemptyFolderContents = folderContents
-                .Where(folderItem => !string.IsNullOrWhiteSpace(folderItem.Path));
+            IAsyncEnumerable<TdvRest_ContainerContents> folderContents = RetrieveResourceChildren(rootNodePath, TdvResourceTypeConst.Container);
 
-            IEnumerable<string> viewsToDrop = nonemptyFolderContents
-                .Where(folderItem => folderItem.TdvResourceType == TdvResourceTypeEnumAgr.View)
-                .Select(folderItem => PathExt.Sanitize(folderItem.Path, FolderDelimiter) ?? string.Empty);
-            IEnumerable<TdvRest_DeleteLink> linksToDrop = nonemptyFolderContents
-                .Where(folderItem => folderItem.TdvResourceType == TdvResourceTypeEnumAgr.PublishedTableOrView)
-                .Select(folderItem => new TdvRest_DeleteLink()
-                {
-                    Path = PathExt.Sanitize(folderItem.Path, FolderDelimiter),
-                    IsTable = true
-                });
-            IEnumerable<TdvRest_ContainerContents> containersToDrop = nonemptyFolderContents
-                .Where(folderItem => folderItem.TdvResourceType is TdvResourceTypeEnumAgr.Folder or TdvResourceTypeEnumAgr.PublishedCatalog or TdvResourceTypeEnumAgr.PublishedSchema);
+            IEnumerable<TdvResourceSpecifier> resourceList = folderContents
+                .Where(folderItem => !string.IsNullOrWhiteSpace(folderItem.Path))
+                .Select(folderItem => new TdvResourceSpecifier(folderItem.Path ?? string.Empty, new TdvResourceType(folderItem.Type, folderItem.SubType, folderItem.TargetType)))
+                .ToEnumerable();
 
-            IEnumerable<Task> dropTasks = containersToDrop
-                .Select(folder => DropFolderRecursive(folder.Path, false))
-                // add the single-call mass-deletions
-                .Append(DropDataViews(viewsToDrop))
-                .Append(DropLinks(linksToDrop));
-
-            await Task.WhenAll(dropTasks);
-
-            await DropAnyContainers(containersToDrop);
-
-            if (dropSelf)
-                await DropAnyContainers(new[] { rootNodePath }, resourceType);
-
-            doneFeedbackCallback?.Invoke(rootNodePath);
-        }
-
-        public async Task<List<TdvRest_ContainerContents>> RetrieveContainerContents(string? path, TdvResourceTypeEnumAgr resourceType)
-        {
-            if (string.IsNullOrWhiteSpace(path))
-                throw new ArgumentNullException(nameof(path));
-
-            (string jsonResourceType, _) = TdvResourceType.CalcWsResourceTypes(resourceType);
-
-            return await _wsClient.EndpointGetObject<List<TdvRest_ContainerContents>>(TdvRestWsEndpoint.ResourceApi(HttpMethod.Get)
-                .AddResourceFolder("children")
-                .AddQuery("path", path)
-                .AddQuery("type", jsonResourceType.ToLower())
-            ).FirstAsync();
+            await DropAnyResources(resourceList, ifExists);
         }
 
         public async IAsyncEnumerable<TdvRest_ContainerContents> RetrieveContainerContentsRecursive(IEnumerable<ValueTuple<string?, TdvResourceTypeEnumAgr>>? containerPaths)
@@ -179,7 +137,7 @@
                 if (string.IsNullOrWhiteSpace(resourceSpec.Item1))
                     throw new ArgumentNullException(nameof(resourceSpec));
 
-                subfolderReaders.Add(RetrieveContainerContents(resourceSpec.Item1, resourceSpec.Item2));
+                subfolderReaders.Add(RetrieveResourceChildrenList(resourceSpec.Item1, resourceSpec.Item2));
 
                 while (subfolderReaders.Any())
                 {
@@ -194,7 +152,7 @@
                             or TdvResourceTypeEnumAgr.DataSourceCompositeWebService
                             or TdvResourceTypeEnumAgr.DataSourceRelational)
                         {
-                            subfolderReaders.Add(RetrieveContainerContents(folderItem.Path, folderItem.TdvResourceType));
+                            subfolderReaders.Add(RetrieveResourceChildrenList(folderItem.Path, folderItem.TdvResourceType));
                         }
 
                         yield return folderItem;

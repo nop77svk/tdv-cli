@@ -2,6 +2,9 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
+    using System.Net.Http;
+    using System.Threading.Tasks;
 
     public partial class TdvWebServiceClient
     {
@@ -27,6 +30,93 @@
                 foreach (WSDL.Admin.resource res in resInfoBody.resources)
                     yield return res;
             }
+        }
+
+        public async IAsyncEnumerable<TdvRest_ContainerContents> RetrieveResourceChildren(string? path, string resourceType)
+        {
+            if (string.IsNullOrWhiteSpace(path))
+                throw new ArgumentNullException(nameof(path));
+
+            IAsyncEnumerable<List<TdvRest_ContainerContents>> resourceChildrenAll = _wsClient.EndpointGetObject<List<TdvRest_ContainerContents>>(TdvRestWsEndpoint.ResourceApi(HttpMethod.Get)
+                .AddResourceFolder("children")
+                .AddQuery("path", path)
+                .AddQuery("type", resourceType.ToUpper())
+            );
+
+            await foreach (List<TdvRest_ContainerContents> resourceChildren in resourceChildrenAll)
+            {
+                foreach (TdvRest_ContainerContents resourceChild in resourceChildren)
+                    yield return resourceChild;
+            }
+        }
+
+        public async IAsyncEnumerable<TdvRest_ContainerContents> RetrieveResourceChildren(string? path, TdvResourceTypeEnumAgr resourceType)
+        {
+            if (string.IsNullOrWhiteSpace(path))
+                throw new ArgumentNullException(nameof(path));
+
+            (string resourceTypeWs, _) = TdvResourceType.CalcWsResourceTypes(resourceType);
+
+            IAsyncEnumerable<TdvRest_ContainerContents> resourceChildrenAll = RetrieveResourceChildren(path, resourceTypeWs);
+
+            await foreach (TdvRest_ContainerContents resourceChild in resourceChildrenAll)
+                yield return resourceChild;
+        }
+
+        public async Task<List<TdvRest_ContainerContents>> RetrieveResourceChildrenList(string? path, TdvResourceTypeEnumAgr resourceType)
+        {
+            if (string.IsNullOrWhiteSpace(path))
+                throw new ArgumentNullException(nameof(path));
+
+            IAsyncEnumerable<TdvRest_ContainerContents> resourceChildrenAll = RetrieveResourceChildren(path, resourceType);
+            return await resourceChildrenAll.ToListAsync();
+        }
+
+        public async Task DropAnyResources(IEnumerable<TdvResourceSpecifier> resourceList, bool ifExists = true)
+        {
+            IEnumerable<IGrouping<TdvResourceTypeEnumAgr, TdvResourceSpecifier>> resourcesByType = resourceList
+                .Where(resource => !string.IsNullOrWhiteSpace(resource.Path))
+                .GroupBy(resource => resource.ResourceType.Type);
+
+            List<Task> dropTasks = new List<Task>();
+            foreach (IGrouping<TdvResourceTypeEnumAgr, TdvResourceSpecifier> singleTypeResources in resourcesByType)
+            {
+                IEnumerable<string> pathOnlyResources = singleTypeResources.Select(folderItem => folderItem.Path ?? string.Empty);
+
+                if (singleTypeResources.Key == TdvResourceTypeEnumAgr.Folder)
+                {
+                    dropTasks.Add(DropFolders(pathOnlyResources, ifExists: ifExists));
+                }
+                else if (singleTypeResources.Key == TdvResourceTypeEnumAgr.PublishedCatalog)
+                {
+                    dropTasks.Add(DropCatalogs(pathOnlyResources, ifExists: ifExists));
+                }
+                else if (singleTypeResources.Key == TdvResourceTypeEnumAgr.PublishedSchema)
+                {
+                    dropTasks.Add(DropSchemas(pathOnlyResources, ifExists: ifExists));
+                }
+                else if (singleTypeResources.Key == TdvResourceTypeEnumAgr.View)
+                {
+                    dropTasks.Add(DropDataViews(pathOnlyResources, ifExists: ifExists));
+                }
+                else if (singleTypeResources.Key == TdvResourceTypeEnumAgr.PublishedTableOrView)
+                {
+                    IEnumerable<TdvRest_DeleteLink> massLinkDrop = singleTypeResources
+                        .Select(resource => new TdvRest_DeleteLink()
+                        {
+                            IsTable = resource.ResourceType.wsTargetType == TdvResourceTypeConst.Table,
+                            Path = resource.Path
+                        });
+
+                    dropTasks.Add(DropLinks(massLinkDrop, ifExists: ifExists));
+                }
+                else
+                {
+                    throw new ArgumentOutOfRangeException(nameof(singleTypeResources) + "." + nameof(singleTypeResources.Key), singleTypeResources.Key, "Unrecognized resource type");
+                }
+            }
+
+            await Task.WhenAll(dropTasks);
         }
     }
 }
