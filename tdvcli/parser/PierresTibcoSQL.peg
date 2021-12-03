@@ -242,7 +242,7 @@ listOfFullResourceSpecifiers<IList<AST.ResourceSpecifier>>
 	{ v }
 
 fullResourceSpecifier<AST.ResourceSpecifier>
-	= typ:resourceType __ res:resourcePath
+	= typ:resourceTypeWS __ res:resourcePath
 	{
 		new AST.ResourceSpecifier()
 		{
@@ -267,10 +267,10 @@ partialResourceSpecifier<AST.ResourceSpecifier>
 	}
 
 resourceTypeWithWhitespace<NoP77svk.TibcoDV.API.WSDL.Admin.resourceType>
-	= v:resourceType __ { v }
+	= v:resourceTypeWS __ { v }
 	/ { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.NONE }
 
-resourceType<NoP77svk.TibcoDV.API.WSDL.Admin.resourceType>
+resourceTypeWS<NoP77svk.TibcoDV.API.WSDL.Admin.resourceType>
 	= "adapter" { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.ADAPTER }
 	/ "container" { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.CONTAINER }
 	/ "datasource" { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.DATA_SOURCE }
