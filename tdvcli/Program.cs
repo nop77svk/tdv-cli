@@ -318,22 +318,28 @@
             if (stmt.Resources is null || !stmt.Resources.Any())
                 throw new ArgumentNullException(nameof(stmt) + "." + nameof(stmt.Resources));
 
+            IEnumerable<ResourceSpecifier> nonemptyResourceSpecifiers = stmt.Resources
+                .Where(resource => !string.IsNullOrWhiteSpace(resource.Path));
+
             if (stmt.AlsoDropRootResource)
             {
-                IEnumerable<TdvResourceSpecifier> resources = stmt.Resources
-                    .Where(resource => !string.IsNullOrWhiteSpace(resource.Path))
+                IEnumerable<TdvResourceSpecifier> resources = nonemptyResourceSpecifiers
                     .Select(resource => new TdvResourceSpecifier(resource.Path ?? string.Empty, new TdvResourceType(resource.Type.ToString(), null)));
 
                 await tdvClient.DropAnyResources(resources, stmt.IfExists);
             }
             else
             {
-                IEnumerable<Task> purgeTasks = stmt.Resources
-                    .Where(resource => !string.IsNullOrWhiteSpace(resource.Path))
+                IEnumerable<Task> purgeTasks = nonemptyResourceSpecifiers
                     .Select(resource => tdvClient.PurgeContainer(resource.Path, stmt.IfExists));
 
                 await Task.WhenAll(purgeTasks);
             }
+
+            _log.Info(nonemptyResourceSpecifiers.Count().ToString() + " resource(s) "
+                + (stmt.AlsoDropRootResource ? "dropped" : "purged")
+                + " OK"
+            );
         }
 
         private static async Task ExecuteGrant(TdvWebServiceClient tdvClient, AST.Grant stmt)
