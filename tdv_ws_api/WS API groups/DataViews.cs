@@ -8,16 +8,16 @@
 
     public partial class TdvWebServiceClient
     {
-        public async Task<string> CreateDataViews(IEnumerable<TdvRest_CreateDataView> requestBody)
+        public async Task CreateDataViews(IEnumerable<TdvRest_CreateDataView> requestBody)
         {
-            return await _wsClient.EndpointGetString(TdvRestWsEndpoint.DataViewApi(HttpMethod.Post)
+            await _wsClient.EndpointGetStream(TdvRestWsEndpoint.DataViewApi(HttpMethod.Post)
                 .WithContent(requestBody)
             );
         }
 
-        public async Task<string> CreateDataView(string parentPath, string name, string sql, string? annotation = null, bool ifNotExists = false)
+        public async Task CreateDataView(string parentPath, string name, string sql, string? annotation = null, bool ifNotExists = false)
         {
-            return await CreateDataViews(new TdvRest_CreateDataView[]
+            await CreateDataViews(new TdvRest_CreateDataView[]
             {
                 new TdvRest_CreateDataView
                 {
@@ -30,18 +30,18 @@
             });
         }
 
-        public async Task<string> DropDataView(string path, bool ifExists = true)
+        public async Task DropDataView(string path, bool ifExists = true)
         {
-            return await DropDataViews(new[] { path }, ifExists: ifExists);
+            await DropDataViews(new[] { path }, ifExists: ifExists);
         }
 
-        public async Task<string> DropDataViews(IEnumerable<string> paths, bool ifExists = true)
+        public async Task DropDataViews(IEnumerable<string> paths, bool ifExists = true)
         {
             IEnumerable<string> pathsSanitized = paths
                 .Where(path => !string.IsNullOrWhiteSpace(path))
                 .Select(x => PathExt.Sanitize(x, FolderDelimiter) ?? string.Empty);
 
-            return await _wsClient.EndpointGetString(TdvRestWsEndpoint.DataViewApi(HttpMethod.Delete)
+            await _wsClient.EndpointGetStream(TdvRestWsEndpoint.DataViewApi(HttpMethod.Delete)
                 .AddTdvQuery(TdvRestEndpointParameterConst.IfExists, ifExists)
                 .WithContent(pathsSanitized)
             );

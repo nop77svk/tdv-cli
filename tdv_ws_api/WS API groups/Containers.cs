@@ -131,17 +131,23 @@
             if (containerPaths is null || !containerPaths.Any())
                 yield break;
 
-            List<Task<List<TdvRest_ContainerContents>>> subfolderReaders = new ();
-            foreach (ValueTuple<string?, TdvResourceTypeEnumAgr> resourceSpec in containerPaths.Distinct())
+            HashSet<string?> pathsAlreadyRead = new HashSet<string?>();
+            LinkedList<Task<List<TdvRest_ContainerContents>>> subfolderReaders = new ();
+
+            foreach (ValueTuple<string?, TdvResourceTypeEnumAgr> resourceSpec in containerPaths)
             {
                 if (string.IsNullOrWhiteSpace(resourceSpec.Item1))
                     throw new ArgumentNullException(nameof(resourceSpec));
 
-                subfolderReaders.Add(RetrieveResourceChildrenList(resourceSpec.Item1, resourceSpec.Item2));
+                if (!pathsAlreadyRead.Contains(resourceSpec.Item1))
+                {
+                    pathsAlreadyRead.Add(resourceSpec.Item1);
+                    subfolderReaders.AddLast(RetrieveResourceChildrenList(resourceSpec.Item1, resourceSpec.Item2));
+                }
 
                 while (subfolderReaders.Any())
                 {
-                    Task<List<TdvRest_ContainerContents>> finishedSubfolderReader = await Task.WhenAny(subfolderReaders);
+                    using Task<List<TdvRest_ContainerContents>> finishedSubfolderReader = await Task.WhenAny(subfolderReaders);
                     subfolderReaders.Remove(finishedSubfolderReader);
 
                     foreach (TdvRest_ContainerContents folderItem in finishedSubfolderReader.Result)
@@ -152,7 +158,11 @@
                             or TdvResourceTypeEnumAgr.DataSourceCompositeWebService
                             or TdvResourceTypeEnumAgr.DataSourceRelational)
                         {
-                            subfolderReaders.Add(RetrieveResourceChildrenList(folderItem.Path, folderItem.TdvResourceType));
+                            if (!pathsAlreadyRead.Contains(folderItem.Path))
+                            {
+                                pathsAlreadyRead.Add(folderItem.Path);
+                                subfolderReaders.AddLast(RetrieveResourceChildrenList(folderItem.Path, folderItem.TdvResourceType));
+                            }
                         }
 
                         yield return folderItem;
