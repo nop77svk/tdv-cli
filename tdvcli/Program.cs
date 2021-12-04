@@ -229,7 +229,7 @@
 
         private static async Task ExecuteCreateResource(TdvWebServiceClient tdvClient, CreateResource stmt)
         {
-            using var log = new TraceLog(_log, nameof(ExecuteParsedStatement));
+            using var log = new TraceLog(_log, nameof(ExecuteCreateResource));
             _log.Debug(stmt);
 
             if (stmt.ResourceDDL is null)
@@ -239,13 +239,15 @@
                 await ExecuteCreateFolder(tdvClient, stmt.IfNotExists, folderDDL);
             else if (stmt.ResourceDDL is AST.SchemaDDL schemaDDL)
                 await ExecuteCreateSchema(tdvClient, stmt.IfNotExists, schemaDDL);
+            else if (stmt.ResourceDDL is AST.ViewDDL viewDDL)
+                await ExecuteCreateView(tdvClient, stmt.IfNotExists, viewDDL);
             else
                 throw new ArgumentOutOfRangeException(nameof(stmt) + "." + nameof(stmt.ResourceDDL), stmt.ResourceDDL.GetType() + " :: " + stmt.ResourceDDL.ToString(), "Unrecognized type of parsed DDL statement");
         }
 
         private static async Task ExecuteCreateFolder(TdvWebServiceClient tdvClient, bool ifNotExists, FolderDDL stmt)
         {
-            using var log = new TraceLog(_log, nameof(ExecuteDescribe));
+            using var log = new TraceLog(_log, nameof(ExecuteCreateFolder));
 
             if (string.IsNullOrEmpty(stmt.ResourcePath))
                 throw new ArgumentNullException(nameof(stmt) + "." + nameof(stmt.ResourcePath));
@@ -267,7 +269,7 @@
 
         private static async Task ExecuteCreateSchema(TdvWebServiceClient tdvClient, bool ifNotExists, SchemaDDL stmt)
         {
-            using var log = new TraceLog(_log, nameof(ExecuteDescribe));
+            using var log = new TraceLog(_log, nameof(ExecuteCreateSchema));
 
             if (string.IsNullOrEmpty(stmt.ResourcePath))
                 throw new ArgumentNullException(nameof(stmt) + "." + nameof(stmt.ResourcePath));
@@ -279,6 +281,32 @@
                 _log.Info($"Schema {stmt.ResourcePath} created (or left intact if there already was one)");
             else
                 _log.Info($"Schema {stmt.ResourcePath} created");
+        }
+
+        private static async Task ExecuteCreateView(TdvWebServiceClient tdvClient, bool ifNotExists, ViewDDL stmt)
+        {
+            using var log = new TraceLog(_log, nameof(ExecuteCreateView));
+
+            if (string.IsNullOrEmpty(stmt.ResourcePath))
+                throw new ArgumentNullException(nameof(stmt) + "." + nameof(stmt.ResourcePath));
+
+            string? parentPath = PathExt.TrimLastLevel(stmt.ResourcePath);
+            if (string.IsNullOrEmpty(parentPath))
+                throw new ArgumentOutOfRangeException(nameof(stmt) + "." + nameof(stmt.ResourcePath), stmt.ResourcePath, "Cannot determine view's parent path");
+
+            string? viewName = PathExt.GetLastLevel(stmt.ResourcePath);
+            if (string.IsNullOrEmpty(viewName))
+                throw new ArgumentOutOfRangeException(nameof(stmt) + "." + nameof(stmt.ResourcePath), stmt.ResourcePath, "Cannot determine view's name");
+
+            if (string.IsNullOrWhiteSpace(stmt.ViewQuery))
+                throw new ArgumentNullException(nameof(stmt) + "." + nameof(stmt.ViewQuery), "Empty view body");
+
+            await tdvClient.CreateDataView(parentPath, viewName, stmt.ViewQuery, ifNotExists: ifNotExists);
+
+            if (ifNotExists)
+                _log.Info($"View {stmt.ResourcePath} created (or left intact if there already was one)");
+            else
+                _log.Info($"View {stmt.ResourcePath} created");
         }
 
         private static async Task ExecuteDescribe(TdvWebServiceClient tdvClient, AST.Describe stmt)

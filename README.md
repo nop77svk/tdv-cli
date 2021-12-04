@@ -26,13 +26,9 @@ The `if not exists` option instructs the server to not return error when such a 
 
 The `if not exists` option instructs the server to not return error when such a view already exists on the sever.
 
-**Note:** Implementation pending!
-
 ### Drop object(s)
 
-`drop [recursive] [if exists] `<_comma-delimited list of resource specifiers_>`;`
-
-The `recursive` option is valid for data sources, catalogs, schemas and folders only; makes the drop statement drop the whole object tree.
+`drop [if exists] `<_comma-delimited list of resource specifiers_>`;`
 
 The `if exists` option instructs the server to not return error when any of the objects listed do not exist on the server.
 
@@ -48,6 +44,8 @@ The command grants privileges <_comma-delimited list of privileges_> to resource
 
 Available privileges are
 * `read`,
+* `write`,
+* `execute`,
 * `select`,
 * `insert`,
 * `update`,
