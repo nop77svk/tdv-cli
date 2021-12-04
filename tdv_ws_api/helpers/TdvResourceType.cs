@@ -1,5 +1,4 @@
-﻿#pragma warning disable IDE1006
-#pragma warning disable SA1313
+﻿#pragma warning disable SA1313
 namespace NoP77svk.TibcoDV.API
 {
     using System;

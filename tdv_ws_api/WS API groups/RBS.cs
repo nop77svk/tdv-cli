@@ -23,7 +23,7 @@
                 throw new ArgumentOutOfRangeException(nameof(degreeOfParallelism), degreeOfParallelism, "Degree of parallelism must be a positive integer");
 
             int totalAssignments = 0;
-            foreach (var chunkOfTables in tables.ChunkByCount(degreeOfParallelism))
+            foreach (ChunkOf<string> chunkOfTables in tables.ChunkByCount(degreeOfParallelism))
             {
                 if (chunkOfTables.Chunk is not null)
                 {
@@ -40,7 +40,7 @@
                                 }
                             )
                         ))
-                        .Select(task => task.ToListAsync().AsTask());
+                        .Select(asyncEnumerable => asyncEnumerable.ToListAsync().AsTask());
 
                     await Task.WhenAll(assignUnassignTasks);
                     totalAssignments += chunkOfTables.TotalChunkMeasure;
