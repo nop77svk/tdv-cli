@@ -194,14 +194,19 @@
                 .Where(res => res.Type == WSDL.Admin.resourceType.TABLE)
                 .Select(res => res.Path ?? string.Empty)
                 .Distinct();
+
             if (_log.IsDebugEnabled)
                 _log.Debug($"#inputTables = {inputTables.Count()}");
 
-            IEnumerable<ValueTuple<string?, TdvResourceTypeEnumAgr>> inputContainers = what.Resources
+            Task<int> inputTablesRbsPolicyTask = tdvClient.AssignUnassignRbsPolicy(action, what.Policy, inputTables);
+
+            List<ValueTuple<string?, TdvResourceTypeEnumAgr>> inputContainers = what.Resources
                 .Where(res => res.Type == WSDL.Admin.resourceType.CONTAINER)
                 .Select(res => res.Path ?? string.Empty)
                 .Distinct()
-                .Select(container => new ValueTuple<string?, TdvResourceTypeEnumAgr>(container, TdvResourceTypeEnumAgr.Folder));
+                .Select(container => new ValueTuple<string?, TdvResourceTypeEnumAgr>(container, TdvResourceTypeEnumAgr.Folder))
+                .ToList();
+
             if (_log.IsDebugEnabled)
                 _log.Debug($"#inputContainers = {inputContainers.Count()}");
 
@@ -209,12 +214,18 @@
                 .Where(folderItem => folderItem.Type == TdvResourceTypeConst.Table)
                 .Where(folderItem => !string.IsNullOrEmpty(folderItem.Path))
                 .Select(folderItem => folderItem.Path ?? string.Empty)
-                .Distinct()
                 .ToEnumerable();
-            if (_log.IsDebugEnabled)
-                _log.Debug($"#containedTables = {containedTables.Count()}");
 
-            int result = await tdvClient.AssignUnassignRbsPolicyBulk(action, what.Policy, inputTables.Union(containedTables));
+            Task<int> containedTablesRbsPolicyTask = tdvClient.AssignUnassignRbsPolicy(
+                action,
+                what.Policy,
+                containedTables,
+                10,
+                chunksThusFar => { _log.Info($"RLS policy {action.ToString().ToLower()}ed to {chunksThusFar} views/tables thus far"); }
+            );
+
+            await Task.WhenAll(inputTablesRbsPolicyTask, containedTablesRbsPolicyTask);
+            int result = inputTablesRbsPolicyTask.Result + containedTablesRbsPolicyTask.Result;
 
             _log.Info($"Total of {result} tables restricted with RBS policy {what.Policy}");
         }
