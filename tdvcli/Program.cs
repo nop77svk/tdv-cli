@@ -142,44 +142,12 @@
                 await stmtAsync.Execute(tdvClient, _out);
             else if (commandAST is AST.IStatement stmt)
                 stmt.Execute(tdvClient, _out);
-            else if (commandAST is AST.CommandDescribe stmtDescribe)
-                await ExecuteDescribe(tdvClient, stmtDescribe);
             else if (commandAST is AST.CommandDropResource stmtDropResource)
                 await ExecuteDropResource(tdvClient, stmtDropResource);
             else if (commandAST is AST.CommandGrant stmtGrant)
                 await ExecuteGrant(tdvClient, stmtGrant);
             else
                 throw new ArgumentOutOfRangeException(nameof(commandAST), commandAST?.GetType() + " :: " + commandAST?.ToString(), "Unrecognized type of parsed statement");
-        }
-
-        private static async Task ExecuteDescribe(TdvWebServiceClient tdvClient, AST.CommandDescribe stmt)
-        {
-            using var log = new TraceLog(_log, nameof(ExecuteDescribe));
-
-            if (stmt.Resources is null || !stmt.Resources.Any())
-                throw new ArgumentNullException(nameof(stmt) + "." + nameof(stmt.Resources));
-
-            IEnumerable<IAsyncEnumerable<WSDL.Admin.resource>> getResourceInfoTasks = stmt.Resources
-                .Select(res => tdvClient.GetResourceInfo(res.Path, res.Type))
-                .ToList();
-
-            foreach (IAsyncEnumerable<WSDL.Admin.resource> resources in getResourceInfoTasks)
-            {
-                await foreach (WSDL.Admin.resource res in resources)
-                {
-                    _out.Info($"resource: {res.path}\n\ttype: {res.type}\n\tsubtype: {res.subtype}\n\towner: {res.ownerName}@{res.ownerDomain}\n\tversion: {res.version}\n\tannotation: {res.annotation}");
-                    /* 2do! describe also the rest...
-                    [System.Xml.Serialization.XmlIncludeAttribute(typeof(tableResource))]
-                    [System.Xml.Serialization.XmlIncludeAttribute(typeof(definitionSetResource))]
-                    [System.Xml.Serialization.XmlIncludeAttribute(typeof(procedureResource))]
-                    [System.Xml.Serialization.XmlIncludeAttribute(typeof(containerResource))]
-                    [System.Xml.Serialization.XmlIncludeAttribute(typeof(dataSourceResource))]
-                    [System.Xml.Serialization.XmlIncludeAttribute(typeof(triggerResource))]
-                    [System.Xml.Serialization.XmlIncludeAttribute(typeof(linkResource))]
-                    [System.Xml.Serialization.XmlIncludeAttribute(typeof(treeResource))]
-                    */
-                }
-            }
         }
 
         private static async Task ExecuteDropResource(TdvWebServiceClient tdvClient, CommandDropResource stmt)
