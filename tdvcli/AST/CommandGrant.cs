@@ -133,10 +133,9 @@
 
         private async Task<ValueTuple<Dictionary<string, List<string>>, Dictionary<string, List<string>>>> RetrieveDomainGroupsAndUsers(TdvWebServiceClient tdvClient)
         {
-            IEnumerable<string> domainsForWildcardMatching = Principals
+            IEnumerable<AST.Principal> domainsForWildcardMatching = Principals
                 .Where(principal => principal.LookupOperator != AST.LookupOperatorEnum.EqualTo)
                 .Where(principal => !string.IsNullOrEmpty(principal.Domain))
-                .Select(principal => principal.Domain ?? string.Empty)
                 .Distinct()
                 .ToList();
 
@@ -144,10 +143,14 @@
             Dictionary<string, List<string>> allDomainUsers = new ();
 
             IEnumerable<Tuple<string, WSDL.userNameType, Task<List<string>>>> domainGroupRetrievalTasks = domainsForWildcardMatching
+                .Where(principal => principal.Type == userNameType.GROUP)
+                .Select(principal => principal.Domain ?? string.Empty)
                 .Select(domain => new Tuple<string, WSDL.userNameType, IAsyncEnumerable<string>>(domain, WSDL.userNameType.GROUP, tdvClient.GetDomainGroups(domain)))
                 .Select(task => new Tuple<string, WSDL.userNameType, Task<List<string>>>(task.Item1, task.Item2, task.Item3.ToListAsync().AsTask()));
 
             IEnumerable<Tuple<string, WSDL.userNameType, Task<List<string>>>> userGroupRetrievalTasks = domainsForWildcardMatching
+                .Where(principal => principal.Type == userNameType.USER)
+                .Select(principal => principal.Domain ?? string.Empty)
                 .Select(domain => new Tuple<string, WSDL.userNameType, IAsyncEnumerable<string>>(domain, WSDL.userNameType.USER, tdvClient.GetDomainUsers(domain)))
                 .Select(task => new Tuple<string, WSDL.userNameType, Task<List<string>>>(task.Item1, task.Item2, task.Item3.ToListAsync().AsTask()));
 
