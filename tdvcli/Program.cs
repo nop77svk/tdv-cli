@@ -142,7 +142,7 @@
                 await ExecuteAssign(tdvClient, stmtAssign);
             else if (commandAST is AST.CommandCreateResource stmtCreateResource)
                 await ExecuteCreateResource(tdvClient, stmtCreateResource);
-            else if (commandAST is AST.Describe stmtDescribe)
+            else if (commandAST is AST.CommandDescribe stmtDescribe)
                 await ExecuteDescribe(tdvClient, stmtDescribe);
             else if (commandAST is AST.DropResource stmtDropResource)
                 await ExecuteDropResource(tdvClient, stmtDropResource);
@@ -339,7 +339,7 @@
                 _out.Info($"View {stmt.ResourcePath} created");
         }
 
-        private static async Task ExecuteDescribe(TdvWebServiceClient tdvClient, AST.Describe stmt)
+        private static async Task ExecuteDescribe(TdvWebServiceClient tdvClient, AST.CommandDescribe stmt)
         {
             using var log = new TraceLog(_log, nameof(ExecuteDescribe));
 

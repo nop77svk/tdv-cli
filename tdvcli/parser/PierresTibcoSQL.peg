@@ -222,7 +222,7 @@ describeStatement<object>
 	= describeCommand __
 	v:listOfPartialResourceSpecifiers
 {
-	new AST.Describe()
+	new AST.CommandDescribe()
 	{
 		Resources = v
 	}
