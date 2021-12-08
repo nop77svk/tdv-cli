@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
     using NoP77svk.Linq;
@@ -16,21 +17,10 @@
             if (string.IsNullOrWhiteSpace(tablePath))
                 throw new ArgumentNullException(nameof(tablePath));
 
-            await _wsClient.EndpointGetStream(
-                new TdvSoapWsEndpoint<WSDL.Admin.rbsAssignFilterPolicyRequest>(
-                    "rbsAssignFilterPolicy",
-                    new WSDL.Admin.rbsAssignFilterPolicyRequest()
-                    {
-                        name = policyFunctionPath,
-                        operation = action,
-                        operationSpecified = true,
-                        target = tablePath
-                    }
-                )
-            );
+            await AssignUnassignRbsPolicy(action, policyFunctionPath, new string[] { tablePath });
         }
 
-        public async Task<int> AssignUnassignRbsPolicy(WSDL.Admin.rbsAssignmentOperationType action, string? policyFunctionPath, IEnumerable<string>? tables, int degreeOfParallelism = 8, Action<int>? totalProcessedFeedback = null)
+        public async Task AssignUnassignRbsPolicy(WSDL.Admin.rbsAssignmentOperationType action, string? policyFunctionPath, IEnumerable<string>? tables)
         {
             if (string.IsNullOrEmpty(policyFunctionPath))
                 throw new ArgumentNullException(nameof(policyFunctionPath));
@@ -38,25 +28,25 @@
             if (tables is null)
                 throw new ArgumentNullException(nameof(tables));
 
-            if (degreeOfParallelism < 1)
-                throw new ArgumentOutOfRangeException(nameof(degreeOfParallelism), degreeOfParallelism, "Degree of parallelism must be a positive integer");
-
-            int totalAssignments = 0;
-            foreach (ChunkOf<string> chunkOfTables in tables.ChunkByCount(degreeOfParallelism))
-            {
-                if (chunkOfTables.Chunk is not null)
+            IEnumerable<Task> assignUnassignTasks = tables
+                .Where(tablePath => tablePath != null)
+                .Select(tablePath => Task.Factory.StartNew(async () =>
                 {
-                    List<Task> assignUnassignTasks = chunkOfTables.Chunk
-                        .Select(tableName => AssignUnassignRbsPolicy(action, policyFunctionPath, tableName))
-                        .ToList();
+                    using Stream x = await _wsClient.EndpointGetStream(
+                        new TdvSoapWsEndpoint<WSDL.Admin.rbsAssignFilterPolicyRequest>(
+                            "rbsAssignFilterPolicy",
+                            new WSDL.Admin.rbsAssignFilterPolicyRequest()
+                            {
+                                name = policyFunctionPath,
+                                operation = action,
+                                operationSpecified = true,
+                                target = tablePath
+                            }
+                        )
+                    );
+                }));
 
-                    await Task.WhenAll(assignUnassignTasks);
-                    totalAssignments += chunkOfTables.TotalChunkMeasure;
-                    totalProcessedFeedback?.Invoke(totalAssignments);
-                }
-            }
-
-            return totalAssignments;
+            await Task.WhenAll(assignUnassignTasks);
         }
     }
 }

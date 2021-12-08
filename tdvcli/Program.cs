@@ -190,15 +190,14 @@
             if (problemResources > 0)
                 throw new ArgumentOutOfRangeException(nameof(what) + "." + nameof(what.Resources), problemResources, "Some non-table, non-container resources supplied");
 
-            IEnumerable<string> inputTables = what.Resources
+            List<string> inputTables = what.Resources
                 .Where(res => res.Type == WSDL.Admin.resourceType.TABLE)
                 .Select(res => res.Path ?? string.Empty)
-                .Distinct();
+                .Distinct()
+                .ToList();
 
             if (_log.IsDebugEnabled)
-                _log.Debug($"#inputTables = {inputTables.Count()}");
-
-            Task<int> inputTablesRbsPolicyTask = tdvClient.AssignUnassignRbsPolicy(action, what.Policy, inputTables);
+                _log.Debug($"#inputTables = {inputTables.Count}");
 
             List<ValueTuple<string?, TdvResourceTypeEnumAgr>> inputContainers = what.Resources
                 .Where(res => res.Type == WSDL.Admin.resourceType.CONTAINER)
@@ -208,26 +207,36 @@
                 .ToList();
 
             if (_log.IsDebugEnabled)
-                _log.Debug($"#inputContainers = {inputContainers.Count()}");
+                _log.Debug($"#inputContainers = {inputContainers.Count}");
 
-            IEnumerable<string> containedTables = tdvClient.RetrieveContainerContentsRecursive(inputContainers)
+            IAsyncEnumerable<string> containedTables = tdvClient.RetrieveContainerContentsRecursive(inputContainers)
                 .Where(folderItem => folderItem.Type == TdvResourceTypeConst.Table)
                 .Where(folderItem => !string.IsNullOrEmpty(folderItem.Path))
-                .Select(folderItem => folderItem.Path ?? string.Empty)
-                .ToEnumerable();
+                .Select(folderItem => folderItem.Path ?? string.Empty);
 
-            Task<int> containedTablesRbsPolicyTask = tdvClient.AssignUnassignRbsPolicy(
-                action,
-                what.Policy,
-                containedTables,
-                10,
-                chunksThusFar => { _log.Info($"RLS policy {action.ToString().ToLower()}ed to {chunksThusFar} views/tables thus far"); }
-            );
+            IAsyncEnumerable<string> allTablesToRestrict = inputTables
+                .ToAsyncEnumerable()
+                .Union(containedTables);
 
-            await Task.WhenAll(inputTablesRbsPolicyTask, containedTablesRbsPolicyTask);
-            int result = inputTablesRbsPolicyTask.Result + containedTablesRbsPolicyTask.Result;
+            string actionDesc = action switch
+            {
+                WSDL.Admin.rbsAssignmentOperationType.ASSIGN => "assigned to",
+                WSDL.Admin.rbsAssignmentOperationType.REMOVE => "removed from",
+                _ => throw new ArgumentOutOfRangeException(nameof(action), action.ToString())
+            };
 
-            _log.Info($"Total of {result} tables restricted with RBS policy {what.Policy}");
+            int tablesProcessed = 0;
+            await foreach (ChunkOf<string> chunkOfTables in allTablesToRestrict.ChunkByCount(25))
+            {
+                await tdvClient.AssignUnassignRbsPolicy(
+                    action,
+                    what.Policy,
+                    chunkOfTables.Chunk
+                );
+
+                tablesProcessed += chunkOfTables.TotalChunkMeasure;
+                _log.Info($"RLS policy {what.Policy} {actionDesc} {tablesProcessed} tables/views thus far");
+            }
         }
 
         private static void ExecuteClientPrompt(AST.ClientPrompt stmtClientPrompt)
