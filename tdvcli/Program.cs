@@ -138,8 +138,10 @@
             using var log = new TraceLog(_log, nameof(ExecuteParsedStatement));
             _log.Debug(commandAST);
 
-            if (commandAST is AST.IStatement stmtAny)
-                await stmtAny.Execute(tdvClient, _out);
+            if (commandAST is AST.IAsyncStatement stmtAsync)
+                await stmtAsync.Execute(tdvClient, _out);
+            else if (commandAST is AST.IStatement stmt)
+                stmt.Execute(tdvClient, _out);
             else if (commandAST is AST.CommandCreateResource stmtCreateResource)
                 await ExecuteCreateResource(tdvClient, stmtCreateResource);
             else if (commandAST is AST.CommandDescribe stmtDescribe)
@@ -148,18 +150,8 @@
                 await ExecuteDropResource(tdvClient, stmtDropResource);
             else if (commandAST is AST.CommandGrant stmtGrant)
                 await ExecuteGrant(tdvClient, stmtGrant);
-            else if (commandAST is AST.ClientPrompt stmtClientPrompt)
-                ExecuteClientPrompt(stmtClientPrompt);
             else
                 throw new ArgumentOutOfRangeException(nameof(commandAST), commandAST?.GetType() + " :: " + commandAST?.ToString(), "Unrecognized type of parsed statement");
-        }
-
-        private static void ExecuteClientPrompt(AST.ClientPrompt stmtClientPrompt)
-        {
-            using var log = new TraceLog(_log, nameof(ExecuteClientPrompt));
-
-            if (stmtClientPrompt.PromptText is not null)
-                _out.Info(stmtClientPrompt.PromptText);
         }
 
         private static async Task ExecuteCreateResource(TdvWebServiceClient tdvClient, CommandCreateResource stmt)
