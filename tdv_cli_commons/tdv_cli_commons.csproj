@@ -38,8 +38,8 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="6.0.0" />
-    <PackageReference Include="NoP77svk.ConnectionStringParsers" Version="1.1.4" />
-    <PackageReference Include="NoP77svk.MiscellaneousHelpers" Version="1.1.4" />
+    <PackageReference Include="NoP77svk.ConnectionStringParsers" Version="2021.12.1" />
+    <PackageReference Include="NoP77svk.MiscellaneousHelpers" Version="2021.12.1" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
