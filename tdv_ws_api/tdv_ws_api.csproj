@@ -36,9 +36,9 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="NoP77svk.Linq" Version="1.1.4" />
-    <PackageReference Include="NoP77svk.MiscellaneousHelpers" Version="1.1.4" />
-    <PackageReference Include="NoP77svk.WebServiceClient" Version="1.1.4" />
+    <PackageReference Include="NoP77svk.Linq" Version="2021.12.1" />
+    <PackageReference Include="NoP77svk.MiscellaneousHelpers" Version="2021.12.1" />
+    <PackageReference Include="NoP77svk.WebServiceClient" Version="2021.12.1" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
