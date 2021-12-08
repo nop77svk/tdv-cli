@@ -55,7 +55,7 @@
             if (string.IsNullOrWhiteSpace(path))
                 throw new ArgumentNullException(nameof(path));
 
-            (string resourceTypeWs, _) = TdvResourceType.CalcWsResourceTypes(resourceType);
+            (string resourceTypeWs, _, _) = TdvResourceType.CalcWsResourceTypes(resourceType);
 
             IAsyncEnumerable<TdvRest_ContainerContents> resourceChildrenAll = RetrieveResourceChildren(path, resourceTypeWs);
 
