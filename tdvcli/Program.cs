@@ -16,6 +16,7 @@
     using NoP77svk.Text.RegularExpressions;
     using NoP77svk.TibcoDV.API;
     using NoP77svk.TibcoDV.CLI.AST;
+    using NoP77svk.TibcoDV.CLI.Commons;
     using NoP77svk.TibcoDV.Commons;
     using NoP77svk.Web.WS;
     using Pegasus.Common;
@@ -25,6 +26,8 @@
         : BaseProgram
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(Program));
+
+        private static IInfoOutput _out = new ConsoleInfoOutput(writeToStdErr: true);
 
         internal static async Task<int> Main(string[] args)
         {
@@ -78,7 +81,7 @@
             args.ValidateAndCleanUp(null);
 #endif
 
-            _log.Info($"Connecting as {args.TdvServerUserName} to {args.TdvServerWsScheme}://{args.TdvServerHost}:{args.TdvServerWsApiPort}");
+            _out.Info($"Connecting as {args.TdvServerUserName} to {args.TdvServerWsScheme}://{args.TdvServerHost}:{args.TdvServerWsApiPort}");
             using HttpClient httpClient = InitHttpConnectionPool(args);
 
             TdvWebServiceClient tdvClient = InitTdvRestClient(
@@ -126,7 +129,7 @@
                 await ExecuteParsedStatement(tdvClient, commandAST);
             }
 
-            _log.Info("All done");
+            _out.Info("All done");
         }
 
         private static async Task ExecuteParsedStatement(TdvWebServiceClient tdvClient, object commandAST)
@@ -170,6 +173,13 @@
         {
             using var log = new TraceLog(_log, nameof(ExecuteAssignRbsPolicy));
 
+            (string actionDescPast, string actionDescPresentInitCaps, string actionDirectionDesc) = action switch
+            {
+                WSDL.Admin.rbsAssignmentOperationType.ASSIGN => ("assigned", "Assigning", "to"),
+                WSDL.Admin.rbsAssignmentOperationType.REMOVE => ("removed", "Removing", "from"),
+                _ => throw new ArgumentOutOfRangeException(nameof(action), action.ToString())
+            };
+
             if (what.Policy is null)
                 throw new ArgumentNullException(nameof(what) + "." + nameof(what.Policy));
 
@@ -181,6 +191,9 @@
 
             if (!what.Resources.Any())
                 throw new ArgumentException("Empty list of resources", nameof(what) + "." + nameof(what.Resources));
+
+            int tablesProcessed = 0;
+            _out.InfoNoEoln($"{actionDescPresentInitCaps} RLS policy {what.Policy} {actionDirectionDesc} {string.Join(',', what.Resources.Select(x => x.Path))}: ");
 
             int problemResources = what.Resources
                 .Where(res => res.Type is not WSDL.Admin.resourceType.TABLE and not WSDL.Admin.resourceType.CONTAINER
@@ -220,15 +233,7 @@
                 .ToAsyncEnumerable()
                 .Union(containedTables);
 
-            string actionDesc = action switch
-            {
-                WSDL.Admin.rbsAssignmentOperationType.ASSIGN => "assigned to",
-                WSDL.Admin.rbsAssignmentOperationType.REMOVE => "removed from",
-                _ => throw new ArgumentOutOfRangeException(nameof(action), action.ToString())
-            };
-
-            int tablesProcessed = 0;
-            await foreach (ChunkOf<string> chunkOfTables in allTablesToRestrict.ChunkByCount(100))
+            await foreach (ChunkOf<string> chunkOfTables in allTablesToRestrict.ChunkByCount(50))
             {
                 await tdvClient.AssignUnassignRbsPolicy(
                     action,
@@ -237,8 +242,10 @@
                 );
 
                 tablesProcessed += chunkOfTables.TotalChunkMeasure;
-                _log.Info($"RLS policy {what.Policy} {actionDesc} {tablesProcessed} tables/views thus far");
+                _out.InfoNoEoln(".");
             }
+
+            _out.Info($" Done on {tablesProcessed} tables/views");
         }
 
         private static void ExecuteClientPrompt(AST.ClientPrompt stmtClientPrompt)
@@ -246,7 +253,7 @@
             using var log = new TraceLog(_log, nameof(ExecuteClientPrompt));
 
             if (stmtClientPrompt.PromptText is not null)
-                _log.Info(stmtClientPrompt.PromptText);
+                _out.Info(stmtClientPrompt.PromptText);
         }
 
         private static async Task ExecuteCreateResource(TdvWebServiceClient tdvClient, CreateResource stmt)
@@ -284,9 +291,9 @@
             _log.Debug($"{nameof(result)} = {result}");
 
             if (ifNotExists)
-                _log.Info($"Folder {stmt.ResourcePath} created (or left intact if there already was one)");
+                _out.Info($"Folder {stmt.ResourcePath} created (or left intact if there already was one)");
             else
-                _log.Info($"Folder {stmt.ResourcePath} created");
+                _out.Info($"Folder {stmt.ResourcePath} created");
         }
 
         private static async Task ExecuteCreateSchema(TdvWebServiceClient tdvClient, bool ifNotExists, SchemaDDL stmt)
@@ -300,9 +307,9 @@
             _log.Debug($"{nameof(result)} = {result}");
 
             if (ifNotExists)
-                _log.Info($"Schema {stmt.ResourcePath} created (or left intact if there already was one)");
+                _out.Info($"Schema {stmt.ResourcePath} created (or left intact if there already was one)");
             else
-                _log.Info($"Schema {stmt.ResourcePath} created");
+                _out.Info($"Schema {stmt.ResourcePath} created");
         }
 
         private static async Task ExecuteCreateView(TdvWebServiceClient tdvClient, bool ifNotExists, ViewDDL stmt)
@@ -326,9 +333,9 @@
             await tdvClient.CreateDataView(parentPath, viewName, stmt.ViewQuery, ifNotExists: ifNotExists);
 
             if (ifNotExists)
-                _log.Info($"View {stmt.ResourcePath} created (or left intact if there already was one)");
+                _out.Info($"View {stmt.ResourcePath} created (or left intact if there already was one)");
             else
-                _log.Info($"View {stmt.ResourcePath} created");
+                _out.Info($"View {stmt.ResourcePath} created");
         }
 
         private static async Task ExecuteDescribe(TdvWebServiceClient tdvClient, AST.Describe stmt)
@@ -346,7 +353,7 @@
             {
                 await foreach (WSDL.Admin.resource res in resources)
                 {
-                    _log.Info($"resource: {res.path}\n\ttype: {res.type}\n\tsubtype: {res.subtype}\n\towner: {res.ownerName}@{res.ownerDomain}\n\tversion: {res.version}\n\tannotation: {res.annotation}");
+                    _out.Info($"resource: {res.path}\n\ttype: {res.type}\n\tsubtype: {res.subtype}\n\towner: {res.ownerName}@{res.ownerDomain}\n\tversion: {res.version}\n\tannotation: {res.annotation}");
                     /* 2do! describe also the rest...
                     [System.Xml.Serialization.XmlIncludeAttribute(typeof(tableResource))]
                     [System.Xml.Serialization.XmlIncludeAttribute(typeof(definitionSetResource))]
@@ -386,7 +393,7 @@
                 await Task.WhenAll(purgeTasks);
             }
 
-            _log.Info(nonemptyResourceSpecifiers.Count().ToString() + " resource(s) "
+            _out.Info(nonemptyResourceSpecifiers.Count().ToString() + " resource(s) "
                 + (stmt.AlsoDropRootResource ? "dropped" : "purged")
                 + " OK"
             );
@@ -540,7 +547,7 @@
                 _ => "Granted"
             };
             string msgRecursive = stmt.IsRecursive ? " recursively" : string.Empty;
-            _log.Info($"{msgModus} {stmt.Privileges.Count} privileges{msgRecursive} on {stmt.Resources.Count} resources to {allGrantees.Length} principals");
+            _out.Info($"{msgModus} {stmt.Privileges.Count} privileges{msgRecursive} on {stmt.Resources.Count} resources to {allGrantees.Length} principals");
         }
     }
 }
