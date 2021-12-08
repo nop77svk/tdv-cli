@@ -192,6 +192,7 @@
 
             List<string> inputTables = what.Resources
                 .Where(res => res.Type == WSDL.Admin.resourceType.TABLE)
+                .Where(res => !string.IsNullOrWhiteSpace(res.Path))
                 .Select(res => res.Path ?? string.Empty)
                 .Distinct()
                 .ToList();
@@ -201,6 +202,7 @@
 
             List<ValueTuple<string?, TdvResourceTypeEnumAgr>> inputContainers = what.Resources
                 .Where(res => res.Type == WSDL.Admin.resourceType.CONTAINER)
+                .Where(res => !string.IsNullOrWhiteSpace(res.Path))
                 .Select(res => res.Path ?? string.Empty)
                 .Distinct()
                 .Select(container => new ValueTuple<string?, TdvResourceTypeEnumAgr>(container, TdvResourceTypeEnumAgr.Folder))
