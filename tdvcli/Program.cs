@@ -138,9 +138,9 @@
             using var log = new TraceLog(_log, nameof(ExecuteParsedStatement));
             _log.Debug(commandAST);
 
-            if (commandAST is AST.Assign stmtAssign)
+            if (commandAST is AST.CommandAssign stmtAssign)
                 await ExecuteAssign(tdvClient, stmtAssign);
-            else if (commandAST is AST.CreateResource stmtCreateResource)
+            else if (commandAST is AST.CommandCreateResource stmtCreateResource)
                 await ExecuteCreateResource(tdvClient, stmtCreateResource);
             else if (commandAST is AST.Describe stmtDescribe)
                 await ExecuteDescribe(tdvClient, stmtDescribe);
@@ -154,7 +154,7 @@
                 throw new ArgumentOutOfRangeException(nameof(commandAST), commandAST?.GetType() + " :: " + commandAST?.ToString(), "Unrecognized type of parsed statement");
         }
 
-        private static async Task ExecuteAssign(TdvWebServiceClient tdvClient, AST.Assign stmt)
+        private static async Task ExecuteAssign(TdvWebServiceClient tdvClient, AST.CommandAssign stmt)
         {
             using var log = new TraceLog(_log, nameof(ExecuteAssign));
 
@@ -257,7 +257,7 @@
                 _out.Info(stmtClientPrompt.PromptText);
         }
 
-        private static async Task ExecuteCreateResource(TdvWebServiceClient tdvClient, CreateResource stmt)
+        private static async Task ExecuteCreateResource(TdvWebServiceClient tdvClient, CommandCreateResource stmt)
         {
             using var log = new TraceLog(_log, nameof(ExecuteCreateResource));
             _log.Debug(stmt);

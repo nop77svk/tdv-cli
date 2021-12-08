@@ -76,7 +76,7 @@ createResourceStatement<object> = "create" __
 	soifnx:statementOptionIfNotExistsWithWhitespace
 	ddl:( createViewDDL / createFolderDDL / createSchemaDDL / #ERROR{ "Unrecognized resource type to be created" } )
 {
-	new AST.CreateResource()
+	new AST.CommandCreateResource()
 	{
 		IfNotExists = soifnx,
 		ResourceDDL = ddl
@@ -181,7 +181,7 @@ assignStatement<object> =
 	action:assignOrUnassign __
 	what:assignWhat
 {
-	new AST.Assign(action, what)
+	new AST.CommandAssign(action, what)
 }
 
 assignOrUnassign<NoP77svk.TibcoDV.API.WSDL.Admin.rbsAssignmentOperationType>
