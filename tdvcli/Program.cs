@@ -142,43 +142,10 @@
                 await stmtAsync.Execute(tdvClient, _out);
             else if (commandAST is AST.IStatement stmt)
                 stmt.Execute(tdvClient, _out);
-            else if (commandAST is AST.CommandDropResource stmtDropResource)
-                await ExecuteDropResource(tdvClient, stmtDropResource);
             else if (commandAST is AST.CommandGrant stmtGrant)
                 await ExecuteGrant(tdvClient, stmtGrant);
             else
                 throw new ArgumentOutOfRangeException(nameof(commandAST), commandAST?.GetType() + " :: " + commandAST?.ToString(), "Unrecognized type of parsed statement");
-        }
-
-        private static async Task ExecuteDropResource(TdvWebServiceClient tdvClient, CommandDropResource stmt)
-        {
-            using var log = new TraceLog(_log, nameof(ExecuteDropResource));
-
-            if (stmt.Resources is null || !stmt.Resources.Any())
-                throw new ArgumentNullException(nameof(stmt) + "." + nameof(stmt.Resources));
-
-            IEnumerable<ResourceSpecifier> nonemptyResourceSpecifiers = stmt.Resources
-                .Where(resource => !string.IsNullOrWhiteSpace(resource.Path));
-
-            if (stmt.AlsoDropRootResource)
-            {
-                IEnumerable<TdvResourceSpecifier> resources = nonemptyResourceSpecifiers
-                    .Select(resource => new TdvResourceSpecifier(resource.Path ?? string.Empty, new TdvResourceType(resource.Type.ToString(), null)));
-
-                await tdvClient.DropAnyResources(resources, stmt.IfExists);
-            }
-            else
-            {
-                IEnumerable<Task> purgeTasks = nonemptyResourceSpecifiers
-                    .Select(resource => tdvClient.PurgeContainer(resource.Path, stmt.IfExists));
-
-                await Task.WhenAll(purgeTasks);
-            }
-
-            _out.Info(nonemptyResourceSpecifiers.Count().ToString() + " resource(s) "
-                + (stmt.AlsoDropRootResource ? "dropped" : "purged")
-                + " OK"
-            );
         }
 
         private static async Task ExecuteGrant(TdvWebServiceClient tdvClient, AST.CommandGrant stmt)
