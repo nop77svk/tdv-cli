@@ -120,7 +120,11 @@
 
             IEnumerable<TdvResourceSpecifier> resourceList = folderContents
                 .Where(folderItem => !string.IsNullOrWhiteSpace(folderItem.Path))
-                .Select(folderItem => new TdvResourceSpecifier(folderItem.Path ?? string.Empty, new TdvResourceType(folderItem.Type, folderItem.SubType, folderItem.TargetType)))
+                .Where(folderItem => !string.IsNullOrEmpty(folderItem.Type))
+                .Select(folderItem => new TdvResourceSpecifier(
+                    folderItem.Path ?? string.Empty,
+                    new TdvResourceType(folderItem.Type ?? string.Empty, folderItem.SubType, folderItem.TargetType)
+                ))
                 .ToEnumerable();
 
             await DropAnyResources(resourceList, ifExists);
