@@ -138,8 +138,8 @@
             using var log = new TraceLog(_log, nameof(ExecuteParsedStatement));
             _log.Debug(commandAST);
 
-            if (commandAST is AST.CommandAssign stmtAssign)
-                await ExecuteAssign(tdvClient, stmtAssign);
+            if (commandAST is AST.IStatement stmtAny)
+                await stmtAny.Execute(tdvClient, _out);
             else if (commandAST is AST.CommandCreateResource stmtCreateResource)
                 await ExecuteCreateResource(tdvClient, stmtCreateResource);
             else if (commandAST is AST.CommandDescribe stmtDescribe)
@@ -152,101 +152,6 @@
                 ExecuteClientPrompt(stmtClientPrompt);
             else
                 throw new ArgumentOutOfRangeException(nameof(commandAST), commandAST?.GetType() + " :: " + commandAST?.ToString(), "Unrecognized type of parsed statement");
-        }
-
-        private static async Task ExecuteAssign(TdvWebServiceClient tdvClient, AST.CommandAssign stmt)
-        {
-            using var log = new TraceLog(_log, nameof(ExecuteAssign));
-
-            if (stmt.What is null)
-                throw new ArgumentNullException(nameof(stmt) + "." + nameof(stmt.What));
-
-            if (stmt.What.Resources is null || !stmt.What.Resources.Any())
-                throw new ArgumentNullException(nameof(stmt) + "." + nameof(stmt.What) + "." + nameof(stmt.What.Resources));
-
-            if (stmt.What is AST.AssignRbsPolicy whatRbsPolicy)
-                await ExecuteAssignRbsPolicy(tdvClient, stmt.Action, whatRbsPolicy);
-            else
-                throw new NotImplementedException($"Don't know how to assign/unassign {stmt.What.GetType()}");
-        }
-
-        private static async Task ExecuteAssignRbsPolicy(TdvWebServiceClient tdvClient, WSDL.Admin.rbsAssignmentOperationType action, AST.AssignRbsPolicy what)
-        {
-            using var log = new TraceLog(_log, nameof(ExecuteAssignRbsPolicy));
-
-            (string actionDescPast, string actionDescPresentInitCaps, string actionDirectionDesc) = action switch
-            {
-                WSDL.Admin.rbsAssignmentOperationType.ASSIGN => ("assigned", "Assigning", "to"),
-                WSDL.Admin.rbsAssignmentOperationType.REMOVE => ("removed", "Removing", "from"),
-                _ => throw new ArgumentOutOfRangeException(nameof(action), action.ToString())
-            };
-
-            if (what.Policy is null)
-                throw new ArgumentNullException(nameof(what) + "." + nameof(what.Policy));
-
-            if (string.IsNullOrEmpty(what.Policy))
-                throw new ArgumentNullException(nameof(what) + "." + nameof(what.Policy));
-
-            if (what.Resources is null)
-                throw new ArgumentNullException(nameof(what) + "." + nameof(what.Resources));
-
-            if (!what.Resources.Any())
-                throw new ArgumentException("Empty list of resources", nameof(what) + "." + nameof(what.Resources));
-
-            int tablesProcessed = 0;
-            _out.InfoNoEoln($"{actionDescPresentInitCaps} RLS policy {what.Policy} {actionDirectionDesc} {string.Join(',', what.Resources.Select(x => x.Path))}: ");
-
-            int problemResources = what.Resources
-                .Where(res => res.Type is not WSDL.Admin.resourceType.TABLE and not WSDL.Admin.resourceType.CONTAINER
-                    || res.Path is null)
-                .Count();
-
-            if (problemResources > 0)
-                throw new ArgumentOutOfRangeException(nameof(what) + "." + nameof(what.Resources), problemResources, "Some non-table, non-container resources supplied");
-
-            List<string> inputTables = what.Resources
-                .Where(res => res.Type == WSDL.Admin.resourceType.TABLE)
-                .Where(res => !string.IsNullOrWhiteSpace(res.Path))
-                .Select(res => res.Path ?? string.Empty)
-                .Distinct()
-                .ToList();
-
-            if (_log.IsDebugEnabled)
-                _log.Debug($"#inputTables = {inputTables.Count}");
-
-            List<ValueTuple<string?, TdvResourceTypeEnumAgr>> inputContainers = what.Resources
-                .Where(res => res.Type == WSDL.Admin.resourceType.CONTAINER)
-                .Where(res => !string.IsNullOrWhiteSpace(res.Path))
-                .Select(res => res.Path ?? string.Empty)
-                .Distinct()
-                .Select(container => new ValueTuple<string?, TdvResourceTypeEnumAgr>(container, TdvResourceTypeEnumAgr.Folder))
-                .ToList();
-
-            if (_log.IsDebugEnabled)
-                _log.Debug($"#inputContainers = {inputContainers.Count}");
-
-            IAsyncEnumerable<string> containedTables = tdvClient.RetrieveContainerContentsRecursive(inputContainers)
-                .Where(folderItem => folderItem.Type == TdvResourceTypeConst.Table)
-                .Where(folderItem => !string.IsNullOrEmpty(folderItem.Path))
-                .Select(folderItem => folderItem.Path ?? string.Empty);
-
-            IAsyncEnumerable<string> allTablesToRestrict = inputTables
-                .ToAsyncEnumerable()
-                .Union(containedTables);
-
-            await foreach (ChunkOf<string> chunkOfTables in allTablesToRestrict.ChunkByCount(50))
-            {
-                await tdvClient.AssignUnassignRbsPolicy(
-                    action,
-                    what.Policy,
-                    chunkOfTables.Chunk
-                );
-
-                tablesProcessed += chunkOfTables.TotalChunkMeasure;
-                _out.InfoNoEoln(".");
-            }
-
-            _out.Info($" Done on {tablesProcessed} tables/views");
         }
 
         private static void ExecuteClientPrompt(AST.ClientPrompt stmtClientPrompt)
