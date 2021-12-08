@@ -141,7 +141,7 @@ grantStatement<object> = "grant" __
 	"on" __ res:listOfFullResourceSpecifiers __
 	"to" __ who:liberalListOfPrincipals
 {
-	new AST.Grant()
+	new AST.CommandGrant()
 	{
 		IsRecursive = isRec,
 		ModusOperandi = modusOperandi,

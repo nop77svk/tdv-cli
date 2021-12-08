@@ -146,7 +146,7 @@
                 await ExecuteDescribe(tdvClient, stmtDescribe);
             else if (commandAST is AST.CommandDropResource stmtDropResource)
                 await ExecuteDropResource(tdvClient, stmtDropResource);
-            else if (commandAST is AST.Grant stmtGrant)
+            else if (commandAST is AST.CommandGrant stmtGrant)
                 await ExecuteGrant(tdvClient, stmtGrant);
             else if (commandAST is AST.ClientPrompt stmtClientPrompt)
                 ExecuteClientPrompt(stmtClientPrompt);
@@ -400,7 +400,7 @@
             );
         }
 
-        private static async Task ExecuteGrant(TdvWebServiceClient tdvClient, AST.Grant stmt)
+        private static async Task ExecuteGrant(TdvWebServiceClient tdvClient, AST.CommandGrant stmt)
         {
             using var log = new TraceLog(_log, nameof(ExecuteGrant));
 

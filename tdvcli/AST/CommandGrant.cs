@@ -4,7 +4,7 @@
     using NoP77svk.TibcoDV.API;
     using WSDL = NoP77svk.TibcoDV.API.WSDL.Admin;
 
-    internal record Grant
+    internal record CommandGrant
     {
         public bool IsRecursive { get; init; } = false;
         public WSDL.updatePrivilegesMode ModusOperandi { get; init; } = WSDL.updatePrivilegesMode.OVERWRITE_APPEND;
