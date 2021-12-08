@@ -100,7 +100,7 @@
 
             IAsyncEnumerable<string> allTablesToRestrict = inputTables
                 .ToAsyncEnumerable()
-                .Union(containedTables);
+                .Concat(containedTables);
 
             await foreach (ChunkOf<string> chunkOfTables in allTablesToRestrict.ChunkByCount(50))
             {

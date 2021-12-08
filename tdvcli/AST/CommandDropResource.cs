@@ -1,16 +1,12 @@
 ﻿namespace NoP77svk.TibcoDV.CLI.AST
 {
-    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
     using log4net;
-    using NoP77svk.Linq;
     using NoP77svk.TibcoDV.API;
-    using NoP77svk.TibcoDV.API.WSDL.Admin;
     using NoP77svk.TibcoDV.CLI.Commons;
     using NoP77svk.TibcoDV.Commons;
-    using WSDL = NoP77svk.TibcoDV.API.WSDL.Admin;
 
     internal class CommandDropResource : IAsyncStatement
     {
