@@ -2,10 +2,17 @@
 {
     using System.Collections.Generic;
 
-    internal record CommandDropResource
+    internal class CommandDropResource
     {
-        public bool IfExists { get; init; }
-        public IList<ResourceSpecifier>? Resources { get; init; }
-        public bool AlsoDropRootResource { get; init; } = true;
+        internal bool IfExists { get; }
+        internal IList<ResourceSpecifier> Resources { get; }
+        internal bool AlsoDropRootResource { get; }
+
+        internal CommandDropResource(bool ifExists, IList<ResourceSpecifier> resources, bool alsoDropRootResource)
+        {
+            IfExists = ifExists;
+            Resources = resources;
+            AlsoDropRootResource = alsoDropRootResource;
+        }
     }
 }

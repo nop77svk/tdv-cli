@@ -1,8 +1,14 @@
 ﻿namespace NoP77svk.TibcoDV.CLI.AST
 {
-    internal record CommandCreateResource
+    internal class CommandCreateResource
     {
-        public bool IfNotExists { get; init; } = false;
-        public object? ResourceDDL { get; init; }
+        internal bool IfNotExists { get; }
+        internal object ResourceDDL { get; }
+
+        internal CommandCreateResource(bool ifNotExists, object resourceDDL)
+        {
+            IfNotExists = ifNotExists;
+            ResourceDDL = resourceDDL;
+        }
     }
 }

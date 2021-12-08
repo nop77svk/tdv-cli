@@ -1,5 +1,12 @@
-﻿#pragma warning disable SA1313
-namespace NoP77svk.TibcoDV.CLI.AST
+﻿namespace NoP77svk.TibcoDV.CLI.AST
 {
-    internal record ClientConnectionTimeout(TimeSpan TimeSpan);
+    internal class ClientConnectionTimeout
+    {
+        internal TimeSpan TimeSpan { get; }
+
+        internal ClientConnectionTimeout(TimeSpan timeSpan)
+        {
+            TimeSpan = timeSpan;
+        }
+    }
 }

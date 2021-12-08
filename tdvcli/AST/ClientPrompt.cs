@@ -1,5 +1,12 @@
-﻿#pragma warning disable SA1313
-namespace NoP77svk.TibcoDV.CLI.AST
+﻿namespace NoP77svk.TibcoDV.CLI.AST
 {
-    internal record ClientPrompt(string? PromptText);
+    internal class ClientPrompt
+    {
+        internal string PromptText { get; }
+
+        internal ClientPrompt(string promptText)
+        {
+            PromptText = promptText;
+        }
+    }
 }

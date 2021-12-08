@@ -76,11 +76,7 @@ createResourceStatement<object> = "create" __
 	soifnx:statementOptionIfNotExistsWithWhitespace
 	ddl:( createViewDDL / createFolderDDL / createSchemaDDL / #ERROR{ "Unrecognized resource type to be created" } )
 {
-	new AST.CommandCreateResource()
-	{
-		IfNotExists = soifnx,
-		ResourceDDL = ddl
-	}
+	new AST.CommandCreateResource(soifnx, ddl)
 }
 
 createViewDDL<object> = ("view" / "dataview" / "data" __ "view") __ res:resourcePath __
@@ -110,12 +106,7 @@ dropResourceStatement<object> = "drop" __
 	soifx:statementOptionIfExistsWithWhitespace
 	res:listOfFullResourceSpecifiers
 {
-	new AST.CommandDropResource()
-	{
-		IfExists = soifx,
-		Resources = res,
-		AlsoDropRootResource = true
-	}
+	new AST.CommandDropResource(soifx, res, true)
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -124,12 +115,7 @@ purgeResourceStatement<object> = "purge" __
 	soifx:statementOptionIfExistsWithWhitespace
 	res:listOfFullResourceSpecifiers
 {
-	new AST.CommandDropResource()
-	{
-		IfExists = soifx,
-		Resources = res,
-		AlsoDropRootResource = false
-	}
+	new AST.CommandDropResource(soifx, res, false)
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -141,14 +127,7 @@ grantStatement<object> = "grant" __
 	"on" __ res:listOfFullResourceSpecifiers __
 	"to" __ who:liberalListOfPrincipals
 {
-	new AST.CommandGrant()
-	{
-		IsRecursive = isRec,
-		ModusOperandi = modusOperandi,
-		Privileges = priv,
-		Resources = res,
-		Principals = who
-	}
+	new AST.CommandGrant(isRec, modusOperandi, priv, res, who)
 }
 
 grantOptionAppendOrSetWithWhitespace<NoP77svk.TibcoDV.API.WSDL.Admin.updatePrivilegesMode>
@@ -222,10 +201,7 @@ describeStatement<object>
 	= describeCommand __
 	v:listOfPartialResourceSpecifiers
 {
-	new AST.CommandDescribe()
-	{
-		Resources = v
-	}
+	new AST.CommandDescribe(v)
 }
 
 describeCommand = "desc" ("r" ("ibe")?)?

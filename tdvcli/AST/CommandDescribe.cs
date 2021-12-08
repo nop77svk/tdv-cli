@@ -2,8 +2,13 @@
 {
     using System.Collections.Generic;
 
-    internal record CommandDescribe
+    internal class CommandDescribe
     {
-        internal IList<AST.ResourceSpecifier>? Resources { get; init; }
+        internal IList<AST.ResourceSpecifier> Resources { get; }
+
+        public CommandDescribe(IList<ResourceSpecifier> resources)
+        {
+            Resources = resources;
+        }
     }
 }
