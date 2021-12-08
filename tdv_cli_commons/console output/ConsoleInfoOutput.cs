@@ -35,6 +35,7 @@
             Console.ForegroundColor = ErrorForegroundColor;
             Console.BackgroundColor = ErrorBackgroundColor;
 
+            OptionalNewLine();
             OptionalDisplayTimestamp();
             OutputWriter.WriteLine(message);
 
@@ -73,7 +74,7 @@
             _thereWasEoln = false;
         }
 
-        private string FormattedTimestamp()
+        private static string FormattedTimestamp()
         {
             return DateTime.Now.ToString("[yyyy-MM-dd HH:mm:ss.fff]");
         }
