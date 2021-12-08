@@ -4,6 +4,7 @@
     using log4net;
     using NoP77svk.TibcoDV.API;
     using NoP77svk.TibcoDV.CLI.Commons;
+    using NoP77svk.TibcoDV.Commons;
 
     internal class ClientTimer : IStatement
     {
@@ -13,11 +14,15 @@
 
         internal ClientTimer(bool state)
         {
+            using var log = new TraceLog(_log, nameof(ClientTimer));
+
             State = state;
         }
 
         public void Execute(TdvWebServiceClient tdvClient, IInfoOutput output)
         {
+            using var log = new TraceLog(_log, nameof(Execute));
+
             throw new NotImplementedException();
         }
     }
