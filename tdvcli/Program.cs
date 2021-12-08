@@ -119,10 +119,14 @@
                     if (e.Data["cursor"] is Cursor)
                         ec = (Cursor?)e.Data["cursor"];
 
+                    string error;
                     if (ec is not null)
-                        _log.Error($"File {statement.FileName}, line {statement.FileLine}, statement line {ec.Line}, column {ec.Column}\":\n{statement.Statement}", e);
+                        error = $"File {statement.FileName}, line {statement.FileLine}, statement line {ec.Line}, column {ec.Column}\":\n{statement.Statement}";
                     else
-                        _log.Error($"File {statement.FileName}, line {statement.FileLine}, failed to parse:\n{statement}", e);
+                        error = $"File {statement.FileName}, line {statement.FileLine}, failed to parse:\n{statement}";
+
+                    _log.Error(error, e);
+                    _out.Error(error, e);
 
                     throw new StatementParseException(statement.FileName, statement.FileLine, statement.Statement, e.Message, e);
                 }
@@ -136,7 +140,6 @@
         private static async Task ExecuteParsedStatement(TdvWebServiceClient tdvClient, object commandAST)
         {
             using var log = new TraceLog(_log, nameof(ExecuteParsedStatement));
-            _log.Debug(commandAST);
 
             if (commandAST is AST.IAsyncStatement stmtAsync)
                 await stmtAsync.Execute(tdvClient, _out);
