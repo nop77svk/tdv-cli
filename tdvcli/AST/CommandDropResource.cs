@@ -2,7 +2,7 @@
 {
     using System.Collections.Generic;
 
-    internal record DropResource
+    internal record CommandDropResource
     {
         public bool IfExists { get; init; }
         public IList<ResourceSpecifier>? Resources { get; init; }

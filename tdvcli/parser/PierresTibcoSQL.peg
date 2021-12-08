@@ -110,7 +110,7 @@ dropResourceStatement<object> = "drop" __
 	soifx:statementOptionIfExistsWithWhitespace
 	res:listOfFullResourceSpecifiers
 {
-	new AST.DropResource()
+	new AST.CommandDropResource()
 	{
 		IfExists = soifx,
 		Resources = res,
@@ -124,7 +124,7 @@ purgeResourceStatement<object> = "purge" __
 	soifx:statementOptionIfExistsWithWhitespace
 	res:listOfFullResourceSpecifiers
 {
-	new AST.DropResource()
+	new AST.CommandDropResource()
 	{
 		IfExists = soifx,
 		Resources = res,
