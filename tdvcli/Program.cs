@@ -49,7 +49,8 @@
             }
             catch (Exception e)
             {
-                _log.Fatal("Generator failed", e);
+                _log.Fatal(e);
+                _out.Error("Fatal error!");
 #if DEBUG
                 throw;
 #else

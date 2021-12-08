@@ -42,6 +42,7 @@
             {
                 OptionalDisplayTimestamp();
                 OutputWriter.WriteLine(e.Message);
+                OutputWriter.WriteLine(e.StackTrace);
             }
 
             Console.ForegroundColor = InfoForegroundColor;
