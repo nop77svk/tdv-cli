@@ -226,7 +226,7 @@
             };
 
             int tablesProcessed = 0;
-            await foreach (ChunkOf<string> chunkOfTables in allTablesToRestrict.ChunkByCount(25))
+            await foreach (ChunkOf<string> chunkOfTables in allTablesToRestrict.ChunkByCount(100))
             {
                 await tdvClient.AssignUnassignRbsPolicy(
                     action,
