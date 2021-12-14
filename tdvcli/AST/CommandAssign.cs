@@ -6,6 +6,7 @@
     using System.Threading.Tasks;
     using log4net;
     using NoP77svk.Linq;
+    using NoP77svk.Linq.Ext;
     using NoP77svk.TibcoDV.API;
     using NoP77svk.TibcoDV.API.WSDL.Admin;
     using NoP77svk.TibcoDV.CLI.Commons;
@@ -72,6 +73,8 @@
             if (problemResources > 0)
                 throw new ArgumentOutOfRangeException(nameof(what) + "." + nameof(what.Resources), problemResources, "Some non-table, non-container resources supplied");
 
+            Task<List<string>> tablesAlreadyRestrictedTask = tdvClient.GetRbsPolicyAssignmentList(what.Policy).ToListAsync().AsTask();
+
             List<string> inputTables = what.Resources
                 .Where(res => res.Type == WSDL.resourceType.TABLE)
                 .Where(res => !string.IsNullOrWhiteSpace(res.Path))
@@ -93,16 +96,40 @@
             if (_log.IsDebugEnabled)
                 _log.Debug($"#inputContainers = {inputContainers.Count}");
 
-            IAsyncEnumerable<string> containedTables = tdvClient.RetrieveContainerContentsRecursive(inputContainers)
+            List<string> containedTables = await tdvClient.RetrieveContainerContentsRecursive(inputContainers)
                 .Where(folderItem => folderItem.Type == TdvResourceTypeConst.Table)
                 .Where(folderItem => !string.IsNullOrEmpty(folderItem.Path))
-                .Select(folderItem => folderItem.Path ?? string.Empty);
+                .Select(folderItem => folderItem.Path ?? string.Empty)
+                .ToListAsync();
 
-            IAsyncEnumerable<string> allTablesToRestrict = inputTables
-                .ToAsyncEnumerable()
+            IEnumerable<string> allTablesFound = inputTables
                 .Concat(containedTables);
 
-            await foreach (ChunkOf<string> chunkOfTables in allTablesToRestrict.ChunkByCount(50))
+            List<string> tablesAlreadyRestricted = await tablesAlreadyRestrictedTask;
+
+            IEnumerable<string> allTablesToRestrict;
+            if (action == rbsAssignmentOperationType.ASSIGN)
+            {
+                allTablesToRestrict = tablesAlreadyRestricted
+                    .RightAntiSemiJoin(
+                        outerTable: allTablesFound,
+                        antiJoinedKeySelector: tableName => tableName,
+                        outerKeySelector: tableName => tableName,
+                        resultSelector: (outerTable, innerTable) => innerTable
+                    );
+            }
+            else
+            {
+                allTablesToRestrict = tablesAlreadyRestricted
+                    .Join(
+                        inner: allTablesFound,
+                        outerKeySelector: tableName => tableName,
+                        innerKeySelector: tableName => tableName,
+                        resultSelector: (outerTable, innerTable) => outerTable
+                    );
+            }
+
+            foreach (ChunkOf<string> chunkOfTables in allTablesToRestrict.ChunkByCount(50))
             {
                 await tdvClient.AssignUnassignRbsPolicy(
                     action,
