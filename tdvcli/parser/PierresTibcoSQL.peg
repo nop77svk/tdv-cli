@@ -185,7 +185,7 @@ assignRbsPolicy<AST.AssignRbsPolicy> = ("rbs" / "rls") __ ( ("pol" "icy"?) / #ER
 	}
 }
 
-filterPolicyFunctionName<string> = (("func" ("t" "ion"?)?) / ("proc" "edure"?)) __ policyResource:resourcePath { policyResource }
+filterPolicyFunctionName<string> = (("func" ("t" "ion"?)?) / ("proc" "edure"?) / #ERROR{ "Missing procedure/function keyword" }) __ policyResource:resourcePath { policyResource }
 
 // ------------------------------------------------------------------------------------------------
 
