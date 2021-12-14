@@ -115,16 +115,7 @@
                 }
                 catch (FormatException e)
                 {
-                    Cursor? ec = null;
-                    if (e.Data["cursor"] is Cursor)
-                        ec = (Cursor?)e.Data["cursor"];
-
-                    string error;
-                    if (ec is not null)
-                        error = $"File {statement.FileName}, line {statement.FileLine}, statement line {ec.Line}, column {ec.Column}\":\n{statement.Statement}";
-                    else
-                        error = $"File {statement.FileName}, line {statement.FileLine}, failed to parse:\n{statement}";
-
+                    string error = error = FormatParserError(statement, e);
                     _log.Error(error, e);
                     _out.Error(error, e);
 
@@ -147,6 +138,20 @@
                 stmt.Execute(tdvClient, _out);
             else
                 throw new ArgumentOutOfRangeException(nameof(commandAST), commandAST?.GetType() + " :: " + commandAST?.ToString(), "Unrecognized type of parsed statement");
+        }
+
+        private static string FormatParserError(ScriptFileParserOutPOCO statement, FormatException e)
+        {
+            string error;
+            Cursor? ec = null;
+            if (e.Data["cursor"] is Cursor)
+                ec = (Cursor?)e.Data["cursor"];
+
+            if (ec is not null)
+                error = $"File {statement.FileName}, line {statement.FileLine}, statement line {ec.Line}, column {ec.Column}\":\n{statement.Statement}";
+            else
+                error = $"File {statement.FileName}, line {statement.FileLine}, failed to parse:\n{statement}";
+            return error;
         }
     }
 }
