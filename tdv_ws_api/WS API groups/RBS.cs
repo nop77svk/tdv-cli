@@ -28,25 +28,35 @@
             if (tables is null)
                 throw new ArgumentNullException(nameof(tables));
 
-            IEnumerable<Task> assignUnassignTasks = tables
+            // 2do! deserialize to get the actual response!
+            List<Task<Stream>> assignUnassignTasks = tables
                 .Where(tablePath => tablePath != null)
-                .Select(tablePath => Task.Factory.StartNew(async () =>
-                {
-                    using Stream x = await _wsClient.EndpointGetStream(
-                        new TdvSoapWsEndpoint<WSDL.Admin.rbsAssignFilterPolicyRequest>(
-                            "rbsAssignFilterPolicy",
-                            new WSDL.Admin.rbsAssignFilterPolicyRequest()
-                            {
-                                name = policyFunctionPath,
-                                operation = action,
-                                operationSpecified = true,
-                                target = tablePath
-                            }
-                        )
-                    );
-                }));
+                .Select(tablePath => _wsClient.EndpointGetStream(
+                    new TdvSoapWsEndpoint<WSDL.Admin.rbsAssignFilterPolicyRequest>(
+                        "rbsAssignFilterPolicy",
+                        new WSDL.Admin.rbsAssignFilterPolicyRequest()
+                        {
+                            name = policyFunctionPath,
+                            operation = action,
+                            operationSpecified = true,
+                            target = tablePath
+                        }
+                    )
+                ))
+                .ToList();
 
-            await Task.WhenAll(assignUnassignTasks);
+            try
+            {
+                await Task.WhenAll(assignUnassignTasks);
+            }
+            finally
+            {
+                foreach (Task<Stream> task in assignUnassignTasks)
+                {
+                    task.Result.Dispose();
+                    task.Dispose();
+                }
+            }
         }
 
         public async IAsyncEnumerable<WSDL.Admin.rbsGetFilterPolicyResponse> GetRbsPolicyInfo(string? policyFunctionPath)
@@ -63,7 +73,9 @@
                     }
                 )
             ))
+            {
                 yield return res;
+            }
         }
 
         public async IAsyncEnumerable<string> GetRbsPolicyAssignmentList(string? policyFunctionPath)
