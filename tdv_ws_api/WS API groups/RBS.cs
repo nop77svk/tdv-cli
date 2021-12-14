@@ -48,5 +48,31 @@
 
             await Task.WhenAll(assignUnassignTasks);
         }
+
+        public async IAsyncEnumerable<WSDL.Admin.rbsGetFilterPolicyResponse> GetRbsPolicyInfo(string? policyFunctionPath)
+        {
+            if (string.IsNullOrEmpty(policyFunctionPath))
+                throw new ArgumentNullException(nameof(policyFunctionPath));
+
+            await foreach (WSDL.Admin.rbsGetFilterPolicyResponse res in _wsClient.EndpointGetObject<WSDL.Admin.rbsGetFilterPolicyResponse>(
+                new TdvSoapWsEndpoint<WSDL.Admin.rbsGetFilterPolicyRequest>(
+                    "rbsGetFilterPolicy",
+                    new WSDL.Admin.rbsGetFilterPolicyRequest()
+                    {
+                        name = policyFunctionPath
+                    }
+                )
+            ))
+                yield return res;
+        }
+
+        public async IAsyncEnumerable<string> GetRbsPolicyAssignmentList(string? policyFunctionPath)
+        {
+            await foreach (WSDL.Admin.rbsGetFilterPolicyResponse resp in GetRbsPolicyInfo(policyFunctionPath))
+            {
+                foreach (string ass in resp.policy.assignmentList)
+                    yield return ass;
+            }
+        }
     }
 }
