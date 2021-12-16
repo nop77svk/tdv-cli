@@ -16,12 +16,14 @@
         private static readonly ILog _log = LogManager.GetLogger(typeof(Program));
 
         internal WSDL.rbsAssignmentOperationType Action { get; }
-        internal AssignWhat What { get; }
+        internal FilterPolicy What { get; }
+        internal IList<ResourceSpecifier> Resources { get; }
 
-        internal CommandAssign(rbsAssignmentOperationType action, AssignWhat what)
+        internal CommandAssign(rbsAssignmentOperationType action, FilterPolicy what, IList<ResourceSpecifier> resources)
         {
             Action = action;
             What = what;
+            Resources = resources;
         }
 
         public async Task Execute(TdvWebServiceClient tdvClient, IInfoOutput output)
@@ -31,16 +33,16 @@
             if (What is null)
                 throw new ArgumentNullException(nameof(What));
 
-            if (What.Resources is null)
-                throw new ArgumentNullException(nameof(What) + "." + nameof(What.Resources));
+            if (Resources is null)
+                throw new ArgumentNullException(nameof(Resources));
 
-            if (What is AST.AssignRbsPolicy whatRbsPolicy)
-                await ExecuteAssignRbsPolicy(tdvClient, Action, whatRbsPolicy, output);
+            if (What is AST.RbsFilterPolicy rbsPolicy)
+                await ExecuteAssignRbsPolicy(tdvClient, Action, rbsPolicy.PolicyPath, Resources, output);
             else
                 throw new NotImplementedException($"Don't know how to assign/unassign {What.GetType()}");
         }
 
-        private static async Task ExecuteAssignRbsPolicy(TdvWebServiceClient tdvClient, WSDL.rbsAssignmentOperationType action, AST.AssignRbsPolicy what, IInfoOutput output)
+        private static async Task ExecuteAssignRbsPolicy(TdvWebServiceClient tdvClient, WSDL.rbsAssignmentOperationType action, string policyFunction, IEnumerable<ResourceSpecifier> resources, IInfoOutput output)
         {
             using var log = new TraceLog(_log, nameof(ExecuteAssignRbsPolicy));
 
@@ -51,28 +53,25 @@
                 _ => throw new ArgumentOutOfRangeException(nameof(action), action.ToString())
             };
 
-            if (what.Policy is null)
-                throw new ArgumentNullException(nameof(what) + "." + nameof(what.Policy));
+            if (string.IsNullOrEmpty(policyFunction))
+                throw new ArgumentNullException(nameof(policyFunction));
 
-            if (string.IsNullOrEmpty(what.Policy))
-                throw new ArgumentNullException(nameof(what) + "." + nameof(what.Policy));
+            if (resources is null)
+                throw new ArgumentNullException(nameof(resources));
 
-            if (what.Resources is null)
-                throw new ArgumentNullException(nameof(what) + "." + nameof(what.Resources));
+            output.InfoNoEoln($"{actionDescPresentInitCaps} RLS policy {policyFunction} {actionDirectionDesc} {string.Join(',', resources.Select(x => x.Path))}...");
 
-            output.InfoNoEoln($"{actionDescPresentInitCaps} RLS policy {what.Policy} {actionDirectionDesc} {string.Join(',', what.Resources.Select(x => x.Path))}...");
-
-            int problemResources = what.Resources
+            int problemResources = resources
                 .Where(res => res.Type is not WSDL.resourceType.TABLE and not WSDL.resourceType.CONTAINER
                     || res.Path is null)
                 .Count();
 
             if (problemResources > 0)
-                throw new ArgumentOutOfRangeException(nameof(what) + "." + nameof(what.Resources), problemResources, "Some non-table, non-container resources supplied");
+                throw new ArgumentOutOfRangeException(nameof(resources), problemResources, "Some non-table, non-container resources supplied");
 
-            Task<WSDL.rbsGetFilterPolicyResponse> policyInfoTask = tdvClient.GetRbsPolicyInfo(what.Policy).FirstAsync().AsTask();
+            Task<WSDL.rbsGetFilterPolicyResponse> policyInfoTask = tdvClient.GetRbsPolicyInfo(policyFunction).FirstAsync().AsTask();
 
-            List<string> inputTables = what.Resources
+            List<string> inputTables = resources
                 .Where(res => res.Type == WSDL.resourceType.TABLE)
                 .Where(res => !string.IsNullOrWhiteSpace(res.Path))
                 .Select(res => res.Path ?? string.Empty)
@@ -82,7 +81,7 @@
             if (_log.IsDebugEnabled)
                 _log.Debug($"#inputTables = {inputTables.Count}");
 
-            List<ValueTuple<string?, TdvResourceTypeEnumAgr>> inputContainers = what.Resources
+            List<ValueTuple<string?, TdvResourceTypeEnumAgr>> inputContainers = resources
                 .Where(res => res.Type == WSDL.resourceType.CONTAINER)
                 .Where(res => !string.IsNullOrWhiteSpace(res.Path))
                 .Select(res => res.Path ?? string.Empty)
@@ -123,7 +122,7 @@
             WSDL.rbsWriteFilterPolicyResponse result = await tdvClient.WriteRbsPolicy(new WSDL.rbsWriteFilterPolicyRequest()
             {
                 policy = policyInfo.policy,
-                originalPath = what.Policy
+                originalPath = policyFunction
             });
 
             output.Info($" {Math.Abs(countAssignmentsAfter - countAssignmentsBefore)} ({countAssignmentsBefore}->{countAssignmentsAfter}) tables/views successfully {actionDescPast}");

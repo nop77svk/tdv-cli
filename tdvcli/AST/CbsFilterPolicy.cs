@@ -1,8 +1,8 @@
 ﻿namespace NoP77svk.TibcoDV.CLI.AST
 {
-    internal record RbsFilterPolicy : FilterPolicy
+    internal record CbsFilterPolicy : FilterPolicy
     {
-        internal RbsFilterPolicy(string policyPath)
+        internal CbsFilterPolicy(string policyPath)
             : base(policyPath)
         {
         }

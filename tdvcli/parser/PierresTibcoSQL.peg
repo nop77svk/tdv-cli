@@ -21,6 +21,7 @@ statement<object>
 	/ dropResourceStatement
 	/ purgeResourceStatement
 	/ assignStatement
+	/ unassignStatement
 	/ describeStatement
 	/ #ERROR{ "Unrecognized statement" }
 
@@ -124,8 +125,8 @@ grantStatement<object> = "grant" __
 	modusOperandi:grantOptionAppendOrSetWithWhitespace
 	isRec:statementOptionRecursiveWithWhitespace
 	priv:listOfResourcePrivileges __
-	"on" __ res:listOfFullResourceSpecifiers __
-	"to" __ who:liberalListOfPrincipals
+	("on" / #ERROR{"ON keyword expected"}) __ res:listOfFullResourceSpecifiers __
+	("to" / #ERROR{"TO keyword expected"}) __ who:liberalListOfPrincipals
 {
 	new AST.CommandGrant(isRec, modusOperandi, priv, res, who)
 }
@@ -156,44 +157,38 @@ resourcePrivilege<TdvPrivilegeEnum>
 
 // ------------------------------------------------------------------------------------------------
 
-assignStatement<object> =
-	action:assignOrUnassign __
-	what:assignWhat
-{
-	new AST.CommandAssign(action, what)
-}
-
-assignOrUnassign<NoP77svk.TibcoDV.API.WSDL.Admin.rbsAssignmentOperationType>
-	= "assign" { NoP77svk.TibcoDV.API.WSDL.Admin.rbsAssignmentOperationType.ASSIGN }
-	/ "unassign" { NoP77svk.TibcoDV.API.WSDL.Admin.rbsAssignmentOperationType.REMOVE }
-
-assignWhat<AST.AssignWhat>
-	= v:assignRbsPolicy { v }
-	/ v:assignCbsPolicy { v }
-
-// ------------------------------------------------------------------------------------------------
-
-assignRbsPolicy<AST.AssignRbsPolicy> = ("rbs" / "rls") __ ( ("pol" "icy"?) / #ERROR{ "Missing \"policy\" keyword"} ) __
-	policy:filterPolicyFunctionName __
-	"to" __
+assignStatement<object> = "assign" __
+	what:policySpecifier __
+	("to" / #ERROR{ "TO keyword expected" }) __
 	res:listOfFullResourceSpecifiers
 {
-	new AST.AssignRbsPolicy()
-	{
-		Policy = policy,
-		Resources = res
-	}
+	new AST.CommandAssign(NoP77svk.TibcoDV.API.WSDL.Admin.rbsAssignmentOperationType.ASSIGN, what, res)
 }
 
-filterPolicyFunctionName<string> = (("func" ("t" "ion"?)?) / ("proc" "edure"?) / #ERROR{ "Missing procedure/function keyword" }) __ policyResource:resourcePath { policyResource }
-
-// ------------------------------------------------------------------------------------------------
-
-assignCbsPolicy<AST.AssignWhat> = ("cbs" / "cls") __ ( ("pol" "icy"?) / #ERROR{ "Expected \"policy\" keyword"} ) __
-	policy:filterPolicyFunctionName __
-	"to" __
+unassignStatement<object> = "unassign" __
+	what:policySpecifier __
+	("from" / #ERROR{ "FROM keyword expected" }) __
 	res:listOfFullResourceSpecifiers
-	#ERROR{ "CBS policy PEG not yet implemented" }
+{
+	new AST.CommandAssign(NoP77svk.TibcoDV.API.WSDL.Admin.rbsAssignmentOperationType.REMOVE, what, res)
+}
+
+policySpecifier<AST.FilterPolicy>
+	= v:rbsFilterPolicySpecifier { v }
+	/ v:cbsFilterPolicySpecifier { v }
+	/ #ERROR{"Unknown filter policy type"}
+
+rbsFilterPolicySpecifier<AST.FilterPolicy> = ("rbs" / "rls") __ ( ("pol" "icy"?) / #ERROR{ "Missing \"policy\" keyword"} ) __
+	policy:resourcePath
+{
+	new AST.RbsFilterPolicy(policy)
+}
+
+cbsFilterPolicySpecifier<AST.FilterPolicy> = ("cbs" / "cls") __ ( ("pol" "icy"?) / #ERROR{ "Expected \"policy\" keyword"} ) __
+	policy:resourcePath
+{
+	new AST.CbsFilterPolicy(policy)
+}
 
 // ------------------------------------------------------------------------------------------------
 
