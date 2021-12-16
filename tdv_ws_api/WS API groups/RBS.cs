@@ -17,7 +17,29 @@
             if (string.IsNullOrWhiteSpace(tablePath))
                 throw new ArgumentNullException(nameof(tablePath));
 
-            await AssignUnassignRbsPolicy(action, policyFunctionPath, new string[] { tablePath });
+            // note: I simply don't know why I have to wrap the async EndpointGetStream to another Task to make it spawn as a thread; without that, it simply runs synchronously
+            using Task<Task<Stream>> dummy = Task.Factory.StartNew(() => _wsClient.EndpointGetStream(
+                new TdvSoapWsEndpoint<WSDL.Admin.rbsAssignFilterPolicyRequest>(
+                    "rbsAssignFilterPolicy",
+                    new WSDL.Admin.rbsAssignFilterPolicyRequest()
+                    {
+                        name = policyFunctionPath,
+                        operation = action,
+                        operationSpecified = true,
+                        target = tablePath
+                    }
+                )
+            ));
+
+            try
+            {
+                await dummy;
+            }
+            finally
+            {
+                dummy.Result.Result.Dispose();
+                dummy.Result.Dispose();
+            }
         }
 
         public async Task AssignUnassignRbsPolicy(WSDL.Admin.rbsAssignmentOperationType action, string? policyFunctionPath, IEnumerable<string>? tables)
@@ -29,21 +51,10 @@
                 throw new ArgumentNullException(nameof(tables));
 
             // 2do! deserialize to get the actual response!
-            List<Task<Stream>> assignUnassignTasks = tables
+            Task[] assignUnassignTasks = tables
                 .Where(tablePath => tablePath != null)
-                .Select(tablePath => _wsClient.EndpointGetStream(
-                    new TdvSoapWsEndpoint<WSDL.Admin.rbsAssignFilterPolicyRequest>(
-                        "rbsAssignFilterPolicy",
-                        new WSDL.Admin.rbsAssignFilterPolicyRequest()
-                        {
-                            name = policyFunctionPath,
-                            operation = action,
-                            operationSpecified = true,
-                            target = tablePath
-                        }
-                    )
-                ))
-                .ToList();
+                .Select(tablePath => AssignUnassignRbsPolicy(action, policyFunctionPath, tablePath))
+                .ToArray();
 
             try
             {
@@ -51,9 +62,8 @@
             }
             finally
             {
-                foreach (Task<Stream> task in assignUnassignTasks)
+                foreach (Task task in assignUnassignTasks)
                 {
-                    task.Result.Dispose();
                     task.Dispose();
                 }
             }
