@@ -5,8 +5,6 @@
     using System.Linq;
     using System.Threading.Tasks;
     using log4net;
-    using NoP77svk.Linq;
-    using NoP77svk.Linq.Ext;
     using NoP77svk.TibcoDV.API;
     using NoP77svk.TibcoDV.API.WSDL.Admin;
     using NoP77svk.TibcoDV.CLI.Commons;
@@ -48,8 +46,8 @@
 
             (string actionDescPast, string actionDescPresentInitCaps, string actionDirectionDesc) = action switch
             {
-                WSDL.rbsAssignmentOperationType.ASSIGN => ("assigned", "Assigning", "to"),
-                WSDL.rbsAssignmentOperationType.REMOVE => ("removed", "Removing", "from"),
+                WSDL.rbsAssignmentOperationType.ASSIGN => ("restricted", "Assigning", "to"),
+                WSDL.rbsAssignmentOperationType.REMOVE => ("unrestricted", "Removing", "from"),
                 _ => throw new ArgumentOutOfRangeException(nameof(action), action.ToString())
             };
 
@@ -62,8 +60,7 @@
             if (what.Resources is null)
                 throw new ArgumentNullException(nameof(what) + "." + nameof(what.Resources));
 
-            int tablesProcessed = 0;
-            output.InfoNoEoln($"{actionDescPresentInitCaps} RLS policy {what.Policy} {actionDirectionDesc} {string.Join(',', what.Resources.Select(x => x.Path))}: ");
+            output.InfoNoEoln($"{actionDescPresentInitCaps} RLS policy {what.Policy} {actionDirectionDesc} {string.Join(',', what.Resources.Select(x => x.Path))}...");
 
             int problemResources = what.Resources
                 .Where(res => res.Type is not WSDL.resourceType.TABLE and not WSDL.resourceType.CONTAINER
@@ -73,7 +70,7 @@
             if (problemResources > 0)
                 throw new ArgumentOutOfRangeException(nameof(what) + "." + nameof(what.Resources), problemResources, "Some non-table, non-container resources supplied");
 
-            Task<List<string>> tablesAlreadyRestrictedTask = tdvClient.GetRbsPolicyAssignmentList(what.Policy).ToListAsync().AsTask();
+            Task<WSDL.rbsGetFilterPolicyResponse> policyInfoTask = tdvClient.GetRbsPolicyInfo(what.Policy).FirstAsync().AsTask();
 
             List<string> inputTables = what.Resources
                 .Where(res => res.Type == WSDL.resourceType.TABLE)
@@ -105,43 +102,31 @@
             IEnumerable<string> allTablesFound = inputTables
                 .Concat(containedTables);
 
-            List<string> tablesAlreadyRestricted = await tablesAlreadyRestrictedTask;
+            WSDL.rbsGetFilterPolicyResponse policyInfo = await policyInfoTask;
+            int countAssignmentsBefore = policyInfo.policy.assignmentList.Length;
 
-            IEnumerable<string> allTablesToRestrict;
             if (action == rbsAssignmentOperationType.ASSIGN)
             {
-                allTablesToRestrict = tablesAlreadyRestricted
-                    .RightAntiSemiJoin(
-                        outerTable: allTablesFound,
-                        antiJoinedKeySelector: tableName => tableName,
-                        outerKeySelector: tableName => tableName,
-                        resultSelector: (outerTable, innerTable) => innerTable
-                    );
+                policyInfo.policy.assignmentList = policyInfo.policy.assignmentList
+                    .Union(allTablesFound)
+                    .ToArray();
             }
             else
             {
-                allTablesToRestrict = tablesAlreadyRestricted
-                    .Join(
-                        inner: allTablesFound,
-                        outerKeySelector: tableName => tableName,
-                        innerKeySelector: tableName => tableName,
-                        resultSelector: (outerTable, innerTable) => outerTable
-                    );
+                policyInfo.policy.assignmentList = policyInfo.policy.assignmentList
+                    .Except(allTablesFound)
+                    .ToArray();
             }
 
-            foreach (ChunkOf<string> chunkOfTables in allTablesToRestrict.ChunkByCount(16))
+            int countAssignmentsAfter = policyInfo.policy.assignmentList.Length;
+
+            WSDL.rbsWriteFilterPolicyResponse result = await tdvClient.WriteRbsPolicy(new WSDL.rbsWriteFilterPolicyRequest()
             {
-                await tdvClient.AssignUnassignRbsPolicy(
-                    action,
-                    what.Policy,
-                    chunkOfTables.Chunk
-                );
+                policy = policyInfo.policy,
+                originalPath = what.Policy
+            });
 
-                tablesProcessed += chunkOfTables.TotalChunkMeasure;
-                output.InfoNoEoln(".");
-            }
-
-            output.Info($" Done on {tablesProcessed} tables/views");
+            output.Info($" {Math.Abs(countAssignmentsAfter - countAssignmentsBefore)} ({countAssignmentsBefore}->{countAssignmentsAfter}) tables/views successfully {actionDescPast}");
         }
     }
 }
