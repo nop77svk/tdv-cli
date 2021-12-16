@@ -124,7 +124,17 @@
                 }
             }
 
-            await Task.WhenAll(dropTasks);
+            try
+            {
+                await Task.WhenAll(dropTasks);
+            }
+            finally
+            {
+                foreach (Task dropTask in dropTasks)
+                {
+                    dropTask.Dispose();
+                }
+            }
         }
     }
 }
