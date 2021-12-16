@@ -17,8 +17,7 @@
             if (string.IsNullOrWhiteSpace(tablePath))
                 throw new ArgumentNullException(nameof(tablePath));
 
-            // note: I simply don't know why I have to wrap the async EndpointGetStream to another Task to make it spawn as a thread; without that, it simply runs synchronously
-            using Task<Task<Stream>> dummy = Task.Factory.StartNew(() => _wsClient.EndpointGetStream(
+            await _wsClient.EndpointGetObject<WSDL.Admin.rbsAssignFilterPolicyResponse>(
                 new TdvSoapWsEndpoint<WSDL.Admin.rbsAssignFilterPolicyRequest>(
                     "rbsAssignFilterPolicy",
                     new WSDL.Admin.rbsAssignFilterPolicyRequest()
@@ -29,43 +28,15 @@
                         target = tablePath
                     }
                 )
-            ));
-
-            try
-            {
-                await dummy;
-            }
-            finally
-            {
-                dummy.Result.Result.Dispose();
-                dummy.Result.Dispose();
-            }
+            ).ToArrayAsync();
         }
 
-        public async Task AssignUnassignRbsPolicy(WSDL.Admin.rbsAssignmentOperationType action, string? policyFunctionPath, IEnumerable<string>? tables)
+        public async IAsyncEnumerable<string> GetRbsPolicyAssignmentList(string? policyFunctionPath)
         {
-            if (string.IsNullOrEmpty(policyFunctionPath))
-                throw new ArgumentNullException(nameof(policyFunctionPath));
-
-            if (tables is null)
-                throw new ArgumentNullException(nameof(tables));
-
-            // 2do! deserialize to get the actual response!
-            Task[] assignUnassignTasks = tables
-                .Where(tablePath => tablePath != null)
-                .Select(tablePath => AssignUnassignRbsPolicy(action, policyFunctionPath, tablePath))
-                .ToArray();
-
-            try
+            await foreach (WSDL.Admin.rbsGetFilterPolicyResponse resp in GetRbsPolicyInfo(policyFunctionPath))
             {
-                await Task.WhenAll(assignUnassignTasks);
-            }
-            finally
-            {
-                foreach (Task task in assignUnassignTasks)
-                {
-                    task.Dispose();
-                }
+                foreach (string ass in resp.policy.assignmentList)
+                    yield return ass;
             }
         }
 
@@ -88,13 +59,10 @@
             }
         }
 
-        public async IAsyncEnumerable<string> GetRbsPolicyAssignmentList(string? policyFunctionPath)
+        public async Task<WSDL.Admin.rbsWriteFilterPolicyResponse> WriteRbsPolicy(WSDL.Admin.rbsWriteFilterPolicyRequest req)
         {
-            await foreach (WSDL.Admin.rbsGetFilterPolicyResponse resp in GetRbsPolicyInfo(policyFunctionPath))
-            {
-                foreach (string ass in resp.policy.assignmentList)
-                    yield return ass;
-            }
+            return await _wsClient.EndpointGetObject<WSDL.Admin.rbsWriteFilterPolicyResponse>(new TdvSoapWsEndpoint<WSDL.Admin.rbsWriteFilterPolicyRequest>("rbsWriteFilterPolicy", req))
+                .FirstAsync();
         }
     }
 }
