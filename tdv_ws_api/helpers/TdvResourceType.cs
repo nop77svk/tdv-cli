@@ -1,5 +1,4 @@
-﻿#pragma warning disable SA1313
-namespace NoP77svk.TibcoDV.API
+﻿namespace NoP77svk.TibcoDV.API
 {
     using System;
 
@@ -50,6 +49,7 @@ namespace NoP77svk.TibcoDV.API
                 (TdvResourceTypeConst.Link, TdvResourceSubtypeConst.None, TdvResourceTypeConst.Table) => TdvResourceTypeEnumAgr.PublishedTableOrView,
                 (TdvResourceTypeConst.DefinitionSet, _, _) => TdvResourceTypeEnumAgr.DefinitionSet,
                 (TdvResourceTypeConst.Model, TdvResourceSubtypeConst.None, _) => TdvResourceTypeEnumAgr.Model,
+                (TdvResourceTypeConst.Trigger, TdvResourceSubtypeConst.None, TdvResourceTypeConst.Trigger) => TdvResourceTypeEnumAgr.Trigger,
                 _ => throw new ArgumentOutOfRangeException(nameof(wsType) + ":" + nameof(wsSubType) + ":" + nameof(wsTargetType), $"Unrecognized combination of resource type \"{wsType}\", subtype \"{wsSubType}\" and target type \"{wsTargetType}\"")
             };
         }

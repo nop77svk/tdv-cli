@@ -19,6 +19,7 @@
         PublishedSchema,
         PublishedTableOrView,
         DefinitionSet,
-        Model
+        Model,
+        Trigger
     }
 }

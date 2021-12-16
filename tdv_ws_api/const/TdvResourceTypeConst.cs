@@ -9,5 +9,6 @@
         public const string Link = "LINK";
         public const string DefinitionSet = "DEFINITION_SET";
         public const string Model = "MODEL";
+        public const string Trigger = "TRIGGER";
     }
 }
