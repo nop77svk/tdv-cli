@@ -79,7 +79,17 @@
                 ));
             }
 
-            await Task.WhenAll(dropContainerTasks);
+            try
+            {
+                await Task.WhenAll(dropContainerTasks);
+            }
+            finally
+            {
+                foreach (Task task in dropContainerTasks)
+                {
+                    task.Dispose();
+                }
+            }
         }
 
         public async Task<string> DropAnyContainers(IEnumerable<string> paths, TdvResourceTypeEnumAgr folderType, bool ifExists = true)
@@ -180,9 +190,12 @@
             if (string.IsNullOrWhiteSpace(containerPath))
                 throw new ArgumentNullException(nameof(containerPath));
 
-            ValueTuple<string?, TdvResourceTypeEnumAgr>[] input = { new ValueTuple<string?, TdvResourceTypeEnumAgr>(containerPath, resourceType) };
-            IAsyncEnumerable<TdvRest_ContainerContents> retrievalTask = RetrieveContainerContentsRecursive(input);
-            await foreach (TdvRest_ContainerContents folderItem in retrievalTask)
+            ValueTuple<string?, TdvResourceTypeEnumAgr>[] input =
+            {
+                new ValueTuple<string?, TdvResourceTypeEnumAgr>(containerPath, resourceType)
+            };
+
+            await foreach (TdvRest_ContainerContents folderItem in RetrieveContainerContentsRecursive(input))
                 yield return folderItem;
         }
     }
