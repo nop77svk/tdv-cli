@@ -1,19 +1,19 @@
-﻿#pragma warning disable IDE1006
+﻿#pragma warning disable SA1313
 namespace NoP77svk.TibcoDV.CLI.AST
 {
-    public record TimeSpan(double value, TimeUnitEnum unit)
+    public record TimeSpan(double Value, TimeUnitEnum Unit)
     {
         public System.TimeSpan AsSystemTimeSpan()
         {
-            return unit switch
+            return Unit switch
             {
-                TimeUnitEnum.Millisecond => System.TimeSpan.FromMilliseconds(value),
-                TimeUnitEnum.Second => System.TimeSpan.FromSeconds(value),
-                TimeUnitEnum.Minute => System.TimeSpan.FromMinutes(value),
-                TimeUnitEnum.Hour => System.TimeSpan.FromHours(value),
-                TimeUnitEnum.Day => System.TimeSpan.FromDays(value),
-                TimeUnitEnum.Week => System.TimeSpan.FromDays(value * 7),
-                _ => throw new System.ArgumentOutOfRangeException(nameof(value), value.ToString())
+                TimeUnitEnum.Millisecond => System.TimeSpan.FromMilliseconds(Value),
+                TimeUnitEnum.Second => System.TimeSpan.FromSeconds(Value),
+                TimeUnitEnum.Minute => System.TimeSpan.FromMinutes(Value),
+                TimeUnitEnum.Hour => System.TimeSpan.FromHours(Value),
+                TimeUnitEnum.Day => System.TimeSpan.FromDays(Value),
+                TimeUnitEnum.Week => System.TimeSpan.FromDays(Value * 7),
+                _ => throw new System.ArgumentOutOfRangeException(nameof(Value), Value.ToString())
             };
         }
     }
