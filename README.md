@@ -108,12 +108,15 @@ If the source resource specified is a folder, then all of its contents (recursiv
 * `/shared/L1_Physical/DWH/BigData/Hive/customers_items_j5`.
 
 Executing `publish /shared/L1_Physical to /services/databases/PublishTest flatten hierarchy with "___";` will result in the `PublishTest` published data source with schemas
+
 * `source`,
 * `DWH___Oracle`,
 * `DWH___PgSQL`,
 * `DWH___BigData___Impala`,
 * `DWH___BigData___Hive`,
+* 
 containing published views as follows
+
 * `source/customers1`,
 * `source/items1`,
 * `source/customers_items_j1`,
