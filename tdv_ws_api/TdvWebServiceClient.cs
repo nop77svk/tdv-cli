@@ -26,7 +26,7 @@
         {
             try
             {
-                return TdvResourceType.CalcResourceType(resource.Type, resource.SubType, resource.TargetType);
+                return new TdvResourceType(resource.Type ?? string.Empty, resource.SubType ?? string.Empty, resource.TargetType).Type;
             }
             catch (Exception e)
             {
