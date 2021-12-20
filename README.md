@@ -32,6 +32,14 @@ The `if not exists` option instructs the server to not return error when such a 
 
 The `if exists` option instructs the server to not return error when any of the objects listed do not exist on the server.
 
+### Drop objects' contents
+
+`purge [if exists] `<_comma-delimited list of resource specifiers_>`;`
+
+The `if exists` option instructs the server to not return error when any of the objects listed do not exist on the server.
+
+This almost has the same effect as `drop...`, except for keeping the listed resource in place, not deleted.
+
 ### Grant privileges
 
 `grant `<_modus operandi_>` [recursive] `<_comma-delimited list of privileges_>` on `<_comma-delimited list of resource specifiers_>` to `<_comma-delimited list of liberal principals>`;`
@@ -58,7 +66,7 @@ Liberal/strict principal specifiers are described in their own section.
 
 ### RBS/RLS policy assignment and removal
 
-`<assign|unassign> <rbs|rls> pol[icy] <func[tion]|proc[edure]> `<_policy function resource path_>` to `<_comma-delimited list of resource specifiers_>`;`
+`<assign|unassign> <rbs|rls> pol[icy] `<_policy function resource path_>` to `<_comma-delimited list of resource specifiers_>`;`
 
 The command assigns (statement `assign`) or unassigns/removes (statement `unassign`) row-level security policy identified by the policy function/procedure <_policy function resource path_> to the specified resources and all their children resources recursively.
 
@@ -74,6 +82,54 @@ Resource specifiers are described in their own section.
 
 **Note:** Implementation pending!
 
+### Mass-publishing
+
+`publish [if not exists] `<_source resource path_>` to `<_target resource path_>` [flatten hierarchy with `<_string literal_>`];`
+
+If the source resource specified is a table/view or a stored procedure, then it gets published under the target path under the same name. The `flatten hierarchy` option is invalid/forbidden in this case.
+
+If the source resource specified is a folder, then all of its contents (recursively) get published under the target path, with all relative subpaths flattened to a single level (schema) by the hierarchy flattening string. All individual objects (tables, views, stored procedures) are left their names intact.
+
+**Example:** Consider the hierarchy of views as follows
+* `/shared/L1_Physical/source/customers1`,
+* `/shared/L1_Physical/source/items1`,
+* `/shared/L1_Physical/source/customers_items_j1`,
+* `/shared/L1_Physical/DWH/Oracle/customers2`,
+* `/shared/L1_Physical/DWH/Oracle/items2`,
+* `/shared/L1_Physical/DWH/Oracle/customers_items_j2`,
+* `/shared/L1_Physical/DWH/PgSQL/customers3`,
+* `/shared/L1_Physical/DWH/PgSQL/items3`,
+* `/shared/L1_Physical/DWH/PgSQL/customers_items_j3`,
+* `/shared/L1_Physical/DWH/BigData/Impala/customers4`,
+* `/shared/L1_Physical/DWH/BigData/Impala/items4`,
+* `/shared/L1_Physical/DWH/BigData/Impala/customers_items_j4`,
+* `/shared/L1_Physical/DWH/BigData/Hive/customers5`,
+* `/shared/L1_Physical/DWH/BigData/Hive/items5`,
+* `/shared/L1_Physical/DWH/BigData/Hive/customers_items_j5`.
+
+Executing `publish /shared/L1_Physical to /services/databases/PublishTest flatten hierarchy with "___";` will result in the `PublishTest` published data source with schemas
+* `source`,
+* `DWH___Oracle`,
+* `DWH___PgSQL`,
+* `DWH___BigData___Impala`,
+* `DWH___BigData___Hive`,
+containing published views as follows
+* `source/customers1`,
+* `source/items1`,
+* `source/customers_items_j1`,
+* `DWH___Oracle/customers2`,
+* `DWH___Oracle/items2`,
+* `DWH___Oracle/customers_items_j2`,
+* `DWH___PgSQL/customers3`,
+* `DWH___PgSQL/items3`,
+* `DWH___PgSQL/customers_items_j3`,
+* `DWH___BigData___Impala/customers4`,
+* `DWH___BigData___Impala/items4`,
+* `DWH___BigData___Impala/customers_items_j4`,
+* `DWH___BigData___Hive/customers5`,
+* `DWH___BigData___Hive/items5`,
+* `DWH___BigData___Hive/customers_items_j5`.
+
 ### Object/resource description
 
 `desc[ribe] `<_list of resource paths_>`;`
@@ -87,11 +143,11 @@ The command displays info on the resources specified by the supplied resource pa
 <_resource specifier_> = <_resource type_> <_resource path_>
 
 <_resource type_> is one of the Tibco DV resource types:
-* `container`, `folder`,
-* `table`, `view`,
+* `container`,
+* `table`,
 * `trigger`,
 * `datasource`, `data_source`, `data source`,
-* `procedure`, `function`,
+* `procedure`,
 * `link`,
 * `definitionset`, `definition_set`, `definition set`,
 * `adapter`,
