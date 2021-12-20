@@ -18,6 +18,8 @@
         PublishedCatalog,
         PublishedSchema,
         PublishedTableOrView,
+        PublishedStoredProcedure,
+        PublishedResource,
         DefinitionSet,
         Model,
         Trigger
