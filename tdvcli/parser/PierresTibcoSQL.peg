@@ -15,8 +15,8 @@ start<object>
 	{ result }
 
 statement<object>
-	= serverSideStatement
-	/ clientSideStatement
+	= clientSideStatement
+	/ serverSideStatement
 
 serverSideStatement<AST.IAsyncStatement>
 	= grantStatement
