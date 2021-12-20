@@ -15,8 +15,11 @@ start<object>
 	{ result }
 
 statement<object>
-	= clientSideStatement
-	/ grantStatement
+	= serverSideStatement
+	/ clientSideStatement
+
+serverSideStatement<AST.IAsyncStatement>
+	= grantStatement
 	/ createResourceStatement
 	/ publishStatement
 	/ dropResourceStatement
@@ -24,20 +27,20 @@ statement<object>
 	/ assignStatement
 	/ unassignStatement
 	/ describeStatement
-	/ #ERROR{ "Unrecognized statement" }
+	/ #ERROR{ "Unrecognized server-side command" }
 
-clientSideStatement<object> = "#" v:clientSideStatementWhat { v }
+clientSideStatement<AST.IStatement> = "#" v:clientSideStatementWhat { v }
 
-clientSideStatementWhat<object>
+clientSideStatementWhat<AST.IStatement>
 	= clientSidePrompt
 	/ clientSideTimer
 	/ clientSideConnectionTimeout
 	/ clientSideSet
-	/ #ERROR{ "Unrecognized client-side statement" }
+	/ #ERROR{ "Unrecognized client-side command" }
 
 // ------------------------------------------------------------------------------------------------
 
-clientSideSet<AST.ClientSet> = "set" __ var:resourceIdentifier _ "=" _ value:clientSideSetValue
+clientSideSet<AST.IStatement> = "set" __ var:resourceIdentifier _ "=" _ value:clientSideSetValue
 {
 	new AST.ClientSet(var, value)
 }
@@ -53,28 +56,28 @@ clientSideSetValue<object>
 
 // ------------------------------------------------------------------------------------------------
 
-clientSideConnectionTimeout<AST.ClientConnectionTimeout> = "timeout" __ v:timeLiteral
+clientSideConnectionTimeout<AST.IStatement> = "timeout" __ v:timeLiteral
 {
 	new AST.ClientConnectionTimeout(v)
 }
 
 // ------------------------------------------------------------------------------------------------
 
-clientSideTimer<AST.ClientTimer> = "timer" __ v:booleanLiteral
+clientSideTimer<AST.IStatement> = "timer" __ v:booleanLiteral
 {
 	new AST.ClientTimer(v)
 }
 
 // ------------------------------------------------------------------------------------------------
 
-clientSidePrompt<AST.ClientPrompt> = "prompt" __ v:stringLiteral
+clientSidePrompt<AST.IStatement> = "prompt" __ v:stringLiteral
 {
 	new AST.ClientPrompt(v)
 }
 
 // ------------------------------------------------------------------------------------------------
 
-createResourceStatement<object> = "create" __
+createResourceStatement<AST.IAsyncStatement> = "create" __
 	soifnx:statementOptionIfNotExistsWithWhitespace
 	ddl:( createViewDDL / createFolderDDL / createSchemaDDL / #ERROR{ "Unrecognized resource type to be created" } )
 {
@@ -104,7 +107,7 @@ createSchemaDDL<object> = "schema" __ res:resourcePath
 
 // ------------------------------------------------------------------------------------------------
 
-publishStatement<object> = "pub" "lish"? __
+publishStatement<AST.IAsyncStatement> = "pub" "lish"? __
 	ifNotExists:statementOptionIfNotExistsWithWhitespace
 	source:resourcePath __
 	"to" __ target:resourcePath
@@ -119,7 +122,7 @@ publishStatement<object> = "pub" "lish"? __
 
 // ------------------------------------------------------------------------------------------------
 
-dropResourceStatement<object> = "drop" __
+dropResourceStatement<AST.IAsyncStatement> = "drop" __
 	soifx:statementOptionIfExistsWithWhitespace
 	res:listOfFullResourceSpecifiers
 {
@@ -128,7 +131,7 @@ dropResourceStatement<object> = "drop" __
 
 // ------------------------------------------------------------------------------------------------
 
-purgeResourceStatement<object> = "purge" __
+purgeResourceStatement<AST.IAsyncStatement> = "purge" __
 	soifx:statementOptionIfExistsWithWhitespace
 	res:listOfFullResourceSpecifiers
 {
@@ -137,7 +140,7 @@ purgeResourceStatement<object> = "purge" __
 
 // ------------------------------------------------------------------------------------------------
 
-grantStatement<object> = "grant" __
+grantStatement<AST.IAsyncStatement> = "grant" __
 	modusOperandi:grantOptionAppendOrSetWithWhitespace
 	isRec:statementOptionRecursiveWithWhitespace
 	priv:listOfResourcePrivileges __
@@ -172,7 +175,7 @@ resourcePrivilege<TdvPrivilegeEnum>
 
 // ------------------------------------------------------------------------------------------------
 
-assignStatement<object> = "assign" __
+assignStatement<AST.IAsyncStatement> = "assign" __
 	what:policySpecifier __
 	("to" / #ERROR{ "TO keyword expected" }) __
 	res:listOfFullResourceSpecifiers
@@ -180,7 +183,7 @@ assignStatement<object> = "assign" __
 	new AST.CommandAssign(NoP77svk.TibcoDV.API.WSDL.Admin.rbsAssignmentOperationType.ASSIGN, what, res)
 }
 
-unassignStatement<object> = "unassign" __
+unassignStatement<AST.IAsyncStatement> = "unassign" __
 	what:policySpecifier __
 	("from" / #ERROR{ "FROM keyword expected" }) __
 	res:listOfFullResourceSpecifiers
@@ -207,7 +210,7 @@ cbsFilterPolicySpecifier<AST.FilterPolicy> = ("cbs" / "cls") __ ( ("pol" "icy"?)
 
 // ------------------------------------------------------------------------------------------------
 
-describeStatement<object>
+describeStatement<AST.IAsyncStatement>
 	= describeCommand __
 	v:listOfPartialResourceSpecifiers
 {
