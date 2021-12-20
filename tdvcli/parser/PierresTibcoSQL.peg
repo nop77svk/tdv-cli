@@ -18,6 +18,7 @@ statement<object>
 	= clientSideStatement
 	/ grantStatement
 	/ createResourceStatement
+	/ publishStatement
 	/ dropResourceStatement
 	/ purgeResourceStatement
 	/ assignStatement
@@ -91,14 +92,29 @@ createViewDDL<object> = ("view" / "dataview" / "data" __ "view") __ res:resource
 	}
 }
 
-createFolderDDL<object> = ("folder" / "container") __ res:resourcePath
+createFolderDDL<object> = "folder" __ res:resourcePath
 {
 	new AST.FolderDDL(res)
 }
 
-createSchemaDDL<object> = ("schema") __ res:resourcePath
+createSchemaDDL<object> = "schema" __ res:resourcePath
 {
 	new AST.SchemaDDL(res)
+}
+
+// ------------------------------------------------------------------------------------------------
+
+publishStatement<object> = "pub" "lish"? __
+	ifNotExists:statementOptionIfNotExistsWithWhitespace
+	source:resourcePath __
+	"to" __ target:resourcePath
+	flattenString:(
+		( __ "flat" "ten"? __ ("folder" __)? "hierarchy" __ "with" __ v:stringLiteral ) {v}
+		/
+		{null}
+	)
+{
+	new AST.CommandPublish(source, target, flattenString, ifNotExists)
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -153,7 +169,6 @@ resourcePrivilege<TdvPrivilegeEnum>
 	/ "execute" { TdvPrivilegeEnum.Execute }
 	/ "grant" { TdvPrivilegeEnum.Grant }
 	/ #ERROR{ "Unrecognized privilege" }
-
 
 // ------------------------------------------------------------------------------------------------
 
@@ -249,10 +264,8 @@ resourceTypeWS<NoP77svk.TibcoDV.API.WSDL.Admin.resourceType>
 	/ "data" __ "source" { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.DATA_SOURCE }
 	/ "definitionset" { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.DEFINITION_SET }
 	/ "definition_set" { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.DEFINITION_SET }
-	/ "definition" __ "set" { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.DEFINITION_SET }
+	/ "def" "inition"? __ "set" { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.DEFINITION_SET }
 	/ "extension" { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.EXTENSION }
-	/ "folder" { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.CONTAINER }
-	/ "function" { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.PROCEDURE }
 	/ "link" { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.LINK }
 	/ "model" { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.MODEL }
 	/ "policy" { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.POLICY }
@@ -261,6 +274,10 @@ resourceTypeWS<NoP77svk.TibcoDV.API.WSDL.Admin.resourceType>
 	/ "table" { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.TABLE }
 	/ "tree" { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.TREE }
 	/ "trigger" { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.TRIGGER }
+
+listOfResources<IList<string>>
+	= v:resourcePath<1,,_ "," _>
+	{ v }
 
 resourcePath<string>
 	= thePath:("" ("/" resourceIdentifier)+)
