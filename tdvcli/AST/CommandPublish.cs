@@ -64,6 +64,9 @@
                 if (targetType.Type is not TdvResourceTypeEnumAgr.PublishedSchema and not TdvResourceTypeEnumAgr.PublishedCatalog and not TdvResourceTypeEnumAgr.DataSourceRelational)
                     throw new CannotHandleResourceType(targetType);
 
+                if (FlattenString != null)
+                    throw new ArgumentOutOfRangeException(nameof(FlattenString), FlattenString, "Hierarchy flattening string is invalid in single-resource publish mode");
+
                 TdvRest_CreateLink createLinkRequest = new TdvRest_CreateLink()
                 {
                     SourceObjectPath = Source,
