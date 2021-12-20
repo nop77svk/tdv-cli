@@ -7,6 +7,7 @@
     using NoP77svk.TibcoDV.API;
     using NoP77svk.TibcoDV.CLI.Commons;
     using NoP77svk.TibcoDV.Commons;
+    using WSDL = NoP77svk.TibcoDV.API.WSDL.Admin;
 
     internal class CommandDropResource : IAsyncStatement
     {
@@ -32,15 +33,16 @@
 
             if (AlsoDropRootResource)
             {
+                // 2do! this resource subtype is not right here!
                 IEnumerable<TdvResourceSpecifier> resources = nonemptyResourceSpecifiers
-                    .Select(resource => new TdvResourceSpecifier(resource.Path ?? string.Empty, new TdvResourceType(resource.Type.ToString(), null)));
+                    .Select(resource => new TdvResourceSpecifier(resource.Path ?? string.Empty, new TdvResourceType(resource.Type, WSDL.resourceSubType.NONE)));
 
                 await tdvClient.DropAnyResources(resources, IfExists);
             }
             else
             {
                 IEnumerable<Task> purgeTasks = nonemptyResourceSpecifiers
-                    .Select(resource => tdvClient.PurgeContainer(resource.Path, IfExists));
+                    .Select(resource => tdvClient.PurgeContainer(resource.Path, resource.Type, IfExists));
 
                 await Task.WhenAll(purgeTasks);
             }
