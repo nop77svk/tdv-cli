@@ -114,7 +114,7 @@ Executing `publish /shared/L1_Physical to /services/databases/PublishTest flatte
 * `DWH___PgSQL`,
 * `DWH___BigData___Impala`,
 * `DWH___BigData___Hive`,
-* 
+
 containing published views as follows
 
 * `source/customers1`,
