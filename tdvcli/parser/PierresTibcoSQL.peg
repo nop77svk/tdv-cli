@@ -16,27 +16,31 @@ start<object>
 
 statement<object>
 	= clientSideStatement
-	/ grantStatement
+	/ serverSideStatement
+
+serverSideStatement<AST.IAsyncStatement>
+	= grantStatement
 	/ createResourceStatement
+	/ publishStatement
 	/ dropResourceStatement
 	/ purgeResourceStatement
 	/ assignStatement
 	/ unassignStatement
 	/ describeStatement
-	/ #ERROR{ "Unrecognized statement" }
+	/ #ERROR{ "Unrecognized server-side command" }
 
-clientSideStatement<object> = "#" v:clientSideStatementWhat { v }
+clientSideStatement<AST.IStatement> = "#" v:clientSideStatementWhat { v }
 
-clientSideStatementWhat<object>
+clientSideStatementWhat<AST.IStatement>
 	= clientSidePrompt
 	/ clientSideTimer
 	/ clientSideConnectionTimeout
 	/ clientSideSet
-	/ #ERROR{ "Unrecognized client-side statement" }
+	/ #ERROR{ "Unrecognized client-side command" }
 
 // ------------------------------------------------------------------------------------------------
 
-clientSideSet<AST.ClientSet> = "set" __ var:resourceIdentifier _ "=" _ value:clientSideSetValue
+clientSideSet<AST.IStatement> = "set" __ var:resourceIdentifier _ "=" _ value:clientSideSetValue
 {
 	new AST.ClientSet(var, value)
 }
@@ -52,28 +56,28 @@ clientSideSetValue<object>
 
 // ------------------------------------------------------------------------------------------------
 
-clientSideConnectionTimeout<AST.ClientConnectionTimeout> = "timeout" __ v:timeLiteral
+clientSideConnectionTimeout<AST.IStatement> = "timeout" __ v:timeLiteral
 {
 	new AST.ClientConnectionTimeout(v)
 }
 
 // ------------------------------------------------------------------------------------------------
 
-clientSideTimer<AST.ClientTimer> = "timer" __ v:booleanLiteral
+clientSideTimer<AST.IStatement> = "timer" __ v:booleanLiteral
 {
 	new AST.ClientTimer(v)
 }
 
 // ------------------------------------------------------------------------------------------------
 
-clientSidePrompt<AST.ClientPrompt> = "prompt" __ v:stringLiteral
+clientSidePrompt<AST.IStatement> = "prompt" __ v:stringLiteral
 {
 	new AST.ClientPrompt(v)
 }
 
 // ------------------------------------------------------------------------------------------------
 
-createResourceStatement<object> = "create" __
+createResourceStatement<AST.IAsyncStatement> = "create" __
 	soifnx:statementOptionIfNotExistsWithWhitespace
 	ddl:( createViewDDL / createFolderDDL / createSchemaDDL / #ERROR{ "Unrecognized resource type to be created" } )
 {
@@ -91,19 +95,34 @@ createViewDDL<object> = ("view" / "dataview" / "data" __ "view") __ res:resource
 	}
 }
 
-createFolderDDL<object> = ("folder" / "container") __ res:resourcePath
+createFolderDDL<object> = "folder" __ res:resourcePath
 {
 	new AST.FolderDDL(res)
 }
 
-createSchemaDDL<object> = ("schema") __ res:resourcePath
+createSchemaDDL<object> = "schema" __ res:resourcePath
 {
 	new AST.SchemaDDL(res)
 }
 
 // ------------------------------------------------------------------------------------------------
 
-dropResourceStatement<object> = "drop" __
+publishStatement<AST.IAsyncStatement> = "pub" "lish"? __
+	ifNotExists:statementOptionIfNotExistsWithWhitespace
+	source:resourcePath __
+	"to" __ target:resourcePath
+	flattenString:(
+		( __ "flat" "ten"? __ ("folder" __)? "hierarchy" __ "with" __ v:stringLiteral ) {v}
+		/
+		{null}
+	)
+{
+	new AST.CommandPublish(source, target, flattenString, ifNotExists)
+}
+
+// ------------------------------------------------------------------------------------------------
+
+dropResourceStatement<AST.IAsyncStatement> = "drop" __
 	soifx:statementOptionIfExistsWithWhitespace
 	res:listOfFullResourceSpecifiers
 {
@@ -112,7 +131,7 @@ dropResourceStatement<object> = "drop" __
 
 // ------------------------------------------------------------------------------------------------
 
-purgeResourceStatement<object> = "purge" __
+purgeResourceStatement<AST.IAsyncStatement> = "purge" __
 	soifx:statementOptionIfExistsWithWhitespace
 	res:listOfFullResourceSpecifiers
 {
@@ -121,7 +140,7 @@ purgeResourceStatement<object> = "purge" __
 
 // ------------------------------------------------------------------------------------------------
 
-grantStatement<object> = "grant" __
+grantStatement<AST.IAsyncStatement> = "grant" __
 	modusOperandi:grantOptionAppendOrSetWithWhitespace
 	isRec:statementOptionRecursiveWithWhitespace
 	priv:listOfResourcePrivileges __
@@ -154,10 +173,9 @@ resourcePrivilege<TdvPrivilegeEnum>
 	/ "grant" { TdvPrivilegeEnum.Grant }
 	/ #ERROR{ "Unrecognized privilege" }
 
-
 // ------------------------------------------------------------------------------------------------
 
-assignStatement<object> = "assign" __
+assignStatement<AST.IAsyncStatement> = "assign" __
 	what:policySpecifier __
 	("to" / #ERROR{ "TO keyword expected" }) __
 	res:listOfFullResourceSpecifiers
@@ -165,7 +183,7 @@ assignStatement<object> = "assign" __
 	new AST.CommandAssign(NoP77svk.TibcoDV.API.WSDL.Admin.rbsAssignmentOperationType.ASSIGN, what, res)
 }
 
-unassignStatement<object> = "unassign" __
+unassignStatement<AST.IAsyncStatement> = "unassign" __
 	what:policySpecifier __
 	("from" / #ERROR{ "FROM keyword expected" }) __
 	res:listOfFullResourceSpecifiers
@@ -192,7 +210,7 @@ cbsFilterPolicySpecifier<AST.FilterPolicy> = ("cbs" / "cls") __ ( ("pol" "icy"?)
 
 // ------------------------------------------------------------------------------------------------
 
-describeStatement<object>
+describeStatement<AST.IAsyncStatement>
 	= describeCommand __
 	v:listOfPartialResourceSpecifiers
 {
@@ -249,10 +267,8 @@ resourceTypeWS<NoP77svk.TibcoDV.API.WSDL.Admin.resourceType>
 	/ "data" __ "source" { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.DATA_SOURCE }
 	/ "definitionset" { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.DEFINITION_SET }
 	/ "definition_set" { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.DEFINITION_SET }
-	/ "definition" __ "set" { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.DEFINITION_SET }
+	/ "def" "inition"? __ "set" { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.DEFINITION_SET }
 	/ "extension" { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.EXTENSION }
-	/ "folder" { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.CONTAINER }
-	/ "function" { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.PROCEDURE }
 	/ "link" { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.LINK }
 	/ "model" { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.MODEL }
 	/ "policy" { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.POLICY }
@@ -261,6 +277,10 @@ resourceTypeWS<NoP77svk.TibcoDV.API.WSDL.Admin.resourceType>
 	/ "table" { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.TABLE }
 	/ "tree" { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.TREE }
 	/ "trigger" { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.TRIGGER }
+
+listOfResources<IList<string>>
+	= v:resourcePath<1,,_ "," _>
+	{ v }
 
 resourcePath<string>
 	= thePath:("" ("/" resourceIdentifier)+)

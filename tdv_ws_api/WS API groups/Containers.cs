@@ -121,19 +121,19 @@
             );
         }
 
-        public async Task PurgeContainer(string? rootNodePath, bool ifExists = true)
+        public async Task PurgeContainer(string? rootNodePath, WSDL.Admin.resourceType type, bool ifExists = true)
         {
             if (string.IsNullOrWhiteSpace(rootNodePath))
                 throw new ArgumentNullException(nameof(rootNodePath));
 
-            IAsyncEnumerable<TdvRest_ContainerContents> folderContents = RetrieveResourceChildren(rootNodePath, TdvResourceTypeConst.Container);
+            IAsyncEnumerable<TdvRest_ContainerContents> folderContents = RetrieveResourceChildren(rootNodePath, type.ToString());
 
             IEnumerable<TdvResourceSpecifier> resourceList = folderContents
                 .Where(folderItem => !string.IsNullOrWhiteSpace(folderItem.Path))
                 .Where(folderItem => !string.IsNullOrEmpty(folderItem.Type))
                 .Select(folderItem => new TdvResourceSpecifier(
                     folderItem.Path ?? string.Empty,
-                    new TdvResourceType(folderItem.Type ?? string.Empty, folderItem.SubType, folderItem.TargetType)
+                    new TdvResourceType(folderItem.Type ?? string.Empty, folderItem.SubType ?? string.Empty, folderItem.TargetType)
                 ))
                 .ToEnumerable();
 

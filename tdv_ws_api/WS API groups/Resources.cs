@@ -55,9 +55,9 @@
             if (string.IsNullOrWhiteSpace(path))
                 throw new ArgumentNullException(nameof(path));
 
-            (string resourceTypeWs, _, _) = TdvResourceType.CalcWsResourceTypes(resourceType);
+            (WSDL.Admin.resourceType resourceTypeWs, _, _, _) = TdvResourceType.CalcWsResourceTypes(resourceType);
 
-            IAsyncEnumerable<TdvRest_ContainerContents> resourceChildrenAll = RetrieveResourceChildren(path, resourceTypeWs);
+            IAsyncEnumerable<TdvRest_ContainerContents> resourceChildrenAll = RetrieveResourceChildren(path, resourceTypeWs.ToString());
 
             await foreach (TdvRest_ContainerContents resourceChild in resourceChildrenAll)
                 yield return resourceChild;
@@ -112,7 +112,7 @@
                     IEnumerable<TdvRest_DeleteLink> massLinkDrop = singleTypeResources
                         .Select(resource => new TdvRest_DeleteLink()
                         {
-                            IsTable = resource.ResourceType.WsTargetType == TdvResourceTypeConst.Table,
+                            IsTable = resource.ResourceType.WsTargetType == WSDL.Admin.resourceType.TABLE,
                             Path = resource.Path
                         });
 
