@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <TargetFramework>net5.0</TargetFramework>
+        <TargetFramework>net6.0</TargetFramework>
         <Nullable>enable</Nullable>
         <RootNamespace>NoP77svk.TibcoDV.CLI</RootNamespace>
         <Product>Tibco Data Virtualization Utilities</Product>
@@ -11,7 +11,7 @@
         <Copyright>Practically copyleft</Copyright>
         <Description>Tibco Data Virtualization Comand-Line Interface</Description>
         <AssemblyName>tdvcli</AssemblyName>
-		<NoWarn>1701;1702;AD0001</NoWarn>
+		<NoWarn>1701;1702;AD0001;NETSDK1182</NoWarn>
         <PackageId></PackageId>
         <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
         <RuntimeIdentifiers>win-x86;win-x64;win-arm;linux-x64;linux-arm</RuntimeIdentifiers>
@@ -42,11 +42,11 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="6.0.0" />
-    <PackageReference Include="NoP77svk.ConnectionStringParsers" Version="2021.12.1" />
-    <PackageReference Include="NoP77svk.Linq" Version="2021.12.1" />
-    <PackageReference Include="NoP77svk.LinqOuterJoins" Version="2021.12.1" />
-    <PackageReference Include="NoP77svk.MiscellaneousHelpers" Version="2021.12.1" />
-    <PackageReference Include="NoP77svk.WebServiceClient" Version="2021.12.1" />
+    <PackageReference Include="NoP77svk.ConnectionStringParsers" Version="2021.12.2" />
+    <PackageReference Include="NoP77svk.Linq" Version="2021.12.2" />
+    <PackageReference Include="NoP77svk.LinqOuterJoins" Version="2021.12.2" />
+    <PackageReference Include="NoP77svk.MiscellaneousHelpers" Version="2021.12.2" />
+    <PackageReference Include="NoP77svk.WebServiceClient" Version="2021.12.2" />
     <PackageReference Include="Pegasus" Version="4.1.0" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
       <PrivateAssets>all</PrivateAssets>

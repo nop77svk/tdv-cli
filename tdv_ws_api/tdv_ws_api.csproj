@@ -2,7 +2,7 @@
 
     <PropertyGroup>
 		<OutputType>Library</OutputType>
-        <TargetFramework>net5.0</TargetFramework>
+        <TargetFramework>net6.0</TargetFramework>
         <Nullable>enable</Nullable>
         <RootNamespace>NoP77svk.TibcoDV.API</RootNamespace>
         <Authors>Peter Hraško</Authors>
@@ -11,7 +11,7 @@
         <Copyright>Copyleft</Copyright>
         <Description>Tibco DataVirt WS API</Description>
         <AssemblyName>nop77svk-tdv-wsapi</AssemblyName>
-        <NoWarn>1701;1702;AD0001</NoWarn>
+        <NoWarn>1701;1702;AD0001;NETSDK1182</NoWarn>
         <PackageId>NoP77svk.TibcoDV.API</PackageId>
         <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
 		<RepositoryUrl>https://github.com/nop77svk/tdv-cli</RepositoryUrl>
@@ -36,9 +36,9 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="NoP77svk.Linq" Version="2021.12.1" />
-    <PackageReference Include="NoP77svk.MiscellaneousHelpers" Version="2021.12.1" />
-    <PackageReference Include="NoP77svk.WebServiceClient" Version="2021.12.1" />
+    <PackageReference Include="NoP77svk.Linq" Version="2021.12.2" />
+    <PackageReference Include="NoP77svk.MiscellaneousHelpers" Version="2021.12.2" />
+    <PackageReference Include="NoP77svk.WebServiceClient" Version="2021.12.2" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
