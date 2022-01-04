@@ -8,11 +8,9 @@ Run `tdvcli --help` to get the overview on available command line parameters.
 
 ### Create folder
 
-`create [if not exists] <folder|container> `<_resource path_>`;`
+`create [if not exists] folder `<_resource path_>`;`
 
 The `if not exists` option instructs the server to not return error when such a folder/container already exists on the sever.
-
-Note that `folder` and `container` keywords are interchangeable.
 
 ### Create schema
 
