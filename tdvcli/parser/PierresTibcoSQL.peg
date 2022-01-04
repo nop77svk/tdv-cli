@@ -278,9 +278,9 @@ resourceTypeWS<NoP77svk.TibcoDV.API.WSDL.Admin.resourceType>
 	/ "tree" { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.TREE }
 	/ "trigger" { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.TRIGGER }
 
-listOfResources<IList<string>>
-	= v:resourcePath<1,,_ "," _>
-	{ v }
+// listOfResources<IList<string>>
+//	= v:resourcePath<1,,_ "," _>
+//	{ v }
 
 resourcePath<string>
 	= thePath:("" ("/" resourceIdentifier)+)
