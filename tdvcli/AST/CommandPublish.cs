@@ -38,7 +38,12 @@
 
             if (sourceType.Type == TdvResourceTypeEnumAgr.Folder)
             {
-                if (targetType.Type is not TdvResourceTypeEnumAgr.PublishedSchema and not TdvResourceTypeEnumAgr.PublishedCatalog and not TdvResourceTypeEnumAgr.DataSourceRelational)
+                bool flattenFolderTreesToSchemas;
+                if (targetType.Type == TdvResourceTypeEnumAgr.PublishedSchema)
+                    flattenFolderTreesToSchemas = false;
+                else if (targetType.Type is TdvResourceTypeEnumAgr.PublishedCatalog or TdvResourceTypeEnumAgr.DataSourceRelational)
+                    flattenFolderTreesToSchemas = true;
+                else
                     throw new CannotHandleResourceType(targetType);
 
                 List<TdvRest_ContainerContents> subtreeContents = await tdvClient.RetrieveContainerContentsRecursive(Source, sourceType.Type).ToListAsync();
@@ -53,7 +58,7 @@
                     });
                 IEnumerable<TdvRest_CreateLink> linkCreateRequests;
 
-                if (targetType.Type is TdvResourceTypeEnumAgr.PublishedCatalog or TdvResourceTypeEnumAgr.DataSourceRelational)
+                if (flattenFolderTreesToSchemas)
                 {
                     Dictionary<string, string> folderToSchemaMap = CalculateFoldersToSchemasMap(subtreeContents, FlattenString);
                     await PrecreateSchemas(tdvClient, folderToSchemaMap);
@@ -66,13 +71,13 @@
                             IfNotExists = IfNotExists,
                             SourceObjectPath = folderItem.Path,
                             PublishedLinkPath = Target
-                            + "/"
-                            + folderToSchemaMap[PathExt.TrimLastLevel(folderItem.Path) ?? string.Empty]
-                            + "/"
-                            + PathExt.GetLastLevel(folderItem.Path)
+                                + "/"
+                                + folderToSchemaMap[PathExt.TrimLastLevel(folderItem.Path) ?? string.Empty]
+                                + "/"
+                                + PathExt.GetLastLevel(folderItem.Path)
                         });
                 }
-                else if (targetType.Type == TdvResourceTypeEnumAgr.PublishedSchema)
+                else
                 {
                     linkCreateRequests = subtreeContentsSanitized
                         .Select(folderItem => new TdvRest_CreateLink()
@@ -84,10 +89,6 @@
                                 + "/"
                                 + PathExt.TrimLeadingPath(folderItem.Path, Source)?.Replace("/", FlattenString)
                         });
-                }
-                else
-                {
-                    throw new CannotHandleResourceType(targetType);
                 }
 
                 int totalLinksCreated = await MassCreateLinksChunked(tdvClient, linkCreateRequests, _ => { output.InfoNoEoln("."); });
