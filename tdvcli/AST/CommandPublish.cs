@@ -36,27 +36,61 @@
             TdvResourceType targetType = new TdvResourceType(targetInfoTask.Result.type, targetInfoTask.Result.subtype);
             output.InfoNoEoln($"Publishing {Source} -> {Target} ");
 
-            bool publishTreeOfResources;
-            if (sourceType.WsType is WSDL.resourceType.TABLE or WSDL.resourceType.PROCEDURE)
-                publishTreeOfResources = false;
-            else if (sourceType.Type == TdvResourceTypeEnumAgr.Folder)
-                publishTreeOfResources = true;
-            else
-                throw new CannotHandleResourceType(sourceType);
-
-            if (publishTreeOfResources)
+            if (sourceType.Type == TdvResourceTypeEnumAgr.Folder)
             {
-                if (targetType.Type is not TdvResourceTypeEnumAgr.PublishedCatalog and not TdvResourceTypeEnumAgr.DataSourceRelational)
+                if (targetType.Type is not TdvResourceTypeEnumAgr.PublishedSchema and not TdvResourceTypeEnumAgr.PublishedCatalog and not TdvResourceTypeEnumAgr.DataSourceRelational)
                     throw new CannotHandleResourceType(targetType);
 
                 List<TdvRest_ContainerContents> subtreeContents = await tdvClient.RetrieveContainerContentsRecursive(Source, sourceType.Type).ToListAsync();
                 output.InfoNoEoln(".");
 
-                Dictionary<string, string> folderToSchemaMap = CalculateFoldersToSchemasMap(subtreeContents, FlattenString);
-                await PrecreateSchemas(tdvClient, folderToSchemaMap);
-                output.InfoNoEoln(".");
+                IEnumerable<TdvRest_ContainerContents> subtreeContentsSanitized = subtreeContents
+                    .Where(folderItem => !string.IsNullOrEmpty(folderItem.Name))
+                    .Where(folderItem => IsResourceTypeEligibleForPublishing(folderItem.TdvResourceType))
+                    .Select(folderItem => folderItem with
+                    {
+                        Path = PathExt.Sanitize(folderItem.Path)
+                    });
+                IEnumerable<TdvRest_CreateLink> linkCreateRequests;
 
-                int totalLinksCreated = await MassCreateTheLinks(tdvClient, subtreeContents, folderToSchemaMap, output);
+                if (targetType.Type is TdvResourceTypeEnumAgr.PublishedCatalog or TdvResourceTypeEnumAgr.DataSourceRelational)
+                {
+                    Dictionary<string, string> folderToSchemaMap = CalculateFoldersToSchemasMap(subtreeContents, FlattenString);
+                    await PrecreateSchemas(tdvClient, folderToSchemaMap);
+                    output.InfoNoEoln(".");
+
+                    linkCreateRequests = subtreeContentsSanitized
+                        .Select(folderItem => new TdvRest_CreateLink()
+                        {
+                            IsTable = IsTableLikeResourceType(folderItem.TdvResourceType),
+                            IfNotExists = IfNotExists,
+                            SourceObjectPath = folderItem.Path,
+                            PublishedLinkPath = Target
+                            + "/"
+                            + folderToSchemaMap[PathExt.TrimLastLevel(folderItem.Path) ?? string.Empty]
+                            + "/"
+                            + PathExt.GetLastLevel(folderItem.Path)
+                        });
+                }
+                else if (targetType.Type == TdvResourceTypeEnumAgr.PublishedSchema)
+                {
+                    linkCreateRequests = subtreeContentsSanitized
+                        .Select(folderItem => new TdvRest_CreateLink()
+                        {
+                            IsTable = IsTableLikeResourceType(folderItem.TdvResourceType),
+                            IfNotExists = IfNotExists,
+                            SourceObjectPath = PathExt.Sanitize(folderItem.Path),
+                            PublishedLinkPath = PathExt.Sanitize(Target)
+                                + "/"
+                                + PathExt.TrimLeadingPath(folderItem.Path, Source)?.Replace("/", FlattenString)
+                        });
+                }
+                else
+                {
+                    throw new CannotHandleResourceType(targetType);
+                }
+
+                int totalLinksCreated = await MassCreateLinksChunked(tdvClient, linkCreateRequests, _ => { output.InfoNoEoln("."); });
                 output.InfoNoEoln($". {totalLinksCreated}");
             }
             else
@@ -74,11 +108,48 @@
                     IfNotExists = IfNotExists,
                     IsTable = targetType.WsType == WSDL.resourceType.TABLE
                 };
+
                 await tdvClient.CreateLinks(new[] { createLinkRequest });
                 output.InfoNoEoln("...");
             }
 
             output.Info(" Done");
+        }
+
+        private static bool IsResourceTypeEligibleForPublishing(TdvResourceTypeEnumAgr tdvResourceType)
+        {
+            return tdvResourceType
+                is TdvResourceTypeEnumAgr.Table
+                or TdvResourceTypeEnumAgr.View
+                or TdvResourceTypeEnumAgr.StoredProcedureSQL;
+        }
+
+        private static bool IsTableLikeResourceType(TdvResourceTypeEnumAgr tdvResourceType)
+        {
+            return tdvResourceType is TdvResourceTypeEnumAgr.Table or TdvResourceTypeEnumAgr.View;
+        }
+
+        private static async Task<int> MassCreateLinksChunked(TdvWebServiceClient tdvClient, IEnumerable<TdvRest_CreateLink> linkCreateRequests, Action<int> visualFeedback)
+        {
+            int totalLinksCreated = 0;
+
+            IEnumerable<ChunkOf<TdvRest_CreateLink>> linkCreateRequestsChunked = linkCreateRequests
+                .ChunkByMeasure(
+                    req => (req.SourceObjectPath?.Length ?? 0) + (req.PublishedLinkPath?.Length ?? 0) + (req.Annotation?.Length ?? 0),
+                    31 * 1024
+                );
+
+            foreach (ChunkOf<TdvRest_CreateLink> chunk in linkCreateRequestsChunked)
+            {
+                if (chunk.Chunk == null)
+                    throw new NullReferenceException("NULL chunk of link creation requests found");
+
+                await tdvClient.CreateLinks(chunk.Chunk);
+                totalLinksCreated += chunk.Chunk.Count;
+                visualFeedback(totalLinksCreated);
+            }
+
+            return totalLinksCreated;
         }
 
         private Dictionary<string, string> CalculateFoldersToSchemasMap(List<TdvRest_ContainerContents> subtreeContents, string? flattenString)
@@ -96,50 +167,6 @@
                         ?.Replace("/", flattenString ?? string.Empty)
                         ?? string.Empty
                 );
-        }
-
-        private async Task<int> MassCreateTheLinks(TdvWebServiceClient tdvClient, List<TdvRest_ContainerContents> subtreeContents, Dictionary<string, string> folderToSchemaMap, IInfoOutput output)
-        {
-            int totalLinksCreated = 0;
-
-            IEnumerable<TdvRest_CreateLink> linkCreateRequests = subtreeContents
-                .Where(folderItem => folderItem.TdvResourceType
-                    is TdvResourceTypeEnumAgr.Table
-                    or TdvResourceTypeEnumAgr.View
-                    or TdvResourceTypeEnumAgr.StoredProcedureSQL)
-                .Select(folderItem => folderItem with
-                {
-                    Path = PathExt.Sanitize(folderItem.Path)
-                })
-                .Select(folderItem => new TdvRest_CreateLink()
-                {
-                    SourceObjectPath = folderItem.Path,
-                    PublishedLinkPath = Target
-                        + "/"
-                        + folderToSchemaMap[PathExt.TrimLastLevel(folderItem.Path) ?? string.Empty]
-                        + "/"
-                        + PathExt.GetLastLevel(folderItem.Path),
-                    IsTable = folderItem.TdvResourceType is TdvResourceTypeEnumAgr.Table or TdvResourceTypeEnumAgr.View,
-                    IfNotExists = false
-                });
-
-            IEnumerable<ChunkOf<TdvRest_CreateLink>> linkCreateRequestsChunked = linkCreateRequests
-                .ChunkByMeasure(
-                    req => (req.SourceObjectPath?.Length ?? 0) + (req.PublishedLinkPath?.Length ?? 0) + (req.Annotation?.Length ?? 0),
-                    31 * 1024
-                );
-
-            foreach (ChunkOf<TdvRest_CreateLink> chunk in linkCreateRequestsChunked)
-            {
-                if (chunk.Chunk == null)
-                    throw new NullReferenceException("NULL chunk of link creation requests found");
-
-                await tdvClient.CreateLinks(chunk.Chunk);
-                totalLinksCreated += chunk.Chunk.Count;
-                output.InfoNoEoln(".");
-            }
-
-            return totalLinksCreated;
         }
 
         private async Task PrecreateSchemas(TdvWebServiceClient tdvClient, Dictionary<string, string> folderToSchemaMap)
