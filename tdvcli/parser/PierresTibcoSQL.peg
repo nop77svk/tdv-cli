@@ -122,6 +122,8 @@ publishStatement<AST.IAsyncStatement> = "pub" "lish"? __
 
 // ------------------------------------------------------------------------------------------------
 
+// 2do! introduce "listOfDroppableResourceSpecifiers", "droppableResourceType" PEG rules
+
 dropResourceStatement<AST.IAsyncStatement> = "drop" __
 	soifx:statementOptionIfExistsWithWhitespace
 	res:listOfFullResourceSpecifiers
