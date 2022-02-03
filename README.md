@@ -77,13 +77,13 @@ Resource specifiers are described in their own section.
 
 ### CBS/CLS policy assignment and removal
 
-`<assign|unassign> <cbs|cls> pol`[`icy`]` <func`[`tion`]|`proc`[`edure`]>` `<_policy function resource path_>` to `<_comma-delimited list of resource specifiers_>`;`
+<`assign`|`unassign`>` `<`cbs`|`cls`>` pol`[`icy`]` `<`func`[`tion`]|`proc`[`edure`]>` `<_policy function resource path_>` to `<_comma-delimited list of resource specifiers_>`;`
 
 The command assigns (statement `assign`) or unassigns/removes (statement `unassign`) column-level security policy identified by the policy function/procedure <_policy function resource path_> to the specified resources and all their children resources recursively.
 
 Resource specifiers are described in their own section.
 
-**Note:** Implementation pending!
+**Note:** CLS assignment implementation pending!
 
 ### Mass-publishing
 
