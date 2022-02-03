@@ -148,8 +148,9 @@ grantStatement<AST.IAsyncStatement> = "grant" __
 	priv:listOfResourcePrivileges __
 	("on" / #ERROR{"ON keyword expected"}) __ res:listOfFullResourceSpecifiers __
 	("to" / #ERROR{"TO keyword expected"}) __ who:liberalListOfPrincipals
+	prop:grantPropagationOptionOptional
 {
-	new AST.CommandGrant(isRec, modusOperandi, priv, res, who)
+	new AST.CommandGrant(isRec, modusOperandi, priv, res, who, prop)
 }
 
 grantOptionAppendOrSetWithWhitespace<NoP77svk.TibcoDV.API.WSDL.Admin.updatePrivilegesMode>
@@ -174,6 +175,24 @@ resourcePrivilege<TdvPrivilegeEnum>
 	/ "execute" { TdvPrivilegeEnum.Execute }
 	/ "grant" { TdvPrivilegeEnum.Grant }
 	/ #ERROR{ "Unrecognized privilege" }
+
+grantPropagationOptionOptional<AST.GrantPropagationDirections>
+	= ( __ prop:grantPropagationOption ) { prop }
+	/ "" { new AST.GrantPropagationDirections(false, false) }
+
+grantPropagationOption<AST.GrantPropagationDirections> = "propagate" __ prop:grantPropagationDirections { prop }
+
+grantPropagationDirections<AST.GrantPropagationDirections>
+	= ( "both" __ "directions" ) { new AST.GrantPropagationDirections(true, true) }
+	/ ( ("both" __)? grantPropagationDirectionDown __ "and" __ grantPropagationDirectionUp ) { new AST.GrantPropagationDirections(true, true) }
+	/ ( ("both" __)? grantPropagationDirectionUp __ "and" __ grantPropagationDirectionDown ) { new AST.GrantPropagationDirections(true, true) }
+	/ grantPropagationDirectionUp { new AST.GrantPropagationDirections(false, true) }
+	/ grantPropagationDirectionDown { new AST.GrantPropagationDirections(true, false) }
+	/ #ERROR{ "Unrecognized way of privilege propagation" }
+
+grantPropagationDirectionDown = "down" / ( "to" __ "producers" )
+
+grantPropagationDirectionUp = "up" / ( "to" __ "consumers" )
 
 // ------------------------------------------------------------------------------------------------
 

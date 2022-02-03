@@ -40,7 +40,7 @@ This almost has the same effect as `drop...`, except for keeping the listed reso
 
 ### Grant privileges
 
-`grant `<_modus operandi_>` [recursive] `<_comma-delimited list of privileges_>` on `<_comma-delimited list of resource specifiers_>` to `<_comma-delimited list of liberal principals>`;`
+`grant `<_modus operandi_>` [recursive] `<_comma-delimited list of privileges_>` on `<_comma-delimited list of resource specifiers_>` to `<_comma-delimited list of liberal principals>` [propagate `<_propagation directions_>`];`
 
 The command grants privileges <_comma-delimited list of privileges_> to resources <_comma-delimited list of resource specifiers_> to grantees/principals <_comma-delimited list of principals>.
 
@@ -61,6 +61,11 @@ Available privileges are
 Resource specifiers are described in their own section.
 
 Liberal/strict principal specifiers are described in their own section.
+
+Specify propagation directions
+* `up`/`to consumers` to propagate the privileges to objects that depend on the granted objects,
+* `down`/`to producers` to propagate the privileges to objects the granted objects depend on,
+* `up and down`/`down and up`/`to consumers and to producers`/`to producers and to consumers`/`both directions`/... to propagate the privileges in both directions described above.
 
 ### RBS/RLS policy assignment and removal
 

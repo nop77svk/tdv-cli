@@ -23,14 +23,16 @@
         internal IList<TdvPrivilegeEnum> Privileges { get; }
         internal IList<ResourceSpecifier> Resources { get; }
         internal IList<Principal> Principals { get; }
+        internal GrantPropagationDirections Propagate { get; }
 
-        internal CommandGrant(bool isRecursive, WSDL.updatePrivilegesMode modusOperandi, IList<TdvPrivilegeEnum> privileges, IList<ResourceSpecifier> resources, IList<Principal> principals)
+        internal CommandGrant(bool isRecursive, WSDL.updatePrivilegesMode modusOperandi, IList<TdvPrivilegeEnum> privileges, IList<ResourceSpecifier> resources, IList<Principal> principals, GrantPropagationDirections propagate)
         {
             IsRecursive = isRecursive;
             ModusOperandi = modusOperandi;
             Privileges = privileges;
             Resources = resources;
             Principals = principals;
+            Propagate = propagate;
         }
 
         public async Task Execute(TdvWebServiceClient tdvClient, IInfoOutput output)
@@ -71,7 +73,7 @@
                 })
                 .ToList();
 
-            await tdvClient.UpdateResourcePrivileges(privilegeEntries, IsRecursive, ModusOperandi);
+            await tdvClient.UpdateResourcePrivileges(privilegeEntries, IsRecursive, ModusOperandi, propagateToProducers: Propagate.Down, propagateToConsumers: Propagate.Up);
 
             string msgModus = ModusOperandi switch
             {

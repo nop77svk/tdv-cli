@@ -49,7 +49,9 @@
         public async Task<string> UpdateResourcePrivileges(
             IEnumerable<WSDL.Admin.privilegeEntry> privEntries,
             bool recursiveUpdate = false,
-            WSDL.Admin.updatePrivilegesMode updateMode = WSDL.Admin.updatePrivilegesMode.OVERWRITE_APPEND
+            WSDL.Admin.updatePrivilegesMode updateMode = WSDL.Admin.updatePrivilegesMode.OVERWRITE_APPEND,
+            bool propagateToProducers = false,
+            bool propagateToConsumers = false
         )
         {
             WSDL.Admin.updateResourcePrivilegesRequest input = new ()
@@ -57,7 +59,11 @@
                 mode = updateMode,
                 modeSpecified = true,
                 updateRecursively = recursiveUpdate,
-                privilegeEntries = privEntries.ToArray()
+                privilegeEntries = privEntries.ToArray(),
+                updateDependenciesRecursively = propagateToProducers,
+                updateDependenciesRecursivelySpecified = propagateToProducers,
+                updateDependentsRecursively = propagateToConsumers,
+                updateDependentsRecursivelySpecified = propagateToConsumers
             };
 
             IAsyncEnumerable<WSDL.Admin.updateResourcePrivilegesResponse> result = _wsClient.EndpointGetObject<WSDL.Admin.updateResourcePrivilegesResponse>(
