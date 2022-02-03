@@ -69,7 +69,7 @@ Specify propagation directions
 
 ### RBS/RLS policy assignment and removal
 
-`<assign|unassign> <rbs|rls> pol`[`icy`]` `<_policy function resource path_>` to `<_comma-delimited list of resource specifiers_>`;`
+<`assign`|`unassign`>` `<`rbs`|`rls`>` pol`[`icy`]` `<_policy function resource path_>` to `<_comma-delimited list of resource specifiers_>`;`
 
 The command assigns (statement `assign`) or unassigns/removes (statement `unassign`) row-level security policy identified by the policy function/procedure <_policy function resource path_> to the specified resources and all their children resources recursively.
 
