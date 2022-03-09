@@ -8,31 +8,31 @@ Run `tdvcli --help` to get the overview on available command line parameters.
 
 ### Create folder
 
-`create [if not exists] folder `<_resource path_>`;`
+`create `[`if not exists`]` folder `<_resource path_>`;`
 
 The `if not exists` option instructs the server to not return error when such a folder/container already exists on the sever.
 
 ### Create schema
 
-`create [if not exists] schema `<_resource path_>`;`
+`create `[`if not exists`]` schema `<_resource path_>`;`
 
 The `if not exists` option instructs the server to not return error when such a schema already exists on the sever.
 
 ### Create data view
 
-`create [if not exists] view `<_resource path_>` as `<_query_>`;`
+`create `[`if not exists`]` view `<_resource path_>` as `<_query_>`;`
 
 The `if not exists` option instructs the server to not return error when such a view already exists on the sever.
 
 ### Drop object(s)
 
-`drop [if exists] `<_comma-delimited list of resource specifiers_>`;`
+`drop `[`if exists`]` `<_comma-delimited list of resource specifiers_>`;`
 
 The `if exists` option instructs the server to not return error when any of the objects listed do not exist on the server.
 
 ### Drop objects' contents
 
-`purge [if exists] `<_comma-delimited list of resource specifiers_>`;`
+`purge `[`if exists`]` `<_comma-delimited list of resource specifiers_>`;`
 
 The `if exists` option instructs the server to not return error when any of the objects listed do not exist on the server.
 
@@ -40,7 +40,7 @@ This almost has the same effect as `drop...`, except for keeping the listed reso
 
 ### Grant privileges
 
-`grant `<_modus operandi_>` [recursive] `<_comma-delimited list of privileges_>` on `<_comma-delimited list of resource specifiers_>` to `<_comma-delimited list of liberal principals>` [propagate `<_propagation directions_>`];`
+`grant `<_modus operandi_>` `[`recursive`]` `<_comma-delimited list of privileges_>` on `<_comma-delimited list of resource specifiers_>` to `<_comma-delimited list of liberal principals_>` `[`propagate `<_propagation directions_>]`;`
 
 The command grants privileges <_comma-delimited list of privileges_> to resources <_comma-delimited list of resource specifiers_> to grantees/principals <_comma-delimited list of principals>.
 
@@ -69,7 +69,7 @@ Specify propagation directions
 
 ### RBS/RLS policy assignment and removal
 
-`<assign|unassign> <rbs|rls> pol[icy] `<_policy function resource path_>` to `<_comma-delimited list of resource specifiers_>`;`
+<`assign`|`unassign`>` `<`rbs`|`rls`>` pol`[`icy`]` `<_policy function resource path_>` to `<_comma-delimited list of resource specifiers_>`;`
 
 The command assigns (statement `assign`) or unassigns/removes (statement `unassign`) row-level security policy identified by the policy function/procedure <_policy function resource path_> to the specified resources and all their children resources recursively.
 
@@ -77,17 +77,17 @@ Resource specifiers are described in their own section.
 
 ### CBS/CLS policy assignment and removal
 
-`<assign|unassign> <cbs|cls> pol[icy] <func[tion]|proc[edure]> `<_policy function resource path_>` to `<_comma-delimited list of resource specifiers_>`;`
+<`assign`|`unassign`>` `<`cbs`|`cls`>` pol`[`icy`]` `<`func`[`tion`]|`proc`[`edure`]>` `<_policy function resource path_>` to `<_comma-delimited list of resource specifiers_>`;`
 
 The command assigns (statement `assign`) or unassigns/removes (statement `unassign`) column-level security policy identified by the policy function/procedure <_policy function resource path_> to the specified resources and all their children resources recursively.
 
 Resource specifiers are described in their own section.
 
-**Note:** Implementation pending!
+**Note:** CLS assignment implementation pending!
 
 ### Mass-publishing
 
-`publish [if not exists] `<_source resource path_>` to `<_target resource path_>` [flatten hierarchy with `<_string literal_>`];`
+`publish `[`if not exists`]` `<_source resource path_>` to `<_target resource path_>` `[`flatten hierarchy with `<_string literal_>]`;`
 
 If the source resource specified is a table/view or a stored procedure, then it gets published under the target path under the same name. The `flatten hierarchy` option is invalid/forbidden in this case.
 
@@ -138,7 +138,7 @@ containing published views as follows
 
 ### Object/resource description
 
-`desc[ribe] `<_list of resource paths_>`;`
+`desc`[`ribe`]` `<_list of resource paths_>`;`
 
 The command displays info on the resources specified by the supplied resource paths. Here, full resource specifiers are not necessary, since the `describe` statement is intended for retrieving the actual resource type information of unknown TDV resources.
 
@@ -192,7 +192,7 @@ user jose@composite, user maria@composite, group administrators@composite, group
 
 ### Principal specifier -- Verbose/strict
 
-<_principal specifier_> = <_principal domain_> <_principal type_>` equal [to] `<_principal name_>
+<_principal specifier_> = <_principal domain_> <_principal type_>` equal `[`to`]` `<_principal name_>
 
 <_principal type_> is one of
 * `user`, or
@@ -208,7 +208,7 @@ composite user jose, composite user equal to maria, composite group administrato
 
 ### Principal specifier -- Verbose/liberal
 
-<_principal specifier_> = <_principal domain_> <_principal type_>` [rlike|rxlike|regexlike|regexplike|matching] `<_regular expression_>`;`
+<_principal specifier_> = <_principal domain_> <_principal type_>` `[`rlike|rxlike|regexlike|regexplike|matching`]` `<_regular expression_>`;`
 
 <_principal type_> is one of
 * `user`, or
