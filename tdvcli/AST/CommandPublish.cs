@@ -178,7 +178,7 @@
                 .Select(schemaName => new TdvRest_CreateSchema()
                 {
                     Path = Target + "/" + schemaName,
-                    IfNotExists = IfNotExists,
+                    IfNotExists = true,
                     Annotation = string.Empty
                 });
 
