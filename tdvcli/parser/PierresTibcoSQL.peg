@@ -243,23 +243,23 @@ describeCommand = "desc" ("r" ("ibe")?)?
 
 // ------------------------------------------------------------------------------------------------
 
-introspectStatement = "introspect" __ introspectTargetDataSourceList
+introspectStatement<AST.IAsyncStatement> = "introspect" __ introspectTargetDataSourceList { null } // 2do!
 
-introspectTargetDataSourceList = introspectTargetDataSource ( _ "," _ introspectTargetDataSource )*
+introspectTargetDataSourceList<IList<string>> = v:introspectTargetDataSource<1,,_ "," _> { v }
 
 introspectTargetDataSource =
 	( "datasource" / "data" __ "source" ) __ resourcePath
 	( _ "(" introspectTargetCatalogList ")" )?
 
-introspectTargetCatalogList = introspectTargetCatalog ( _ "," _ introspectTargetCatalog )*
+introspectTargetCatalogList<IList<string>> = v:introspectTargetCatalog<1,,_ "," _> { v }
 
 introspectTargetCatalog =
 	"catalog" __ resourceIdentifier
 	( _ "(" introspectTargetSchemaList ")" )?
 
-introspectTargetSchemaList = introspectTargetSchema ( _ "," _ introspectTargetSchema )*
+introspectTargetSchemaList<IList<string>> = v:introspectTargetSchema<1,,_ "," _> { v }
 
-introspectTargetSchema = "schema" __ resourceIdentifier
+introspectTargetSchema<string> = "schema" __ v:resourceIdentifier { v }
 
 // ================================================================================================
 // general language elements
