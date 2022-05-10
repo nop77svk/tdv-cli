@@ -27,6 +27,7 @@ serverSideStatement<AST.IAsyncStatement>
 	/ assignStatement
 	/ unassignStatement
 	/ describeStatement
+	/ introspectStatement
 	/ #ERROR{ "Unrecognized server-side command" }
 
 clientSideStatement<AST.IStatement> = "#" v:clientSideStatementWhat { v }
@@ -239,6 +240,26 @@ describeStatement<AST.IAsyncStatement>
 }
 
 describeCommand = "desc" ("r" ("ibe")?)?
+
+// ------------------------------------------------------------------------------------------------
+
+introspectStatement = "introspect" __ introspectTargetDataSourceList
+
+introspectTargetDataSourceList = introspectTargetDataSource ( _ "," _ introspectTargetDataSource )*
+
+introspectTargetDataSource =
+	( "datasource" / "data" __ "source" ) __ resourcePath
+	( _ "(" introspectTargetCatalogList ")" )?
+
+introspectTargetCatalogList = introspectTargetCatalog ( _ "," _ introspectTargetCatalog )*
+
+introspectTargetCatalog =
+	"catalog" __ resourceIdentifier
+	( _ "(" introspectTargetSchemaList ")" )?
+
+introspectTargetSchemaList = introspectTargetSchema ( _ "," _ introspectTargetSchema )*
+
+introspectTargetSchema = "schema" __ resourceIdentifier
 
 // ================================================================================================
 // general language elements
