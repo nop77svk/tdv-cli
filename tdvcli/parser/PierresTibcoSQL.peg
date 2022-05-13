@@ -486,13 +486,7 @@ timeUnit<AST.TimeUnitEnum>
 	/ #ERROR{ "Unrecognized time unit" }
 
 // ------------------------------------------------------------------------------------------------
-// general language elements - commons
-
-resourceIdentifier<string>
-	= v:([a-z][^/@, \t\r\n]*) { v }
-	/ #ERROR{ "Invalid resource identifier" }
-
-sqlQuery<string> = v:("" .*) { v.TrimEnd() }
+// general language elements - common statement options
 
 statementOptionRecursive = "recursive"
 
@@ -516,6 +510,15 @@ setElementOperation<AST.SetElementOperation>
 	= ( "in" ("c" "lude"?)? ) { AST.SetElementOperation.Include }
 	/ ( "ex" ("c" "lude"?)? ) { AST.SetElementOperation.Exclude }
 	/ #ERROR{ "\"include\"/\"exclude\" keyword expected" }
+
+// ------------------------------------------------------------------------------------------------
+// general language elements - others
+
+resourceIdentifier<string>
+	= v:([a-z][^/@, \t\r\n]*) { v }
+	/ #ERROR{ "Invalid resource identifier" }
+
+sqlQuery<string> = v:("" .*) { v.TrimEnd() }
 
 // ------------------------------------------------------------------------------------------------
 // general language elements - whitespace and insignificant elements
