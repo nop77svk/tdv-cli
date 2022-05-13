@@ -310,14 +310,7 @@ listOfFullResourceSpecifiers<IList<AST.ResourceSpecifier>>
 	{ v }
 
 fullResourceSpecifier<AST.ResourceSpecifier>
-	= typ:resourceTypeWS __ res:resourcePath
-	{
-		new AST.ResourceSpecifier()
-		{
-			Type = typ,
-			Path = res
-		}
-	}
+	= typ:resourceTypeWS __ res:resourcePath { new AST.ResourceSpecifier(typ, res) }
 	/ #ERROR{ "Invalid resource specifier" }
 
 listOfPartialResourceSpecifiers<IList<AST.ResourceSpecifier>>
@@ -325,14 +318,7 @@ listOfPartialResourceSpecifiers<IList<AST.ResourceSpecifier>>
 	{ v }
 
 partialResourceSpecifier<AST.ResourceSpecifier>
-	= typ:resourceTypeWithWhitespace res:resourcePath
-	{
-		new AST.ResourceSpecifier()
-		{
-			Type = typ,
-			Path = res
-		}
-	}
+	= typ:resourceTypeWithWhitespace res:resourcePath { new AST.ResourceSpecifier(typ, res) }
 
 resourceTypeWithWhitespace<NoP77svk.TibcoDV.API.WSDL.Admin.resourceType>
 	= v:resourceTypeWS __ { v }
@@ -365,6 +351,10 @@ resourcePath<string>
 	= thePath:("" (!"/*" "/" resourceIdentifier)+)
 	{ thePath }
 	/ #ERROR{ "Invalid resource path" }
+
+resourceIdentifier<string>
+	= v:([a-z][a-z0-9_$]*) { v }
+	/ #ERROR{ "Invalid resource identifier" }
 
 // ------------------------------------------------------------------------------------------------
 // general language elements - principal
@@ -513,10 +503,6 @@ setElementOperation<AST.SetElementOperation>
 
 // ------------------------------------------------------------------------------------------------
 // general language elements - others
-
-resourceIdentifier<string>
-	= v:([a-z][a-z0-9_$]*) { v }
-	/ #ERROR{ "Invalid resource identifier" }
 
 sqlQuery<string> = v:("" .*) { v.TrimEnd() }
 
