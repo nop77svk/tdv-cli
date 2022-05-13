@@ -122,10 +122,10 @@
                     throw new StatementParseException(statement.FileName, statement.FileLine, statement.Statement, e.Message, e);
                 }
 
-                if (!args.DryRun)
-                    await ExecuteParsedStatement(tdvClient, commandAST);
-                else
+                if (args.DryRun)
                     _out.Info(commandAST?.ToString() ?? "(null command)");
+                else
+                    await ExecuteParsedStatement(tdvClient, commandAST);
             }
 
             _out.Info("All done");

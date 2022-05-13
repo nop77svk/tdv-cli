@@ -524,15 +524,16 @@ sqlQuery<string> = v:("" .*) { v.TrimEnd() }
 // general language elements - whitespace and insignificant elements
 
 // _ = whiteSpaceCharacter*
-_ = ( whiteSpaceCharacter* ( comment whiteSpaceCharacter* )* ) / whiteSpaceCharacter* { null }
+_ -lexical = ( whiteSpaceCharacter* ( comment whiteSpaceCharacter* )* ) / whiteSpaceCharacter* { null }
 // __ = whiteSpaceCharacter+
-__ = ( whiteSpaceCharacter* ( comment whiteSpaceCharacter* )* ) / whiteSpaceCharacter+ { null }
+__ -lexical = ( whiteSpaceCharacter* ( comment whiteSpaceCharacter* )* ) / whiteSpaceCharacter+ { null }
 
 comment = singleLineComment / multiLineComment
 singleLineComment = "--" [^\r\n]* EOLN
-multiLineComment = "\/\*" .* "\*\/"
+multiLineComment = "/*" (!"*/" .)* "*/"
 
-whiteSpaceCharacter = [ \t\r\n]
-EOLN = "\r\n" / "\n"
+whiteSpaceCharacter = [ \t\v\f\u00A0\uFEFF\u1680\u180E\u2000-\u200A\u202F\u205F\u3000] / EOLN
+
+EOLN = "\r\n" / "\n" / "\r" / "\u2028" / "\u2029"
 
 EOF = !. / c:("" .*) #ERROR{ "Unexpected trailing \"" + c + "\"" }
