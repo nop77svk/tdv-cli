@@ -73,7 +73,7 @@
                 })
                 .ToList();
 
-            await tdvClient.UpdateResourcePrivileges(privilegeEntries, IsRecursive, ModusOperandi, propagateToProducers: Propagate.Down, propagateToConsumers: Propagate.Up);
+            await tdvClient.UpdateResourcePrivileges(privilegeEntries, IsRecursive, ModusOperandi, propagateToProducers: Propagate.ToProducers, propagateToConsumers: Propagate.ToConsumers);
 
             string msgModus = ModusOperandi switch
             {

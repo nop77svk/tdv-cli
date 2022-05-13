@@ -185,15 +185,15 @@ grantPropagationOption<AST.GrantPropagationDirections> = "propagate" __ prop:gra
 
 grantPropagationDirections<AST.GrantPropagationDirections>
 	= ( "both" __ "directions" ) { new AST.GrantPropagationDirections(true, true) }
-	/ ( ("both" __)? grantPropagationDirectionDown __ "and" __ grantPropagationDirectionUp ) { new AST.GrantPropagationDirections(true, true) }
-	/ ( ("both" __)? grantPropagationDirectionUp __ "and" __ grantPropagationDirectionDown ) { new AST.GrantPropagationDirections(true, true) }
-	/ grantPropagationDirectionUp { new AST.GrantPropagationDirections(false, true) }
-	/ grantPropagationDirectionDown { new AST.GrantPropagationDirections(true, false) }
+	/ ( ("both" __)? grantPropagationDirectionToConsumers __ "and" __ grantPropagationDirectionToProducers ) { new AST.GrantPropagationDirections(true, true) }
+	/ ( ("both" __)? grantPropagationDirectionToProducers __ "and" __ grantPropagationDirectionToConsumers ) { new AST.GrantPropagationDirections(true, true) }
+	/ grantPropagationDirectionToProducers { new AST.GrantPropagationDirections(false, true) }
+	/ grantPropagationDirectionToConsumers { new AST.GrantPropagationDirections(true, false) }
 	/ #ERROR{ "Unrecognized way of privilege propagation" }
 
-grantPropagationDirectionDown = "down" / ( "to" __ "producers" )
+grantPropagationDirectionToConsumers = ( "down" "stream"? ) / ( "to" __ "consumers" )
 
-grantPropagationDirectionUp = "up" / ( "to" __ "consumers" )
+grantPropagationDirectionToProducers = ( "up" "stream"? ) / ( "to" __ "producers" )
 
 // ------------------------------------------------------------------------------------------------
 

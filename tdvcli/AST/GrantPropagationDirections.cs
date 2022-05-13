@@ -7,5 +7,5 @@ namespace NoP77svk.TibcoDV.CLI.AST
     using System.Text;
     using System.Threading.Tasks;
 
-    internal record GrantPropagationDirections(bool Down, bool Up);
+    internal record GrantPropagationDirections(bool ToConsumers, bool ToProducers);
 }

@@ -63,8 +63,8 @@ Resource specifiers are described in their own section.
 Liberal/strict principal specifiers are described in their own section.
 
 Specify propagation directions
-* `up`/`to consumers` to propagate the privileges to objects that depend on the granted objects,
-* `down`/`to producers` to propagate the privileges to objects the granted objects depend on,
+* `downstream`/`to consumers` to propagate the privileges to objects that depend on the granted objects,
+* `upstream`/`to producers` to propagate the privileges to objects the granted objects depend on,
 * `up and down`/`down and up`/`to consumers and to producers`/`to producers and to consumers`/`both directions`/... to propagate the privileges in both directions described above.
 
 ### RBS/RLS policy assignment and removal
