@@ -449,31 +449,7 @@ matchIdentifierByRegExp<AST.MatchBy> = ("rlike" / "rxlike" / "regexlike" / "rege
 matchIdentifierExactly<AST.MatchBy> = (("equal" ( __ "to")?) / "exactly")? __ value:resourceIdentifier { new AST.MatchExactly(value) }
 
 // ------------------------------------------------------------------------------------------------
-// general language elements - commons
-
-resourceIdentifier<string>
-	= v:([a-z][^/@, \t\r\n]*) { v }
-	/ #ERROR{ "Invalid resource identifier" }
-
-sqlQuery<string> = v:("" .*) { v.TrimEnd() }
-
-statementOptionRecursive = "recursive"
-
-statementOptionRecursiveWithWhitespace<bool>
-	= statementOptionRecursive __ { true }
-	/ { false }
-
-statementOptionIfExists = "if" __ ( "exists" / #ERROR{ "\"exists\" expected" } )
-
-statementOptionIfExistsWithWhitespace<bool>
-	= statementOptionIfExists __ { true }
-	/ { false }
-
-statementOptionIfNotExists = "if" __ ( "not" __ "exists" / #ERROR{ "\"not exists\" expected" } )
-
-statementOptionIfNotExistsWithWhitespace<bool>
-	= statementOptionIfNotExists __ { true }
-	/ { false }
+// general language elements - literals
 
 numericLiteral<double> = v:( "" [+-]? ( numericLiteralIntegerAndFraction / numericLiteralFractionOnly ) ([eE] [+-]? numericLiteralPositiveInteger) ) { double.Parse(v) }
 numericLiteralPositiveInteger<string> = v:("" [0-9]+) { v }
@@ -508,6 +484,33 @@ timeUnit<AST.TimeUnitEnum>
 	/ "d" ("ay" "s"?)? { AST.TimeUnitEnum.Day }
 	/ "w" "eek"? { AST.TimeUnitEnum.Week }
 	/ #ERROR{ "Unrecognized time unit" }
+
+// ------------------------------------------------------------------------------------------------
+// general language elements - commons
+
+resourceIdentifier<string>
+	= v:([a-z][^/@, \t\r\n]*) { v }
+	/ #ERROR{ "Invalid resource identifier" }
+
+sqlQuery<string> = v:("" .*) { v.TrimEnd() }
+
+statementOptionRecursive = "recursive"
+
+statementOptionRecursiveWithWhitespace<bool>
+	= statementOptionRecursive __ { true }
+	/ { false }
+
+statementOptionIfExists = "if" __ ( "exists" / #ERROR{ "\"exists\" expected" } )
+
+statementOptionIfExistsWithWhitespace<bool>
+	= statementOptionIfExists __ { true }
+	/ { false }
+
+statementOptionIfNotExists = "if" __ ( "not" __ "exists" / #ERROR{ "\"not exists\" expected" } )
+
+statementOptionIfNotExistsWithWhitespace<bool>
+	= statementOptionIfNotExists __ { true }
+	/ { false }
 
 setElementOperation<AST.SetElementOperation>
 	= ( "in" ("c" "lude"?)? ) { AST.SetElementOperation.Include }
