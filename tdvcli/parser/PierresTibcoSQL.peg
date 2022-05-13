@@ -515,7 +515,7 @@ setElementOperation<AST.SetElementOperation>
 // general language elements - others
 
 resourceIdentifier<string>
-	= v:([a-z][^/@, \t\r\n]*) { v }
+	= v:([a-z][a-z0-9_$]*) { v }
 	/ #ERROR{ "Invalid resource identifier" }
 
 sqlQuery<string> = v:("" .*) { v.TrimEnd() }

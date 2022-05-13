@@ -7,7 +7,6 @@
 
     internal class ScriptFileParser
     {
-        internal string CommentSequence { get; set; } = "--";
         internal char CommandDelimiter { get; set; } = ';';
 
         internal IEnumerable<ScriptFileParserOutPOCO> SplitScriptsToStatements(IEnumerable<string?>? scriptFiles)
@@ -40,9 +39,6 @@
                                 else
                                     scriptLine = scriptLine[leftWhiteSpaceAmount..];
                             }
-
-                            if (scriptLine.StartsWith(CommentSequence))
-                                continue;
 
                             isStartOfCommand = false;
                             (bool isEndOfCommand, int endingSlackLength) = TrimmedStringEndsWith(scriptLine, CommandDelimiter);

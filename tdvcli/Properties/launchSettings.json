@@ -3,6 +3,10 @@
     "run _temp.sql on Dev": {
       "commandName": "Project",
       "commandLineArgs": "-u datavirt-dev.eb.lan.at --no-proxy --use-ssl=no -f d:\\_temp.sql"
+    },
+    "dry-run _temp.sql on Dev": {
+      "commandName": "Project",
+      "commandLineArgs": "-u datavirt-dev.eb.lan.at --no-proxy --use-ssl=no -f d:\\_temp.sql --dry-run"
     }
   }
 }
