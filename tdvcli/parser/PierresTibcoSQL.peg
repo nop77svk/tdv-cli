@@ -362,7 +362,7 @@ resourceTypeWS<NoP77svk.TibcoDV.API.WSDL.Admin.resourceType>
 //	{ v }
 
 resourcePath<string>
-	= thePath:("" ("/" resourceIdentifier)+)
+	= thePath:("" (!"/*" "/" resourceIdentifier)+)
 	{ thePath }
 	/ #ERROR{ "Invalid resource path" }
 
