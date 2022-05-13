@@ -517,6 +517,9 @@ setElementOperation<AST.SetElementOperation>
 	/ ( "ex" ("c" "lude"?)? ) { AST.SetElementOperation.Exclude }
 	/ #ERROR{ "\"include\"/\"exclude\" keyword expected" }
 
+// ------------------------------------------------------------------------------------------------
+// general language elements - whitespace and insignificant elements
+
 // _ = whiteSpaceCharacter*
 _ = ( whiteSpaceCharacter* ( comment whiteSpaceCharacter* )* ) / whiteSpaceCharacter* { null }
 // __ = whiteSpaceCharacter+
@@ -528,6 +531,5 @@ multiLineComment = "\/\*" .* "\*\/"
 
 whiteSpaceCharacter = [ \t\r\n]
 EOLN = "\r\n" / "\n"
-
 
 EOF = !. / c:("" .*) #ERROR{ "Unexpected trailing \"" + c + "\"" }
