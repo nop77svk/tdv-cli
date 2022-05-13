@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Net.Http;
+    using System.Text;
     using System.Text.RegularExpressions;
     using System.Threading.Tasks;
     using CommandLine;
@@ -46,6 +47,15 @@
                     .ParseArguments<CommandLineOptions>(args)
                     .WithParsedAsync(async argsParsed => await MainWithParsedOptions(argsParsed));
                 returnCode = 0;
+            }
+            catch (StatementParseException e)
+            {
+                _log.Error(e.FailedCommand, e);
+
+                string error = FormatParserError(e);
+                _out.Error(error);
+
+                returnCode = 125;
             }
             catch (Exception e)
             {
@@ -115,10 +125,6 @@
                 }
                 catch (FormatException e)
                 {
-                    string error = error = FormatParserError(statement, e);
-                    _log.Error(error, e);
-                    _out.Error(error, e);
-
                     throw new StatementParseException(statement.FileName, statement.FileLine, statement.Statement, e.Message, e);
                 }
 
@@ -143,18 +149,22 @@
                 throw new ArgumentOutOfRangeException(nameof(commandAST), commandAST?.GetType() + " :: " + commandAST?.ToString(), "Unrecognized type of parsed statement");
         }
 
-        private static string FormatParserError(ScriptFileParserOutPOCO statement, FormatException e)
+        private static string FormatParserError(StatementParseException e)
         {
-            string error;
-            Cursor? ec = null;
-            if (e.Data["cursor"] is Cursor)
-                ec = (Cursor?)e.Data["cursor"];
+            StringBuilder error = new StringBuilder();
 
-            if (ec is not null)
-                error = $"File {statement.FileName}, line {statement.FileLine}, statement line {ec.Line}, column {ec.Column}\":\n{statement.Statement}";
-            else
-                error = $"File {statement.FileName}, line {statement.FileLine}, failed to parse:\n{statement}";
-            return error;
+            error.Append($"Parse error in file {e.FileName}, line {e.FileLine}");
+
+            if (e.InnerException is FormatException && e.InnerException?.Data["cursor"] is Cursor)
+            {
+                Cursor? ec = (Cursor?)e.InnerException.Data["cursor"];
+                if (ec is not null)
+                    error.Append($", statement line {ec.Line}, column {ec.Column}");
+            }
+
+            error.Append($" - {e.Message}:\n{e.FailedCommand}");
+
+            return error.ToString();
         }
     }
 }
