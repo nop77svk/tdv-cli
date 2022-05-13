@@ -42,7 +42,7 @@ This almost has the same effect as `drop...`, except for keeping the listed reso
 
 `grant `<_modus operandi_>` `[`recursive`]` `<_comma-delimited list of privileges_>` on `<_comma-delimited list of resource specifiers_>` to `<_comma-delimited list of liberal principals_>` `[`propagate `<_propagation directions_>]`;`
 
-The command grants privileges <_comma-delimited list of privileges_> to resources <_comma-delimited list of resource specifiers_> to grantees/principals <_comma-delimited list of principals>.
+The command grants privileges <_comma-delimited list of privileges_> to resources <_comma-delimited list of resource specifiers_> to grantees/principals <_comma-delimited list of principals_>.
 
 <_modus operandi_> of `set` causes the server to replace all privileges already assigned to the specified resources with the specified privileges, whereas `append` causes the server to append the specfied privileges to the privileges already assigned to the specified resources.
 
