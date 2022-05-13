@@ -243,23 +243,60 @@ describeCommand = "desc" ("r" ("ibe")?)?
 
 // ------------------------------------------------------------------------------------------------
 
-introspectStatement<AST.IAsyncStatement> = "introspect" __ introspectTargetDataSourceList { null } // 2do!
+introspectStatement<AST.IAsyncStatement> = "introspect" __ dslist:introspectTargetDataSourceList
+{
+	new AST.CommandIntrospect(dslist)
+}
 
-introspectTargetDataSourceList<IList<string>> = v:introspectTargetDataSource<1,,_ "," _> { v }
+introspectTargetDataSourceList<IList<AST.IntrospectTargetDataSource>> = v:introspectTargetDataSource<1,,_ "," _> { v }
 
-introspectTargetDataSource =
-	( "datasource" / "data" __ "source" ) __ resourcePath
-	( _ "(" introspectTargetCatalogList ")" )?
+introspectTargetDataSource<AST.IntrospectTargetDataSource> =
+	( "datasource" / "data" __ "source" ) __ name:resourcePath clist:introspectTargetDataSourceOptionalCatalogList
+{
+	new AST.IntrospectTargetDataSource(name, clist)
+}
 
-introspectTargetCatalogList<IList<string>> = v:introspectTargetCatalog<1,,_ "," _> { v }
+introspectTargetDataSourceOptionalCatalogList<IList<AST.IntrospectTargetCatalog>> =
+	( _ "(" _ x:introspectTargetCatalogList _ ")" _ ) { x }
+	/
+	"" { new List<AST.IntrospectTargetCatalog>() }
 
-introspectTargetCatalog =
-	"catalog" __ resourceIdentifier
-	( _ "(" introspectTargetSchemaList ")" )?
+introspectTargetCatalogList<IList<AST.IntrospectTargetCatalog>> = v:introspectTargetCatalog<1,,_ "," _> { v }
 
-introspectTargetSchemaList<IList<string>> = v:introspectTargetSchema<1,,_ "," _> { v }
+introspectTargetCatalog<AST.IntrospectTargetCatalog> =
+	"catalog" __ name:resourceIdentifier slist:introspectTargetCatalogOptionalSchemaList
+{
+	new AST.IntrospectTargetCatalog(name, slist)
+}
 
-introspectTargetSchema<string> = "schema" __ v:resourceIdentifier { v }
+introspectTargetCatalogOptionalSchemaList<IList<AST.IntrospectTargetSchema>> =
+	( _ "(" _ x:introspectTargetSchemaList _ ")" _ ) { x }
+	/
+	"" { new List<AST.IntrospectTargetSchema>() }
+
+introspectTargetSchemaList<IList<AST.IntrospectTargetSchema>> = v:introspectTargetSchema<1,,_ "," _> { v }
+
+introspectTargetSchema<AST.IntrospectTargetSchema> =
+	"schema" __ name:resourceIdentifier tlist:introspectTargetSchemaOptionalTableList
+{
+	new AST.IntrospectTargetSchema(name, tlist)
+}
+
+introspectTargetSchemaOptionalTableList<IList<AST.IntrospectTargetTable>> =
+	( _ "(" _ x:introspectTargetTableList _ ")" _ ) { x }
+	/
+	"" { new List<AST.IntrospectTargetTable>() }
+
+introspectTargetTableList<IList<AST.IntrospectTargetTable>> = v:introspectTargetTable<1,,_ "," _> { v }
+
+introspectTargetTable<AST.IntrospectTargetTable> = tabOp:setElementOperation __ tabSpec:introspectTargetTableSpecifier
+{
+	new AST.IntrospectTargetTable(tabOp, tabSpec)
+}
+
+introspectTargetTableSpecifier<AST.MatchBy>
+	= a:matchIdentifierByRegExp { a }
+	/ x:matchIdentifierExactly { x }
 
 // ================================================================================================
 // general language elements
@@ -391,11 +428,11 @@ principalIdentifierMatchByEquality<AST.Principal> = "equal" __ ("to" __)? name:r
 	}
 }
 
-principalIdentifierMatchByRegexp<AST.Principal> = ("rlike" / "rxlike" / "regexlike" / "regexplike" / "matching") __ name:regexp
+principalIdentifierMatchByRegexp<AST.Principal> = rx:matchIdentifierByRegExp
 {
 	new AST.Principal()
 	{
-		Name = name,
+		Name = rx.Value,
 		LookupOperator = AST.LookupOperatorEnum.RegexpLike
 	}
 }
@@ -403,6 +440,13 @@ principalIdentifierMatchByRegexp<AST.Principal> = ("rlike" / "rxlike" / "regexli
 principalType<NoP77svk.TibcoDV.API.WSDL.Admin.userNameType>
 	= "user" { NoP77svk.TibcoDV.API.WSDL.Admin.userNameType.USER }
 	/ "group" { NoP77svk.TibcoDV.API.WSDL.Admin.userNameType.GROUP }
+
+// ------------------------------------------------------------------------------------------------
+// general language elements - matching
+
+matchIdentifierByRegExp<AST.MatchBy> = ("rlike" / "rxlike" / "regexlike" / "regexplike" / "matching") __ value:regexp { new AST.MatchByRegExp(value) }
+
+matchIdentifierExactly<AST.MatchBy> = (("equal" ( __ "to")?) / "exactly")? __ value:resourceIdentifier { new AST.MatchExactly(value) }
 
 // ------------------------------------------------------------------------------------------------
 // general language elements - commons
@@ -456,17 +500,23 @@ booleanLiteral<bool>
 
 timeLiteral<AST.TimeSpan> = value:numericLiteral __ unit:timeUnit { new AST.TimeSpan(value, unit) }
 
-timeUnit<NoP77svk.TibcoDV.CLI.AST.TimeUnitEnum>
-	= ("ms" / ("millisec" ("ond" "s"?)?)) { NoP77svk.TibcoDV.CLI.AST.TimeUnitEnum.Millisecond }
-	/ "s" ("ec" ("ond" "s"?)?)? { NoP77svk.TibcoDV.CLI.AST.TimeUnitEnum.Second }
-	/ "min" ("ute" "s"?)? { NoP77svk.TibcoDV.CLI.AST.TimeUnitEnum.Minute }
-	/ "h" ("our" "s"?)? { NoP77svk.TibcoDV.CLI.AST.TimeUnitEnum.Hour }
-	/ "d" ("ay" "s"?)? { NoP77svk.TibcoDV.CLI.AST.TimeUnitEnum.Day }
-	/ "w" "eek"? { NoP77svk.TibcoDV.CLI.AST.TimeUnitEnum.Week }
+timeUnit<AST.TimeUnitEnum>
+	= ("ms" / ("millisec" ("ond" "s"?)?)) { AST.TimeUnitEnum.Millisecond }
+	/ "s" ("ec" ("ond" "s"?)?)? { AST.TimeUnitEnum.Second }
+	/ "min" ("ute" "s"?)? { AST.TimeUnitEnum.Minute }
+	/ "h" ("our" "s"?)? { AST.TimeUnitEnum.Hour }
+	/ "d" ("ay" "s"?)? { AST.TimeUnitEnum.Day }
+	/ "w" "eek"? { AST.TimeUnitEnum.Week }
 	/ #ERROR{ "Unrecognized time unit" }
+
+setElementOperation<AST.SetElementOperation>
+	= ( "in" ("c" "lude"?)? ) { AST.SetElementOperation.Include }
+	/ ( "ex" ("c" "lude"?)? ) { AST.SetElementOperation.Exclude }
+	/ #ERROR{ "\"include\"/\"exclude\" keyword expected" }
 
 _ = whiteSpaceCharacter*
 __ = whiteSpaceCharacter+
+
 whiteSpaceCharacter = [ \t\r\n]
 
-EOF = !. / c:("" .*) #ERROR{ "Unexpected trailing \"" + c.Trim() + "\"" }
+EOF = !. / c:("" .*) #ERROR{ "Unexpected trailing \"" + c + "\"" }
