@@ -1,11 +1,9 @@
 ﻿namespace NoP77svk.TibcoDV.CLI
 {
     using System;
-    using System.Collections.Generic;
     using System.Linq;
     using System.Net.Http;
     using System.Text;
-    using System.Text.RegularExpressions;
     using System.Threading.Tasks;
     using CommandLine;
     using log4net;
@@ -13,15 +11,11 @@
     using Microsoft.Extensions.Configuration;
 #endif
     using NoP77svk.IO;
-    using NoP77svk.Linq;
-    using NoP77svk.Text.RegularExpressions;
     using NoP77svk.TibcoDV.API;
-    using NoP77svk.TibcoDV.CLI.AST;
     using NoP77svk.TibcoDV.CLI.Commons;
     using NoP77svk.TibcoDV.Commons;
     using NoP77svk.Web.WS;
     using Pegasus.Common;
-    using WSDL = NoP77svk.TibcoDV.API.WSDL;
 
     internal class Program
         : BaseProgram
