@@ -344,8 +344,7 @@ resourceTypeWS<NoP77svk.TibcoDV.API.WSDL.Admin.resourceType>
 //	{ v }
 
 resourcePath<string>
-	= thePath:("" (!"/*" "/" resourceIdentifier)+)
-	{ thePath }
+	= thePath:("" (!"/*" "/" resourceIdentifier)+) { thePath }
 	/ #ERROR{ "Invalid resource path" }
 
 resourceIdentifier<string>
@@ -355,9 +354,7 @@ resourceIdentifier<string>
 // ------------------------------------------------------------------------------------------------
 // general language elements - principal
 
-liberalListOfPrincipals<IList<AST.Principal>>
-	= v:liberalPrincipal<1,,_ "," _>
-	{ v }
+liberalListOfPrincipals<IList<AST.Principal>> = v:liberalPrincipal<1,,_ "," _> { v }
 
 liberalPrincipal<AST.Principal>
 	= v:simplePrincipalIdentifier { v }
