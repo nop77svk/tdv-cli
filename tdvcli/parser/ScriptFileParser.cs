@@ -7,13 +7,26 @@
 
     internal class ScriptFileParser
     {
-        internal char CommandDelimiter { get; set; } = ';';
+        private Func<char> commandDelimiterGetter;
+
+        public char CommandDelimiter
+        {
+            get
+            {
+                char result = commandDelimiterGetter();
+                if (result != ';')
+                    throw new ArgumentOutOfRangeException(nameof(result), result, "Invalid command delimiter");
+                return result;
+            }
+        }
+
+        public ScriptFileParser(Func<char> commandDelimiterGetter)
+        {
+            this.commandDelimiterGetter = commandDelimiterGetter;
+        }
 
         internal IEnumerable<ScriptFileParserOutPOCO> SplitScriptsToStatements(IEnumerable<string?>? scriptFiles)
         {
-            if (CommandDelimiter is not ';')
-                throw new ArgumentOutOfRangeException(nameof(CommandDelimiter), CommandDelimiter, "Invalid command separator");
-
             if (scriptFiles is not null)
             {
                 foreach (string? scriptFile in scriptFiles)

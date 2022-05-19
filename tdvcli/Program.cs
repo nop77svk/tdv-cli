@@ -104,7 +104,7 @@
                 DebugLogHttpResponse
             );
 
-            ScriptFileParser fileParser = new ScriptFileParser();
+            ScriptFileParser fileParser = new ScriptFileParser(() => ';'); // 2do!
             PierresTibcoSqlParser sqlParser = new PierresTibcoSqlParser();
 
             // do your stuff
