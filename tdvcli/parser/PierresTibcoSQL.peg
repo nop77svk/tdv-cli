@@ -399,30 +399,22 @@ matchingPrincipalIdentifier<AST.Principal> = dom:resourceIdentifier __ typ:princ
 principalIdentifierMatch<AST.Principal>
 	= v:principalIdentifierMatchByRegexp { v }
 	/ v:principalIdentifierMatchByEquality { v }
-	/ name:resourceIdentifier
-		{
-			new AST.Principal()
-			{
-				Name = name,
-				LookupOperator = AST.LookupOperatorEnum.EqualTo
-			}
-		}
 	/ #ERROR{ "Unrecognized principal identifier format"}
 
-principalIdentifierMatchByEquality<AST.Principal> = "equal" __ ("to" __)? name:resourceIdentifier
+principalIdentifierMatchByEquality<AST.Principal> = ident:matchIdentifierExactly
 {
 	new AST.Principal()
 	{
-		Name = name,
+		Name = ident.Value,
 		LookupOperator = AST.LookupOperatorEnum.EqualTo
 	}
 }
 
-principalIdentifierMatchByRegexp<AST.Principal> = rx:matchIdentifierByRegExp
+principalIdentifierMatchByRegexp<AST.Principal> = ident:matchIdentifierByRegExp
 {
 	new AST.Principal()
 	{
-		Name = rx.Value,
+		Name = ident.Value,
 		LookupOperator = AST.LookupOperatorEnum.RegexpLike
 	}
 }
