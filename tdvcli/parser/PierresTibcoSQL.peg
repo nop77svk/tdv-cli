@@ -367,50 +367,14 @@ conservativeListOfPrincipals<IList<AST.Principal>>
 	{ v }
 */
 
-simplePrincipalIdentifier<AST.Principal> = typ:principalType __ name:resourceIdentifier "@" dom:resourceIdentifier	
-{
-	new AST.Principal()
-	{
-		Type = typ,
-		Name = name,
-		Domain = dom,
-		LookupOperator = AST.LookupOperatorEnum.EqualTo
-	}
-}
+simplePrincipalIdentifier<AST.Principal> = typ:principalType __ name:resourceIdentifier "@" dom:resourceIdentifier { new AST.Principal(typ, dom, new AST.MatchExactly(name)) }
 
-matchingPrincipalIdentifier<AST.Principal> = dom:resourceIdentifier __ typ:principalType __ op:principalIdentifierMatch
-{
-	new AST.Principal()
-	{
-		Type = typ,
-		Name = op.Name,
-		Domain = dom,
-		LookupOperator = op.LookupOperator
-	}
-}
+matchingPrincipalIdentifier<AST.Principal> = dom:resourceIdentifier __ typ:principalType __ op:principalIdentifierMatch { new AST.Principal(typ, dom, op) }
 
-principalIdentifierMatch<AST.Principal>
-	= v:principalIdentifierMatchByRegexp { v }
-	/ v:principalIdentifierMatchByEquality { v }
-	/ #ERROR{ "Unrecognized principal identifier format"}
-
-principalIdentifierMatchByEquality<AST.Principal> = ident:matchIdentifierExactly
-{
-	new AST.Principal()
-	{
-		Name = ident.Value,
-		LookupOperator = AST.LookupOperatorEnum.EqualTo
-	}
-}
-
-principalIdentifierMatchByRegexp<AST.Principal> = ident:matchIdentifierByRegExp
-{
-	new AST.Principal()
-	{
-		Name = ident.Value,
-		LookupOperator = AST.LookupOperatorEnum.RegexpLike
-	}
-}
+principalIdentifierMatch<AST.MatchBy>
+	= ident:matchIdentifierExactly { ident }
+	/ ident:matchIdentifierByRegExp { ident }
+	/ #ERROR{ "Unrecognized principal identifier matching expression"}
 
 principalType<NoP77svk.TibcoDV.API.WSDL.Admin.userNameType>
 	= "user" { NoP77svk.TibcoDV.API.WSDL.Admin.userNameType.USER }

@@ -50,12 +50,12 @@
 
             // calculate the final set of grantees
             IEnumerable<WSDL.privilege> granteesMatchedByEquality = Principals
-                .Where(principal => principal.LookupOperator == AST.LookupOperatorEnum.EqualTo)
+                .Where(principal => principal.MatchingPrincipal is AST.MatchExactly)
                 .Select(principal => new WSDL.privilege()
                 {
                     domain = principal.Domain,
-                    name = principal.Name,
-                    nameType = principal.Type ?? throw new ArgumentNullException(nameof(principal) + "." + nameof(principal.Type)),
+                    name = principal.MatchingPrincipal.Value,
+                    nameType = principal.Type,
                     privs = privilegesConcatenated
                 });
 
@@ -94,8 +94,8 @@
                 )
                 .CrossProduct(Principals
                     .Where(principal => principal.Type == WSDL.userNameType.USER)
-                    .Where(principal => principal.LookupOperator == AST.LookupOperatorEnum.RegexpLike)
-                    .Select(principal => new { GranteePrincipal = principal, GranteeWildcard = RegexExt.ParseSlashedRegexp(principal.Name, RegexOptions.IgnoreCase) })
+                    .Where(principal => principal.MatchingPrincipal is AST.MatchByRegExp)
+                    .Select(principal => new { GranteePrincipal = principal, GranteeWildcard = RegexExt.ParseSlashedRegexp(principal.MatchingPrincipal.Value, RegexOptions.IgnoreCase) })
                 )
                 .Where(crossRecord => crossRecord.Item1.ServerDomain.Equals(crossRecord.Item2.GranteePrincipal.Domain)
                     && crossRecord.Item2.GranteeWildcard.IsMatch(crossRecord.Item1.ServerUser)
@@ -118,8 +118,8 @@
                 )
                 .CrossProduct(Principals
                     .Where(principal => principal.Type == WSDL.userNameType.GROUP)
-                    .Where(principal => principal.LookupOperator == AST.LookupOperatorEnum.RegexpLike)
-                    .Select(principal => new { GranteePrincipal = principal, GranteeWildcard = RegexExt.ParseSlashedRegexp(principal.Name, RegexOptions.IgnoreCase) })
+                    .Where(principal => principal.MatchingPrincipal is AST.MatchByRegExp)
+                    .Select(principal => new { GranteePrincipal = principal, GranteeWildcard = RegexExt.ParseSlashedRegexp(principal.MatchingPrincipal.Value, RegexOptions.IgnoreCase) })
                 )
                 .Where(crossRecord => crossRecord.Item1.ServerDomain.Equals(crossRecord.Item2.GranteePrincipal.Domain)
                     && crossRecord.Item2.GranteeWildcard.IsMatch(crossRecord.Item1.ServerGroup)
@@ -136,7 +136,7 @@
         private async Task<ValueTuple<Dictionary<string, List<string>>, Dictionary<string, List<string>>>> RetrieveDomainGroupsAndUsers(TdvWebServiceClient tdvClient)
         {
             IEnumerable<AST.Principal> domainsForWildcardMatching = Principals
-                .Where(principal => principal.LookupOperator != AST.LookupOperatorEnum.EqualTo)
+                .Where(principal => principal.MatchingPrincipal is AST.MatchExactly)
                 .Where(principal => !string.IsNullOrEmpty(principal.Domain))
                 .ToList();
 
