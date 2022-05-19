@@ -327,12 +327,8 @@ resourceTypeWithWhitespace<NoP77svk.TibcoDV.API.WSDL.Admin.resourceType>
 resourceTypeWS<NoP77svk.TibcoDV.API.WSDL.Admin.resourceType>
 	= "adapter" { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.ADAPTER }
 	/ "container" { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.CONTAINER }
-	/ "datasource" { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.DATA_SOURCE }
-	/ "data_source" { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.DATA_SOURCE }
-	/ "data" __ "source" { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.DATA_SOURCE }
-	/ "definitionset" { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.DEFINITION_SET }
-	/ "definition_set" { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.DEFINITION_SET }
-	/ "def" "inition"? __ "set" { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.DEFINITION_SET }
+	/ "data" ("_" / _) "source" { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.DATA_SOURCE }
+	/ "def" "inition"? ("_" / _) "set" { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.DEFINITION_SET }
 	/ "extension" { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.EXTENSION }
 	/ "link" { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.LINK }
 	/ "model" { NoP77svk.TibcoDV.API.WSDL.Admin.resourceType.MODEL }
