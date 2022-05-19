@@ -43,7 +43,7 @@ clientSideStatementWhat<AST.IStatement>
 
 clientSideSet<AST.IStatement> = "set" __ var:resourceIdentifier _ "=" _ value:clientSideSetValue
 {
-	new AST.ClientSet(var, value)
+	new AST.Client.CommandSet(var, value)
 }
 
 clientSideSetValue<object>
@@ -59,21 +59,21 @@ clientSideSetValue<object>
 
 clientSideConnectionTimeout<AST.IStatement> = "timeout" __ v:timeLiteral
 {
-	new AST.ClientConnectionTimeout(v)
+	new AST.Client.CommandConnectionTimeout(v)
 }
 
 // ------------------------------------------------------------------------------------------------
 
 clientSideTimer<AST.IStatement> = "timer" __ v:booleanLiteral
 {
-	new AST.ClientTimer(v)
+	new AST.Client.CommandTimer(v)
 }
 
 // ------------------------------------------------------------------------------------------------
 
 clientSidePrompt<AST.IStatement> = "prompt" __ v:stringLiteral
 {
-	new AST.ClientPrompt(v)
+	new AST.Client.CommandPrompt(v)
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -82,14 +82,14 @@ createResourceStatement<AST.IAsyncStatement> = "create" __
 	soifnx:statementOptionIfNotExistsWithWhitespace
 	ddl:( createViewDDL / createFolderDDL / createSchemaDDL / #ERROR{ "Unrecognized resource type to be created" } )
 {
-	new AST.CommandCreateResource(soifnx, ddl)
+	new AST.Server.CommandCreateResource(soifnx, ddl)
 }
 
 createViewDDL<object> = ("view" / "dataview" / "data" __ "view") __ res:resourcePath __
 	"as" __
 	q:sqlQuery
 {
-	new AST.ViewDDL()
+	new AST.Server.ViewDDL()
 	{
 		ResourcePath = res,
 		ViewQuery = q
@@ -98,12 +98,12 @@ createViewDDL<object> = ("view" / "dataview" / "data" __ "view") __ res:resource
 
 createFolderDDL<object> = "folder" __ res:resourcePath
 {
-	new AST.FolderDDL(res)
+	new AST.Server.FolderDDL(res)
 }
 
 createSchemaDDL<object> = "schema" __ res:resourcePath
 {
-	new AST.SchemaDDL(res)
+	new AST.Server.SchemaDDL(res)
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -118,7 +118,7 @@ publishStatement<AST.IAsyncStatement> = "pub" "lish"? __
 		{null}
 	)
 {
-	new AST.CommandPublish(source, target, flattenString, ifNotExists)
+	new AST.Server.CommandPublish(source, target, flattenString, ifNotExists)
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -129,7 +129,7 @@ dropResourceStatement<AST.IAsyncStatement> = "drop" __
 	soifx:statementOptionIfExistsWithWhitespace
 	res:listOfFullResourceSpecifiers
 {
-	new AST.CommandDropResource(soifx, res, true)
+	new AST.Server.CommandDropResource(soifx, res, true)
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -138,7 +138,7 @@ purgeResourceStatement<AST.IAsyncStatement> = "purge" __
 	soifx:statementOptionIfExistsWithWhitespace
 	res:listOfFullResourceSpecifiers
 {
-	new AST.CommandDropResource(soifx, res, false)
+	new AST.Server.CommandDropResource(soifx, res, false)
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -151,7 +151,7 @@ grantStatement<AST.IAsyncStatement> = "grant" __
 	("to" / #ERROR{"TO keyword expected"}) __ who:liberalListOfPrincipals
 	prop:grantPropagationOptionOptional
 {
-	new AST.CommandGrant(isRec, modusOperandi, priv, res, who, prop)
+	new AST.Server.CommandGrant(isRec, modusOperandi, priv, res, who, prop)
 }
 
 grantOptionAppendOrSetWithWhitespace<NoP77svk.TibcoDV.API.WSDL.Admin.updatePrivilegesMode>
@@ -177,18 +177,18 @@ resourcePrivilege<TdvPrivilegeEnum>
 	/ "grant" { TdvPrivilegeEnum.Grant }
 	/ #ERROR{ "Unrecognized privilege" }
 
-grantPropagationOptionOptional<AST.GrantPropagationDirections>
+grantPropagationOptionOptional<AST.Server.GrantPropagationDirections>
 	= ( __ prop:grantPropagationOption ) { prop }
-	/ "" { new AST.GrantPropagationDirections(false, false) }
+	/ "" { new AST.Server.GrantPropagationDirections(false, false) }
 
-grantPropagationOption<AST.GrantPropagationDirections> = "propagate" __ prop:grantPropagationDirections { prop }
+grantPropagationOption<AST.Server.GrantPropagationDirections> = "propagate" __ prop:grantPropagationDirections { prop }
 
-grantPropagationDirections<AST.GrantPropagationDirections>
-	= ( "both" __ "directions" ) { new AST.GrantPropagationDirections(true, true) }
-	/ ( ("both" __)? grantPropagationDirectionToConsumers __ "and" __ grantPropagationDirectionToProducers ) { new AST.GrantPropagationDirections(true, true) }
-	/ ( ("both" __)? grantPropagationDirectionToProducers __ "and" __ grantPropagationDirectionToConsumers ) { new AST.GrantPropagationDirections(true, true) }
-	/ grantPropagationDirectionToProducers { new AST.GrantPropagationDirections(false, true) }
-	/ grantPropagationDirectionToConsumers { new AST.GrantPropagationDirections(true, false) }
+grantPropagationDirections<AST.Server.GrantPropagationDirections>
+	= ( "both" __ "directions" ) { new AST.Server.GrantPropagationDirections(true, true) }
+	/ ( ("both" __)? grantPropagationDirectionToConsumers __ "and" __ grantPropagationDirectionToProducers ) { new AST.Server.GrantPropagationDirections(true, true) }
+	/ ( ("both" __)? grantPropagationDirectionToProducers __ "and" __ grantPropagationDirectionToConsumers ) { new AST.Server.GrantPropagationDirections(true, true) }
+	/ grantPropagationDirectionToProducers { new AST.Server.GrantPropagationDirections(false, true) }
+	/ grantPropagationDirectionToConsumers { new AST.Server.GrantPropagationDirections(true, false) }
 	/ #ERROR{ "Unrecognized way of privilege propagation" }
 
 grantPropagationDirectionToConsumers = ( "down" "stream"? ) / ( "to" __ "consumers" )
@@ -202,7 +202,7 @@ assignStatement<AST.IAsyncStatement> = "assign" __
 	("to" / #ERROR{ "TO keyword expected" }) __
 	res:listOfFullResourceSpecifiers
 {
-	new AST.CommandAssign(NoP77svk.TibcoDV.API.WSDL.Admin.rbsAssignmentOperationType.ASSIGN, what, res)
+	new AST.Server.CommandAssign(NoP77svk.TibcoDV.API.WSDL.Admin.rbsAssignmentOperationType.ASSIGN, what, res)
 }
 
 unassignStatement<AST.IAsyncStatement> = "unassign" __
@@ -210,24 +210,24 @@ unassignStatement<AST.IAsyncStatement> = "unassign" __
 	("from" / #ERROR{ "FROM keyword expected" }) __
 	res:listOfFullResourceSpecifiers
 {
-	new AST.CommandAssign(NoP77svk.TibcoDV.API.WSDL.Admin.rbsAssignmentOperationType.REMOVE, what, res)
+	new AST.Server.CommandAssign(NoP77svk.TibcoDV.API.WSDL.Admin.rbsAssignmentOperationType.REMOVE, what, res)
 }
 
-policySpecifier<AST.FilterPolicy>
+policySpecifier<AST.Server.FilterPolicy>
 	= v:rbsFilterPolicySpecifier { v }
 	/ v:cbsFilterPolicySpecifier { v }
 	/ #ERROR{"Unknown filter policy type"}
 
-rbsFilterPolicySpecifier<AST.FilterPolicy> = ("rbs" / "rls") __ ( ("pol" "icy"?) / #ERROR{ "Missing \"policy\" keyword"} ) __
+rbsFilterPolicySpecifier<AST.Server.FilterPolicy> = ("rbs" / "rls") __ ( ("pol" "icy"?) / #ERROR{ "Missing \"policy\" keyword"} ) __
 	policy:resourcePath
 {
-	new AST.RbsFilterPolicy(policy)
+	new AST.Server.RbsFilterPolicy(policy)
 }
 
-cbsFilterPolicySpecifier<AST.FilterPolicy> = ("cbs" / "cls") __ ( ("pol" "icy"?) / #ERROR{ "Expected \"policy\" keyword"} ) __
+cbsFilterPolicySpecifier<AST.Server.FilterPolicy> = ("cbs" / "cls") __ ( ("pol" "icy"?) / #ERROR{ "Expected \"policy\" keyword"} ) __
 	policy:resourcePath
 {
-	new AST.CbsFilterPolicy(policy)
+	new AST.Server.CbsFilterPolicy(policy)
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -236,7 +236,7 @@ describeStatement<AST.IAsyncStatement>
 	= describeCommand __
 	v:listOfPartialResourceSpecifiers
 {
-	new AST.CommandDescribe(v)
+	new AST.Server.CommandDescribe(v)
 }
 
 describeCommand = "desc" ("r" ("ibe")?)?
@@ -245,56 +245,56 @@ describeCommand = "desc" ("r" ("ibe")?)?
 
 introspectStatement<AST.IAsyncStatement> = "introspect" __ dslist:introspectTargetDataSourceList
 {
-	new AST.CommandIntrospect(dslist)
+	new AST.Server.CommandIntrospect(dslist)
 }
 
-introspectTargetDataSourceList<IList<AST.IntrospectTargetDataSource>> = v:introspectTargetDataSource<1,,_ "," _> { v }
+introspectTargetDataSourceList<IList<AST.Server.IntrospectTargetDataSource>> = v:introspectTargetDataSource<1,,_ "," _> { v }
 
-introspectTargetDataSource<AST.IntrospectTargetDataSource> =
+introspectTargetDataSource<AST.Server.IntrospectTargetDataSource> =
 	( "datasource" / "data" __ "source" ) __ name:resourcePath clist:introspectTargetDataSourceOptionalCatalogList
 {
-	new AST.IntrospectTargetDataSource(name, clist)
+	new AST.Server.IntrospectTargetDataSource(name, clist)
 }
 
-introspectTargetDataSourceOptionalCatalogList<IList<AST.IntrospectTargetCatalog>> =
+introspectTargetDataSourceOptionalCatalogList<IList<AST.Server.IntrospectTargetCatalog>> =
 	( _ "(" _ x:introspectTargetCatalogList _ ")" _ ) { x }
 	/
-	"" { new List<AST.IntrospectTargetCatalog>() }
+	"" { new List<AST.Server.IntrospectTargetCatalog>() }
 
-introspectTargetCatalogList<IList<AST.IntrospectTargetCatalog>> = v:introspectTargetCatalog<1,,_ "," _> { v }
+introspectTargetCatalogList<IList<AST.Server.IntrospectTargetCatalog>> = v:introspectTargetCatalog<1,,_ "," _> { v }
 
-introspectTargetCatalog<AST.IntrospectTargetCatalog> =
+introspectTargetCatalog<AST.Server.IntrospectTargetCatalog> =
 	"catalog" __ name:resourceIdentifier slist:introspectTargetCatalogOptionalSchemaList
 {
-	new AST.IntrospectTargetCatalog(name, slist)
+	new AST.Server.IntrospectTargetCatalog(name, slist)
 }
 
-introspectTargetCatalogOptionalSchemaList<IList<AST.IntrospectTargetSchema>> =
+introspectTargetCatalogOptionalSchemaList<IList<AST.Server.IntrospectTargetSchema>> =
 	( _ "(" _ x:introspectTargetSchemaList _ ")" _ ) { x }
 	/
-	"" { new List<AST.IntrospectTargetSchema>() }
+	"" { new List<AST.Server.IntrospectTargetSchema>() }
 
-introspectTargetSchemaList<IList<AST.IntrospectTargetSchema>> = v:introspectTargetSchema<1,,_ "," _> { v }
+introspectTargetSchemaList<IList<AST.Server.IntrospectTargetSchema>> = v:introspectTargetSchema<1,,_ "," _> { v }
 
-introspectTargetSchema<AST.IntrospectTargetSchema> =
+introspectTargetSchema<AST.Server.IntrospectTargetSchema> =
 	"schema" __ name:resourceIdentifier tlist:introspectTargetSchemaOptionalTableList
 {
-	new AST.IntrospectTargetSchema(name, tlist)
+	new AST.Server.IntrospectTargetSchema(name, tlist)
 }
 
-introspectTargetSchemaOptionalTableList<IList<AST.IntrospectTargetTable>> =
+introspectTargetSchemaOptionalTableList<IList<AST.Server.IntrospectTargetTable>> =
 	( _ "(" _ x:introspectTargetTableList _ ")" _ ) { x }
 	/
-	"" { new List<AST.IntrospectTargetTable>() }
+	"" { new List<AST.Server.IntrospectTargetTable>() }
 
-introspectTargetTableList<IList<AST.IntrospectTargetTable>> = v:introspectTargetTable<1,,_ "," _> { v }
+introspectTargetTableList<IList<AST.Server.IntrospectTargetTable>> = v:introspectTargetTable<1,,_ "," _> { v }
 
-introspectTargetTable<AST.IntrospectTargetTable> = tabOp:setElementOperation __ tabSpec:introspectTargetTableSpecifier
+introspectTargetTable<AST.Server.IntrospectTargetTable> = tabOp:setElementOperation __ tabSpec:introspectTargetTableSpecifier
 {
-	new AST.IntrospectTargetTable(tabOp, tabSpec)
+	new AST.Server.IntrospectTargetTable(tabOp, tabSpec)
 }
 
-introspectTargetTableSpecifier<AST.MatchBy>
+introspectTargetTableSpecifier<AST.Infra.MatchBy>
 	= a:matchIdentifierByRegExp { a }
 	/ x:matchIdentifierExactly { x }
 
@@ -305,20 +305,20 @@ introspectTargetTableSpecifier<AST.MatchBy>
 // ------------------------------------------------------------------------------------------------
 // general language elements - resource
 
-listOfFullResourceSpecifiers<IList<AST.ResourceSpecifier>>
+listOfFullResourceSpecifiers<IList<AST.Server.ResourceSpecifier>>
 	= v:fullResourceSpecifier<1,,_ "," _>
 	{ v }
 
-fullResourceSpecifier<AST.ResourceSpecifier>
-	= typ:resourceTypeWS __ res:resourcePath { new AST.ResourceSpecifier(typ, res) }
+fullResourceSpecifier<AST.Server.ResourceSpecifier>
+	= typ:resourceTypeWS __ res:resourcePath { new AST.Server.ResourceSpecifier(typ, res) }
 	/ #ERROR{ "Invalid resource specifier" }
 
-listOfPartialResourceSpecifiers<IList<AST.ResourceSpecifier>>
+listOfPartialResourceSpecifiers<IList<AST.Server.ResourceSpecifier>>
 	= v:partialResourceSpecifier<1,,_ "," _>
 	{ v }
 
-partialResourceSpecifier<AST.ResourceSpecifier>
-	= typ:resourceTypeWithWhitespace res:resourcePath { new AST.ResourceSpecifier(typ, res) }
+partialResourceSpecifier<AST.Server.ResourceSpecifier>
+	= typ:resourceTypeWithWhitespace res:resourcePath { new AST.Server.ResourceSpecifier(typ, res) }
 
 resourceTypeWithWhitespace<NoP77svk.TibcoDV.API.WSDL.Admin.resourceType>
 	= v:resourceTypeWS __ { v }
@@ -354,24 +354,24 @@ resourceIdentifier<string>
 // ------------------------------------------------------------------------------------------------
 // general language elements - principal
 
-liberalListOfPrincipals<IList<AST.Principal>> = v:liberalPrincipal<1,,_ "," _> { v }
+liberalListOfPrincipals<IList<AST.Server.Principal>> = v:liberalPrincipal<1,,_ "," _> { v }
 
-liberalPrincipal<AST.Principal>
+liberalPrincipal<AST.Server.Principal>
 	= v:simplePrincipalIdentifier { v }
 	/ v:matchingPrincipalIdentifier { v }
 	/ #ERROR{ "Incorrect principal specifier" }
 
 /*
-conservativeListOfPrincipals<IList<AST.Principal>>
+conservativeListOfPrincipals<IList<AST.Server.Principal>>
 	= v:simplePrincipalIdentifier<1,,_ "," _>
 	{ v }
 */
 
-simplePrincipalIdentifier<AST.Principal> = typ:principalType __ name:resourceIdentifier "@" dom:resourceIdentifier { new AST.Principal(typ, dom, new AST.MatchExactly(name)) }
+simplePrincipalIdentifier<AST.Server.Principal> = typ:principalType __ name:resourceIdentifier "@" dom:resourceIdentifier { new AST.Server.Principal(typ, dom, new AST.Infra.MatchExactly(name)) }
 
-matchingPrincipalIdentifier<AST.Principal> = dom:resourceIdentifier __ typ:principalType __ op:principalIdentifierMatch { new AST.Principal(typ, dom, op) }
+matchingPrincipalIdentifier<AST.Server.Principal> = dom:resourceIdentifier __ typ:principalType __ op:principalIdentifierMatch { new AST.Server.Principal(typ, dom, op) }
 
-principalIdentifierMatch<AST.MatchBy>
+principalIdentifierMatch<AST.Infra.MatchBy>
 	= ident:matchIdentifierByRegExp { ident }
 	/ ident:matchIdentifierExactly { ident }
 	/ #ERROR{ "Unrecognized principal identifier matching expression"}
@@ -383,9 +383,9 @@ principalType<NoP77svk.TibcoDV.API.WSDL.Admin.userNameType>
 // ------------------------------------------------------------------------------------------------
 // general language elements - matching
 
-matchIdentifierByRegExp<AST.MatchBy> = ("rlike" / "rxlike" / "regexlike" / "regexplike" / "matching") __ value:regexp { new AST.MatchByRegExp(value) }
+matchIdentifierByRegExp<AST.Infra.MatchBy> = ("rlike" / "rxlike" / "regexlike" / "regexplike" / "matching") __ value:regexp { new AST.Infra.MatchByRegExp(value) }
 
-matchIdentifierExactly<AST.MatchBy> = (("equal" ( __ "to")?) / "exactly")? __ value:resourceIdentifier { new AST.MatchExactly(value) }
+matchIdentifierExactly<AST.Infra.MatchBy> = (("equal" ( __ "to")?) / "exactly")? __ value:resourceIdentifier { new AST.Infra.MatchExactly(value) }
 
 // ------------------------------------------------------------------------------------------------
 // general language elements - literals
@@ -413,15 +413,15 @@ booleanLiteral<bool>
 	/ "0" { false }
 	/ #ERROR{ "Boolean literal value expected" }
 
-timeLiteral<AST.TimeSpan> = value:numericLiteral __ unit:timeUnit { new AST.TimeSpan(value, unit) }
+timeLiteral<AST.Infra.TimeSpan> = value:numericLiteral __ unit:timeUnit { new AST.Infra.TimeSpan(value, unit) }
 
-timeUnit<AST.TimeUnitEnum>
-	= ("ms" / ("millisec" ("ond" "s"?)?)) { AST.TimeUnitEnum.Millisecond }
-	/ "s" ("ec" ("ond" "s"?)?)? { AST.TimeUnitEnum.Second }
-	/ "min" ("ute" "s"?)? { AST.TimeUnitEnum.Minute }
-	/ "h" ("our" "s"?)? { AST.TimeUnitEnum.Hour }
-	/ "d" ("ay" "s"?)? { AST.TimeUnitEnum.Day }
-	/ "w" "eek"? { AST.TimeUnitEnum.Week }
+timeUnit<AST.Infra.TimeUnitEnum>
+	= ("ms" / ("millisec" ("ond" "s"?)?)) { AST.Infra.TimeUnitEnum.Millisecond }
+	/ "s" ("ec" ("ond" "s"?)?)? { AST.Infra.TimeUnitEnum.Second }
+	/ "min" ("ute" "s"?)? { AST.Infra.TimeUnitEnum.Minute }
+	/ "h" ("our" "s"?)? { AST.Infra.TimeUnitEnum.Hour }
+	/ "d" ("ay" "s"?)? { AST.Infra.TimeUnitEnum.Day }
+	/ "w" "eek"? { AST.Infra.TimeUnitEnum.Week }
 	/ #ERROR{ "Unrecognized time unit" }
 
 // ------------------------------------------------------------------------------------------------
@@ -445,9 +445,9 @@ statementOptionIfNotExistsWithWhitespace<bool>
 	= statementOptionIfNotExists __ { true }
 	/ { false }
 
-setElementOperation<AST.SetElementOperation>
-	= ( "in" ("c" "lude"?)? ) { AST.SetElementOperation.Include }
-	/ ( "ex" ("c" "lude"?)? ) { AST.SetElementOperation.Exclude }
+setElementOperation<AST.Infra.SetElementOperation>
+	= ( "in" ("c" "lude"?)? ) { AST.Infra.SetElementOperation.Include }
+	/ ( "ex" ("c" "lude"?)? ) { AST.Infra.SetElementOperation.Exclude }
 	/ #ERROR{ "\"include\"/\"exclude\" keyword expected" }
 
 // ------------------------------------------------------------------------------------------------
