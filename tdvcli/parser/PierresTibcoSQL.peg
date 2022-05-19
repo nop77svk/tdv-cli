@@ -372,8 +372,8 @@ simplePrincipalIdentifier<AST.Principal> = typ:principalType __ name:resourceIde
 matchingPrincipalIdentifier<AST.Principal> = dom:resourceIdentifier __ typ:principalType __ op:principalIdentifierMatch { new AST.Principal(typ, dom, op) }
 
 principalIdentifierMatch<AST.MatchBy>
-	= ident:matchIdentifierExactly { ident }
-	/ ident:matchIdentifierByRegExp { ident }
+	= ident:matchIdentifierByRegExp { ident }
+	/ ident:matchIdentifierExactly { ident }
 	/ #ERROR{ "Unrecognized principal identifier matching expression"}
 
 principalType<NoP77svk.TibcoDV.API.WSDL.Admin.userNameType>
