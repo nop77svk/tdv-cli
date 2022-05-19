@@ -10,7 +10,7 @@
     using NoP77svk.TibcoDV.CLI.Commons;
     using NoP77svk.TibcoDV.Commons;
 
-    internal class CommandAssign : IAsyncStatement
+    internal class CommandAssign : IAsyncExecutable
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(Program));
 

@@ -5,7 +5,7 @@
     using NoP77svk.TibcoDV.CLI.Commons;
     using NoP77svk.TibcoDV.Commons;
 
-    internal class CommandPrompt : IStatement
+    internal class CommandPrompt : ISyncExecutable
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(Program));
 

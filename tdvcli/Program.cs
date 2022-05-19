@@ -141,9 +141,9 @@
         {
             using var log = new TraceLog(_log, nameof(ExecuteParsedStatement));
 
-            if (commandAST is AST.IAsyncStatement stmtAsync)
+            if (commandAST is AST.IAsyncExecutable stmtAsync)
                 await stmtAsync.Execute(tdvClient, _out);
-            else if (commandAST is AST.IStatement stmt)
+            else if (commandAST is AST.ISyncExecutable stmt)
                 stmt.Execute(tdvClient, _out);
             else
                 throw new ArgumentOutOfRangeException(nameof(commandAST), commandAST?.GetType() + " :: " + commandAST?.ToString(), "Unrecognized type of parsed statement");

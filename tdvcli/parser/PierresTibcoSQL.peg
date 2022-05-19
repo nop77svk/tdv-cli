@@ -18,7 +18,7 @@ statement<object>
 	= clientSideStatement
 	/ serverSideStatement
 
-serverSideStatement<AST.IAsyncStatement>
+serverSideStatement<AST.IAsyncExecutable>
 	= grantStatement
 	/ createResourceStatement
 	/ publishStatement
@@ -30,9 +30,9 @@ serverSideStatement<AST.IAsyncStatement>
 	/ introspectStatement
 	/ #ERROR{ "Unrecognized server-side command" }
 
-clientSideStatement<AST.IStatement> = "#" v:clientSideStatementWhat { v }
+clientSideStatement<AST.ISyncExecutable> = "#" v:clientSideStatementWhat { v }
 
-clientSideStatementWhat<AST.IStatement>
+clientSideStatementWhat<AST.ISyncExecutable>
 	= clientSidePrompt
 	/ clientSideTimer
 	/ clientSideConnectionTimeout
@@ -41,7 +41,7 @@ clientSideStatementWhat<AST.IStatement>
 
 // ------------------------------------------------------------------------------------------------
 
-clientSideSet<AST.IStatement> = "set" __ var:resourceIdentifier _ "=" _ value:clientSideSetValue
+clientSideSet<AST.ISyncExecutable> = "set" __ var:resourceIdentifier _ "=" _ value:clientSideSetValue
 {
 	new AST.Client.CommandSet(var, value)
 }
@@ -57,28 +57,28 @@ clientSideSetValue<object>
 
 // ------------------------------------------------------------------------------------------------
 
-clientSideConnectionTimeout<AST.IStatement> = "timeout" __ v:timeLiteral
+clientSideConnectionTimeout<AST.ISyncExecutable> = "timeout" __ v:timeLiteral
 {
 	new AST.Client.CommandConnectionTimeout(v)
 }
 
 // ------------------------------------------------------------------------------------------------
 
-clientSideTimer<AST.IStatement> = "timer" __ v:booleanLiteral
+clientSideTimer<AST.ISyncExecutable> = "timer" __ v:booleanLiteral
 {
 	new AST.Client.CommandTimer(v)
 }
 
 // ------------------------------------------------------------------------------------------------
 
-clientSidePrompt<AST.IStatement> = "prompt" __ v:stringLiteral
+clientSidePrompt<AST.ISyncExecutable> = "prompt" __ v:stringLiteral
 {
 	new AST.Client.CommandPrompt(v)
 }
 
 // ------------------------------------------------------------------------------------------------
 
-createResourceStatement<AST.IAsyncStatement> = "create" __
+createResourceStatement<AST.IAsyncExecutable> = "create" __
 	soifnx:statementOptionIfNotExistsWithWhitespace
 	ddl:( createViewDDL / createFolderDDL / createSchemaDDL / #ERROR{ "Unrecognized resource type to be created" } )
 {
@@ -108,7 +108,7 @@ createSchemaDDL<object> = "schema" __ res:resourcePath
 
 // ------------------------------------------------------------------------------------------------
 
-publishStatement<AST.IAsyncStatement> = "pub" "lish"? __
+publishStatement<AST.IAsyncExecutable> = "pub" "lish"? __
 	ifNotExists:statementOptionIfNotExistsWithWhitespace
 	source:resourcePath __
 	"to" __ target:resourcePath
@@ -125,7 +125,7 @@ publishStatement<AST.IAsyncStatement> = "pub" "lish"? __
 
 // 2do! introduce "listOfDroppableResourceSpecifiers", "droppableResourceType" PEG rules
 
-dropResourceStatement<AST.IAsyncStatement> = "drop" __
+dropResourceStatement<AST.IAsyncExecutable> = "drop" __
 	soifx:statementOptionIfExistsWithWhitespace
 	res:listOfFullResourceSpecifiers
 {
@@ -134,7 +134,7 @@ dropResourceStatement<AST.IAsyncStatement> = "drop" __
 
 // ------------------------------------------------------------------------------------------------
 
-purgeResourceStatement<AST.IAsyncStatement> = "purge" __
+purgeResourceStatement<AST.IAsyncExecutable> = "purge" __
 	soifx:statementOptionIfExistsWithWhitespace
 	res:listOfFullResourceSpecifiers
 {
@@ -143,7 +143,7 @@ purgeResourceStatement<AST.IAsyncStatement> = "purge" __
 
 // ------------------------------------------------------------------------------------------------
 
-grantStatement<AST.IAsyncStatement> = "grant" __
+grantStatement<AST.IAsyncExecutable> = "grant" __
 	modusOperandi:grantOptionAppendOrSetWithWhitespace
 	isRec:statementOptionRecursiveWithWhitespace
 	priv:listOfResourcePrivileges __
@@ -197,7 +197,7 @@ grantPropagationDirectionToProducers = ( "up" "stream"? ) / ( "to" __ "producers
 
 // ------------------------------------------------------------------------------------------------
 
-assignStatement<AST.IAsyncStatement> = "assign" __
+assignStatement<AST.IAsyncExecutable> = "assign" __
 	what:policySpecifier __
 	("to" / #ERROR{ "TO keyword expected" }) __
 	res:listOfFullResourceSpecifiers
@@ -205,7 +205,7 @@ assignStatement<AST.IAsyncStatement> = "assign" __
 	new AST.Server.CommandAssign(NoP77svk.TibcoDV.API.WSDL.Admin.rbsAssignmentOperationType.ASSIGN, what, res)
 }
 
-unassignStatement<AST.IAsyncStatement> = "unassign" __
+unassignStatement<AST.IAsyncExecutable> = "unassign" __
 	what:policySpecifier __
 	("from" / #ERROR{ "FROM keyword expected" }) __
 	res:listOfFullResourceSpecifiers
@@ -232,7 +232,7 @@ cbsFilterPolicySpecifier<AST.Server.FilterPolicy> = ("cbs" / "cls") __ ( ("pol" 
 
 // ------------------------------------------------------------------------------------------------
 
-describeStatement<AST.IAsyncStatement>
+describeStatement<AST.IAsyncExecutable>
 	= describeCommand __
 	v:listOfPartialResourceSpecifiers
 {
@@ -243,7 +243,7 @@ describeCommand = "desc" ("r" ("ibe")?)?
 
 // ------------------------------------------------------------------------------------------------
 
-introspectStatement<AST.IAsyncStatement> = "introspect" __ dslist:introspectTargetDataSourceList
+introspectStatement<AST.IAsyncExecutable> = "introspect" __ dslist:introspectTargetDataSourceList
 {
 	new AST.Server.CommandIntrospect(dslist)
 }

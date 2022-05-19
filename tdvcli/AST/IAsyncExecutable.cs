@@ -4,7 +4,7 @@
     using NoP77svk.TibcoDV.API;
     using NoP77svk.TibcoDV.CLI.Commons;
 
-    internal interface IAsyncStatement
+    internal interface IAsyncExecutable
     {
         Task Execute(TdvWebServiceClient tdvClient, IInfoOutput output);
     }

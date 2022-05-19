@@ -8,7 +8,7 @@
     using NoP77svk.TibcoDV.CLI.Commons;
     using NoP77svk.TibcoDV.Commons;
 
-    internal class CommandSet : IStatement
+    internal class CommandSet : ISyncExecutable
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(Program));
 

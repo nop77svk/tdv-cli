@@ -3,7 +3,7 @@
     using NoP77svk.TibcoDV.API;
     using NoP77svk.TibcoDV.CLI.Commons;
 
-    internal interface IStatement
+    internal interface ISyncExecutable
     {
         void Execute(TdvWebServiceClient tdvClient, IInfoOutput output);
     }

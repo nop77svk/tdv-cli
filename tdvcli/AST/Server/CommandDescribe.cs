@@ -9,7 +9,7 @@
     using NoP77svk.TibcoDV.Commons;
     using WSDL = NoP77svk.TibcoDV.API.WSDL.Admin;
 
-    internal class CommandDescribe : IAsyncStatement
+    internal class CommandDescribe : IAsyncExecutable
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(Program));
 

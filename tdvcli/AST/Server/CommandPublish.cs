@@ -10,7 +10,7 @@
     using NoP77svk.TibcoDV.CLI.Commons;
     using WSDL = NoP77svk.TibcoDV.API.WSDL.Admin;
 
-    internal class CommandPublish : IAsyncStatement
+    internal class CommandPublish : IAsyncExecutable
     {
         public string Source { get; }
         public string Target { get; }

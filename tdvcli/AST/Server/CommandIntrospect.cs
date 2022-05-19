@@ -8,7 +8,7 @@
     using NoP77svk.TibcoDV.API;
     using NoP77svk.TibcoDV.CLI.Commons;
 
-    internal class CommandIntrospect : IAsyncStatement
+    internal class CommandIntrospect : IAsyncExecutable
     {
         public IList<IntrospectTargetDataSource> DataSources { get; }
 
