@@ -7,13 +7,13 @@
 
     internal class ScriptFileParser
     {
-        private Func<char> commandDelimiterGetter;
+        private Func<char> getCommandDelimiter;
 
         public char CommandDelimiter
         {
             get
             {
-                char result = commandDelimiterGetter();
+                char result = getCommandDelimiter();
                 if (result != ';')
                     throw new ArgumentOutOfRangeException(nameof(result), result, "Invalid command delimiter");
                 return result;
@@ -22,7 +22,7 @@
 
         public ScriptFileParser(Func<char> commandDelimiterGetter)
         {
-            this.commandDelimiterGetter = commandDelimiterGetter;
+            getCommandDelimiter = commandDelimiterGetter;
         }
 
         internal IEnumerable<ScriptFileParserOutPOCO> SplitScriptsToStatements(IEnumerable<string?>? scriptFiles)
