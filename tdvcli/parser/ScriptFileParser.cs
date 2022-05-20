@@ -7,20 +7,20 @@
 
     internal class ScriptFileParser
     {
-        private Func<char> getCommandDelimiter;
+        private Func<string> getCommandDelimiter;
 
         public string CommandDelimiter
         {
             get
             {
-                string result = getCommandDelimiter().ToString();
+                string result = getCommandDelimiter();
                 if (result != ";")
                     throw new ArgumentOutOfRangeException(nameof(result), result, "Invalid command delimiter");
                 return result;
             }
         }
 
-        public ScriptFileParser(Func<char> commandDelimiterGetter)
+        public ScriptFileParser(Func<string> commandDelimiterGetter)
         {
             getCommandDelimiter = commandDelimiterGetter;
         }

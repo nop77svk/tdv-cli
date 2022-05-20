@@ -2,6 +2,6 @@
 {
     internal class ParserState
     {
-        public char CommandDelimiter { get; set; }
+        public string CommandDelimiter { get; set; } = ";";
     }
 }

@@ -106,7 +106,7 @@
 
             ParserState parserState = new ParserState()
             {
-                CommandDelimiter = ';'
+                CommandDelimiter = ";"
             };
             ScriptFileParser fileParser = new ScriptFileParser(() => parserState.CommandDelimiter);
             PierresTibcoSqlParser sqlParser = new PierresTibcoSqlParser();
