@@ -9,12 +9,12 @@
     {
         private Func<char> getCommandDelimiter;
 
-        public char CommandDelimiter
+        public string CommandDelimiter
         {
             get
             {
-                char result = getCommandDelimiter();
-                if (result != ';')
+                string result = getCommandDelimiter().ToString();
+                if (result != ";")
                     throw new ArgumentOutOfRangeException(nameof(result), result, "Invalid command delimiter");
                 return result;
             }
@@ -85,7 +85,7 @@
             return ixNonWhiteSpaceChar;
         }
 
-        private static ValueTuple<bool, int> TrimmedStringEndsWith(string? value, char endingChar)
+        private static ValueTuple<bool, int> TrimmedStringEndsWith(string? value, string endingSequence)
         {
             if (string.IsNullOrEmpty(value))
                 return new (false, 0);
@@ -94,9 +94,12 @@
             while (ixEnding >= 0 && char.IsWhiteSpace(value[ixEnding]))
                 ixEnding--;
 
+            int endingSequenceLength = endingSequence.Length;
+            ReadOnlySpan<char> endingSequenceSpan = endingSequence.AsSpan();
+
             if (ixEnding < 0)
                 return new (false, 0);
-            else if (value[ixEnding] == endingChar)
+            else if (value.AsSpan(ixEnding, endingSequenceLength).SequenceEqual(endingSequenceSpan))
                 return new (true, value.Length - ixEnding);
             else
                 return new (false, 0);
