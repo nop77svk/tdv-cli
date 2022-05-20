@@ -5,6 +5,6 @@
 
     internal interface ISyncExecutable
     {
-        void Execute(TdvWebServiceClient tdvClient, IInfoOutput output);
+        void Execute(TdvWebServiceClient tdvClient, IInfoOutput output, ParserState parserState);
     }
 }

@@ -104,7 +104,11 @@
                 DebugLogHttpResponse
             );
 
-            ScriptFileParser fileParser = new ScriptFileParser(() => ';'); // 2do!
+            ParserState parserState = new ParserState()
+            {
+                CommandDelimiter = ';'
+            };
+            ScriptFileParser fileParser = new ScriptFileParser(() => parserState.CommandDelimiter);
             PierresTibcoSqlParser sqlParser = new PierresTibcoSqlParser();
 
             // do your stuff
@@ -125,20 +129,20 @@
                 if (args.DryRun)
                     _out.Info(commandAST?.ToString() ?? "(null command)");
                 else
-                    await ExecuteParsedStatement(tdvClient, commandAST);
+                    await ExecuteParsedStatement(tdvClient, commandAST, parserState);
             }
 
             _out.Info("All done");
         }
 
-        private static async Task ExecuteParsedStatement(TdvWebServiceClient tdvClient, object commandAST)
+        private static async Task ExecuteParsedStatement(TdvWebServiceClient tdvClient, object commandAST, ParserState parserState)
         {
             using var log = new TraceLog(_log, nameof(ExecuteParsedStatement));
 
             if (commandAST is AST.IAsyncExecutable stmtAsync)
-                await stmtAsync.Execute(tdvClient, _out);
+                await stmtAsync.Execute(tdvClient, _out, parserState);
             else if (commandAST is AST.ISyncExecutable stmt)
-                stmt.Execute(tdvClient, _out);
+                stmt.Execute(tdvClient, _out, parserState);
             else
                 throw new ArgumentOutOfRangeException(nameof(commandAST), commandAST?.GetType() + " :: " + commandAST?.ToString(), "Unrecognized type of parsed statement");
         }

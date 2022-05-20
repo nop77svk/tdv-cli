@@ -36,7 +36,7 @@
             Propagate = propagate;
         }
 
-        public async Task Execute(TdvWebServiceClient tdvClient, IInfoOutput output)
+        public async Task Execute(TdvWebServiceClient tdvClient, IInfoOutput output, ParserState parserState)
         {
             using var log = new TraceLog(_log, nameof(Execute));
 

@@ -6,6 +6,6 @@
 
     internal interface IAsyncExecutable
     {
-        Task Execute(TdvWebServiceClient tdvClient, IInfoOutput output);
+        Task Execute(TdvWebServiceClient tdvClient, IInfoOutput output, ParserState parserState);
     }
 }

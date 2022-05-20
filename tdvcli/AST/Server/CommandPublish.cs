@@ -25,7 +25,7 @@
             IfNotExists = ifNotExists;
         }
 
-        public async Task Execute(TdvWebServiceClient tdvClient, IInfoOutput output)
+        public async Task Execute(TdvWebServiceClient tdvClient, IInfoOutput output, ParserState parserState)
         {
             using Task<WSDL.resource> sourceInfoTask = tdvClient.GetResourceInfo(Source).FirstAsync().AsTask();
             using Task<WSDL.resource> targetInfoTask = tdvClient.GetResourceInfo(Target).FirstAsync().AsTask();

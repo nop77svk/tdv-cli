@@ -17,7 +17,7 @@
             DataSources = dataSources;
         }
 
-        public async Task Execute(TdvWebServiceClient tdvClient, IInfoOutput output)
+        public async Task Execute(TdvWebServiceClient tdvClient, IInfoOutput output, ParserState parserState)
         {
             throw new NotImplementedException();
         }

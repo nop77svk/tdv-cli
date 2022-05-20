@@ -23,7 +23,7 @@
             VarValue = varValue;
         }
 
-        public void Execute(TdvWebServiceClient tdvClient, IInfoOutput output)
+        public void Execute(TdvWebServiceClient tdvClient, IInfoOutput output, ParserState parserState)
         {
             using var log = new TraceLog(_log, nameof(Execute));
 
