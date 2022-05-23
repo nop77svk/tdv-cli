@@ -20,7 +20,7 @@
             await response.LastAsync();
         }
 
-        public async Task<WSDL.Admin.getIntrospectedResourceIdsResultResponse> GetIntrospectedResourceIds(string dataSourcePath, int pollingIntervalMS = 500, CancellationToken? cancellationToken = null)
+        public async IAsyncEnumerable<WSDL.Admin.pathTypePair> GetIntrospectedResourceIds(string dataSourcePath, int pollingIntervalMS = 500, CancellationToken? cancellationToken = null)
         {
             if (pollingIntervalMS < 0)
                 throw new ArgumentOutOfRangeException(nameof(pollingIntervalMS), pollingIntervalMS, "Invalid polling interval");
@@ -32,21 +32,20 @@
             {
                 result = await GetIntrospectedResourceIdsResult(taskId);
 
-                // 2do! yield the results as IAsyncEnumerable; result.completed marks the checkpoint of "no more data on output"
+                for (int i = 0; i < result.resourceIdentifiers.Length; i++)
+                    yield return result.resourceIdentifiers[i];
 
                 if (result.completed)
                     break;
 
                 cancellationToken?.ThrowIfCancellationRequested();
 
-                if (pollingIntervalMS > 0)
+                if (pollingIntervalMS > 0 && result.resourceIdentifiers.Length <= 0)
                     await Task.Delay(pollingIntervalMS);
             }
-
-            return result;
         }
 
-        public async Task<WSDL.Admin.getIntrospectableResourceIdsResultResponse> GetIntrospectableResourceIds(string dataSourcePath, int pollingIntervalMS = 500, bool clearCachePriorToRefresh = true, CancellationToken? cancellationToken = null)
+        public async IAsyncEnumerable<WSDL.Admin.linkableResourceId> GetIntrospectableResourceIds(string dataSourcePath, int pollingIntervalMS = 500, bool clearCachePriorToRefresh = true, CancellationToken? cancellationToken = null)
         {
             if (pollingIntervalMS < 0)
                 throw new ArgumentOutOfRangeException(nameof(pollingIntervalMS), pollingIntervalMS, "Invalid polling interval");
@@ -61,18 +60,17 @@
             {
                 result = await GetIntrospectableResourceIdsResult(taskId);
 
-                // 2do! yield the results as IAsyncEnumerable; result.completed marks the checkpoint of "no more data on output"
+                for (int i = 0; i < result.resourceIdentifiers.Length; i++)
+                    yield return result.resourceIdentifiers[i];
 
                 if (result.completed)
                     break;
 
                 cancellationToken?.ThrowIfCancellationRequested();
 
-                if (pollingIntervalMS > 0)
+                if (pollingIntervalMS > 0 && result.resourceIdentifiers.Length <= 0)
                     await Task.Delay(pollingIntervalMS);
             }
-
-            return result;
         }
 
         private async Task<int> GetIntrospectedResourceIdsTask(string dataSourcePath)
