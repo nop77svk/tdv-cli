@@ -8,6 +8,18 @@
 
     public partial class TdvWebServiceClient
     {
+        public async Task ClearIntrospectableResourceIdCache(string dataSourcePath)
+        {
+            IAsyncEnumerable<WSDL.Admin.clearIntrospectableResourceIdCacheResponse> response = _wsClient.EndpointGetObject<WSDL.Admin.clearIntrospectableResourceIdCacheResponse>(
+                new TdvSoapWsEndpoint<WSDL.Admin.clearIntrospectableResourceIdCacheRequest>("clearIntrospectableResourceIdCache", new WSDL.Admin.clearIntrospectableResourceIdCacheRequest()
+                {
+                    path = dataSourcePath
+                }
+            ));
+
+            await response.LastAsync();
+        }
+
         public async Task<WSDL.Admin.getIntrospectedResourceIdsResultResponse> GetIntrospectedResourceIds(string dataSourcePath, int pollingIntervalMS = 500, CancellationToken? cancellationToken = null)
         {
             if (pollingIntervalMS < 0)
@@ -31,10 +43,13 @@
             return result;
         }
 
-        public async Task<WSDL.Admin.getIntrospectableResourceIdsResultResponse> GetIntrospectableResourceIds(string dataSourcePath, int pollingIntervalMS = 500, CancellationToken? cancellationToken = null)
+        public async Task<WSDL.Admin.getIntrospectableResourceIdsResultResponse> GetIntrospectableResourceIds(string dataSourcePath, int pollingIntervalMS = 500, bool clearCachePriorToRefresh = true, CancellationToken? cancellationToken = null)
         {
             if (pollingIntervalMS < 0)
                 throw new ArgumentOutOfRangeException(nameof(pollingIntervalMS), pollingIntervalMS, "Invalid polling interval");
+
+            if (clearCachePriorToRefresh)
+                await ClearIntrospectableResourceIdCache(dataSourcePath);
 
             int taskId = await GetIntrospectableResourceIdsTask(dataSourcePath);
 
