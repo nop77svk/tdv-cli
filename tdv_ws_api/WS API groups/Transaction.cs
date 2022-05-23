@@ -29,5 +29,15 @@
 
             await response.LastAsync();
         }
+
+        public async Task CommitTransaction()
+        {
+            await CloseTransaction(WSDL.Util.commitAction.COMMIT);
+        }
+
+        public async Task RollbackTransaction()
+        {
+            await CloseTransaction(WSDL.Util.commitAction.ROLLBACK);
+        }
     }
 }
