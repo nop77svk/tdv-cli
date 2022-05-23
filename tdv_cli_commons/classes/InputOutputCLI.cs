@@ -21,7 +21,7 @@
         public string? OutputTdvPath { get; set; }
 
         [Option("purge-output-first", Required = false, Default = false, HelpText = "\n"
-            + "Purge the target TDV path of all views prior to generating the L1 views")]
+            + "Purge the target TDV path of all views prior to generating the target resources")]
         public bool PurgeOutputPathFirst { get; set; }
 
         // ----------------------------------------------------------------------------------------
