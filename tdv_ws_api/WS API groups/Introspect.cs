@@ -31,6 +31,9 @@
             while (true)
             {
                 result = await GetIntrospectedResourceIdsResult(taskId);
+
+                // 2do! yield the results as IAsyncEnumerable; result.completed marks the checkpoint of "no more data on output"
+
                 if (result.completed)
                     break;
 
@@ -57,6 +60,9 @@
             while (true)
             {
                 result = await GetIntrospectableResourceIdsResult(taskId);
+
+                // 2do! yield the results as IAsyncEnumerable; result.completed marks the checkpoint of "no more data on output"
+
                 if (result.completed)
                     break;
 
