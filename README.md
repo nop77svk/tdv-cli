@@ -67,6 +67,8 @@ Specify propagation directions
 * `upstream`/`to producers` to propagate the privileges to objects the granted objects depend on,
 * `up and down`/`down and up`/`to consumers and to producers`/`to producers and to consumers`/`both directions`/... to propagate the privileges in both directions described above.
 
+**Warning:** Recursive privilege assignment does not work with privilege propagation options. This is due to the design limitation (read: flaw) of Tibco's DV server as of version 8.4. Propagation only works when granting privileges on individual TDV resources.
+
 ### RBS/RLS policy assignment and removal
 
 <`assign`|`unassign`>` `<`rbs`|`rls`>` pol`[`icy`]` `<_policy function resource path_>` to `<_comma-delimited list of resource specifiers_>`;`
