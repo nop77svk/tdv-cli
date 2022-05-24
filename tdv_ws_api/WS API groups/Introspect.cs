@@ -122,5 +122,20 @@
 
             return await response.FirstAsync();
         }
+
+        private async Task<int> IntrospectResourcesTask(string dataSourcePath, bool runInBackgroundTransaction = true)
+        {
+            IAsyncEnumerable<WSDL.Admin.introspectResourcesTaskResponse> response = _wsClient.EndpointGetObject<WSDL.Admin.introspectResourcesTaskResponse>(
+                new TdvSoapWsEndpoint<WSDL.Admin.introspectResourcesTaskRequest>("introspectResourcesTask", new WSDL.Admin.introspectResourcesTaskRequest()
+                {
+                    path = dataSourcePath,
+                    runInBackgroundTransaction = runInBackgroundTransaction,
+                    // 2do!
+                }
+            ));
+
+            WSDL.Admin.introspectResourcesTaskResponse result = await response.FirstAsync();
+            return int.Parse(result.taskId);
+        }
     }
 }
