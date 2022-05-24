@@ -145,9 +145,10 @@
                 if (!args.DryRun)
                 {
                     await tdvClient.CloseSession();
-                    _out.Info("All done");
                 }
             }
+
+            _out.Info("All done");
         }
 
         private static async Task ExecuteParsedStatement(TdvWebServiceClient tdvClient, object commandAST, ParserState parserState)
