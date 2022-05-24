@@ -39,7 +39,7 @@
 
         [Option("http-connection-pool-size", Required = false, Default = 16, HelpText = "\n"
             + "Maximum number of concurrently open HTTP(S) connections to the TDV Server")]
-        public int HttpConnectionPoolSize { get; set; }
+        public int HttpConnectionPoolSize { get; set; } = 16;
 
         // ----------------------------------------------------------------------------------------
         // cleaned-up CLI arguments
