@@ -86,7 +86,7 @@
             args.ValidateAndCleanUp(null);
 #endif
 
-            _out.Info($"Connecting as {args.TdvServerUserName} to {args.TdvServerWsScheme}://{args.TdvServerHost}:{args.TdvServerWsApiPort}");
+            _out.InfoNoEoln($"Connecting as {args.TdvServerUserName} to {args.TdvServerWsScheme}://{args.TdvServerHost}:{args.TdvServerWsApiPort}...");
             using HttpClient httpClient = InitHttpConnectionPool(args);
 
             TdvWebServiceClient tdvClient = InitTdvRestClient(
@@ -107,7 +107,11 @@
             if (!args.DryRun)
             {
                 await tdvClient.BeginSession();
-                _out.Info("Connected");
+                _out.Info(" Connected");
+            }
+            else
+            {
+                _out.Info(string.Empty);
             }
 
             try
