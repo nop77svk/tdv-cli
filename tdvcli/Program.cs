@@ -104,35 +104,50 @@
                 DebugLogHttpResponse
             );
 
-            ParserState parserState = new ParserState()
+            if (!args.DryRun)
             {
-                CommandDelimiter = ";"
-            };
-            ScriptFileParser fileParser = new ScriptFileParser(() => parserState.CommandDelimiter);
-            PierresTibcoSqlParser sqlParser = new PierresTibcoSqlParser();
-
-            // do your stuff
-            foreach (ScriptFileParserOutPOCO statement in fileParser.SplitScriptsToStatements(args.PrivilegeDefinitionFiles))
-            {
-                _log.Debug(statement);
-                object commandAST;
-
-                try
-                {
-                    commandAST = sqlParser.Parse(statement.Statement);
-                }
-                catch (FormatException e)
-                {
-                    throw new StatementParseException(statement.FileName, statement.FileLine, statement.Statement, e.Message, e);
-                }
-
-                if (args.DryRun)
-                    _out.Info(commandAST?.ToString() ?? "(null command)");
-                else
-                    await ExecuteParsedStatement(tdvClient, commandAST, parserState);
+                await tdvClient.BeginSession();
+                _out.Info("Connected");
             }
 
-            _out.Info("All done");
+            try
+            {
+                ParserState parserState = new ParserState()
+                {
+                    CommandDelimiter = ";"
+                };
+                ScriptFileParser fileParser = new ScriptFileParser(() => parserState.CommandDelimiter);
+                PierresTibcoSqlParser sqlParser = new PierresTibcoSqlParser();
+
+                // do your stuff
+                foreach (ScriptFileParserOutPOCO statement in fileParser.SplitScriptsToStatements(args.PrivilegeDefinitionFiles))
+                {
+                    _log.Debug(statement);
+                    object commandAST;
+
+                    try
+                    {
+                        commandAST = sqlParser.Parse(statement.Statement);
+                    }
+                    catch (FormatException e)
+                    {
+                        throw new StatementParseException(statement.FileName, statement.FileLine, statement.Statement, e.Message, e);
+                    }
+
+                    if (args.DryRun)
+                        _out.Info(commandAST?.ToString() ?? "(null command)");
+                    else
+                        await ExecuteParsedStatement(tdvClient, commandAST, parserState);
+                }
+            }
+            finally
+            {
+                if (!args.DryRun)
+                {
+                    await tdvClient.CloseSession();
+                    _out.Info("All done");
+                }
+            }
         }
 
         private static async Task ExecuteParsedStatement(TdvWebServiceClient tdvClient, object commandAST, ParserState parserState)
