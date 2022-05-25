@@ -22,17 +22,17 @@
             TResponse response;
             while (true)
             {
-                response = await taskHandler.PollTaskResultAsync();
+                response = await taskHandler.PollTaskResultAsync(taskId);
 
                 cancellationToken?.ThrowIfCancellationRequested();
                 responseFeedback?.Invoke(response);
 
                 taskHandler.HandleResponse(response);
 
-                if (taskHandler.IsFinished()) break;
+                if (taskHandler.IsFinished(response)) break;
                 cancellationToken?.ThrowIfCancellationRequested();
 
-                if (taskHandler.ShouldWaitBeforeAnotherPolling())
+                if (taskHandler.ShouldWaitBeforeAnotherPolling(response))
                 {
                     if (cancellationToken != null)
                         await Task.Delay((int)taskHandler.PollingInterval.TotalMilliseconds, (CancellationToken)cancellationToken);
@@ -58,7 +58,7 @@
             TResponse response;
             while (true)
             {
-                response = await taskHandler.PollTaskResultAsync();
+                response = await taskHandler.PollTaskResultAsync(taskId);
 
                 cancellationToken?.ThrowIfCancellationRequested();
                 responseFeedback?.Invoke(response);
@@ -66,10 +66,10 @@
                 foreach (TResult result in taskHandler.ExtractResults(response))
                     yield return result;
 
-                if (taskHandler.IsFinished()) break;
+                if (taskHandler.IsFinished(response)) break;
                 cancellationToken?.ThrowIfCancellationRequested();
 
-                if (taskHandler.ShouldWaitBeforeAnotherPolling())
+                if (taskHandler.ShouldWaitBeforeAnotherPolling(response))
                 {
                     if (cancellationToken != null)
                         await Task.Delay((int)taskHandler.PollingInterval.TotalMilliseconds, (CancellationToken)cancellationToken);

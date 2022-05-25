@@ -11,10 +11,10 @@
         TimeSpan PollingInterval { get; set; }
 
         Task<int> StartTaskAsync();
-        Task<TResponse> PollTaskResultAsync();
+        Task<TResponse> PollTaskResultAsync(int taskId);
         void HandleResponse(TResponse response);
-        bool IsFinished();
-        bool ShouldWaitBeforeAnotherPolling();
+        bool IsFinished(TResponse response);
+        bool ShouldWaitBeforeAnotherPolling(TResponse response);
         void Finalize(TResponse response);
     }
 }
