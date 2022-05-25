@@ -2,10 +2,8 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
-    using NoP77svk.Linq;
 
     public partial class TdvWebServiceClient
     {
@@ -28,7 +26,7 @@
                         target = tablePath
                     }
                 )
-            ).ToArrayAsync();
+            ).FirstAsync();
         }
 
         public async IAsyncEnumerable<string> GetRbsPolicyAssignmentList(string? policyFunctionPath)
