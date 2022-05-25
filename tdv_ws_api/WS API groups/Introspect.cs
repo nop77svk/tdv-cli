@@ -96,13 +96,13 @@
 
                 resultFeedback?.Invoke(result);
 
-                if (result.completed || result.status.status is WSDL.Admin.operationStatus.SUCCESS or WSDL.Admin.operationStatus.FAIL or WSDL.Admin.operationStatus.CANCELED)
-                    break;
+                bool noMoreResults = result.completed || result.status.status is WSDL.Admin.operationStatus.SUCCESS or WSDL.Admin.operationStatus.FAIL or WSDL.Admin.operationStatus.CANCELED;
+                if (noMoreResults) break;
 
                 cancellationToken?.ThrowIfCancellationRequested();
 
-                if (pollingIntervalMS > 0)
-                    await Task.Delay(pollingIntervalMS);
+                bool shouldWaitBeforeAnotherPolling = pollingIntervalMS > 0;
+                if (shouldWaitBeforeAnotherPolling) await Task.Delay(pollingIntervalMS);
             }
 
             if (result.completed)
@@ -149,13 +149,13 @@
                 for (int i = 0; i < result.status.report.Length; i++)
                     yield return result.status.report[i];
 
-                if (result.completed || result.status.status is WSDL.Admin.operationStatus.SUCCESS or WSDL.Admin.operationStatus.FAIL or WSDL.Admin.operationStatus.CANCELED)
-                    break;
+                bool noMoreResults = result.completed || result.status.status is WSDL.Admin.operationStatus.SUCCESS or WSDL.Admin.operationStatus.FAIL or WSDL.Admin.operationStatus.CANCELED;
+                if (noMoreResults) break;
 
                 cancellationToken?.ThrowIfCancellationRequested();
 
-                if (pollingIntervalMS > 0 && result.status.report.Length <= 0)
-                    await Task.Delay(pollingIntervalMS);
+                bool shouldWaitBeforeAnotherPolling = pollingIntervalMS > 0 && result.status.report.Length <= 0;
+                if (shouldWaitBeforeAnotherPolling) await Task.Delay(pollingIntervalMS);
             }
 
             if (result.completed)
