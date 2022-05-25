@@ -32,6 +32,8 @@
             {
                 result = await GetIntrospectedResourceIdsResult(taskId);
 
+                cancellationToken?.ThrowIfCancellationRequested();
+
                 for (int i = 0; i < result.resourceIdentifiers.Length; i++)
                     yield return result.resourceIdentifiers[i];
 
@@ -41,7 +43,12 @@
                 cancellationToken?.ThrowIfCancellationRequested();
 
                 if (pollingIntervalMS > 0 && result.resourceIdentifiers.Length <= 0)
-                    await Task.Delay(pollingIntervalMS);
+                {
+                    if (cancellationToken != null)
+                        await Task.Delay(pollingIntervalMS, (CancellationToken)cancellationToken);
+                    else
+                        await Task.Delay(pollingIntervalMS);
+                }
             }
         }
 
@@ -60,6 +67,8 @@
             {
                 result = await GetIntrospectableResourceIdsResult(taskId);
 
+                cancellationToken?.ThrowIfCancellationRequested();
+
                 for (int i = 0; i < result.resourceIdentifiers.Length; i++)
                     yield return result.resourceIdentifiers[i];
 
@@ -69,7 +78,12 @@
                 cancellationToken?.ThrowIfCancellationRequested();
 
                 if (pollingIntervalMS > 0 && result.resourceIdentifiers.Length <= 0)
-                    await Task.Delay(pollingIntervalMS);
+                {
+                    if (cancellationToken != null)
+                        await Task.Delay(pollingIntervalMS, (CancellationToken)cancellationToken);
+                    else
+                        await Task.Delay(pollingIntervalMS);
+                }
             }
         }
 
@@ -94,6 +108,7 @@
             {
                 result = await IntrospectResourcesResult(taskId, blocking: retrieveResultInBlockingFashion, detailLevel: WSDL.Admin.detailLevel.SIMPLE);
 
+                cancellationToken?.ThrowIfCancellationRequested();
                 resultFeedback?.Invoke(result);
 
                 bool noMoreResults = result.completed || result.status.status is WSDL.Admin.operationStatus.SUCCESS or WSDL.Admin.operationStatus.FAIL or WSDL.Admin.operationStatus.CANCELED;
@@ -102,7 +117,13 @@
                 cancellationToken?.ThrowIfCancellationRequested();
 
                 bool shouldWaitBeforeAnotherPolling = pollingIntervalMS > 0;
-                if (shouldWaitBeforeAnotherPolling) await Task.Delay(pollingIntervalMS);
+                if (shouldWaitBeforeAnotherPolling)
+                {
+                    if (cancellationToken != null)
+                        await Task.Delay(pollingIntervalMS, (CancellationToken)cancellationToken);
+                    else
+                        await Task.Delay(pollingIntervalMS);
+                }
             }
 
             if (result.completed)
@@ -144,6 +165,7 @@
             {
                 result = await IntrospectResourcesResult(taskId, blocking: retrieveResultInBlockingFashion, detailLevel: WSDL.Admin.detailLevel.FULL);
 
+                cancellationToken?.ThrowIfCancellationRequested();
                 resultFeedback?.Invoke(result);
 
                 for (int i = 0; i < result.status.report.Length; i++)
@@ -155,7 +177,13 @@
                 cancellationToken?.ThrowIfCancellationRequested();
 
                 bool shouldWaitBeforeAnotherPolling = pollingIntervalMS > 0 && result.status.report.Length <= 0;
-                if (shouldWaitBeforeAnotherPolling) await Task.Delay(pollingIntervalMS);
+                if (shouldWaitBeforeAnotherPolling)
+                {
+                    if (cancellationToken != null)
+                        await Task.Delay(pollingIntervalMS, (CancellationToken)cancellationToken);
+                    else
+                        await Task.Delay(pollingIntervalMS);
+                }
             }
 
             if (result.completed)
