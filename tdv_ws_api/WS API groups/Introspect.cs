@@ -123,14 +123,22 @@
             return await response.FirstAsync();
         }
 
-        private async Task<int> IntrospectResourcesTask(string dataSourcePath, bool runInBackgroundTransaction = true)
+        private async Task<int> IntrospectResourcesTask(string dataSourcePath, IEnumerable<WSDL.Admin.introspectionPlanEntry> entries, TdvIntrospectionOptions options)
         {
             IAsyncEnumerable<WSDL.Admin.introspectResourcesTaskResponse> response = _wsClient.EndpointGetObject<WSDL.Admin.introspectResourcesTaskResponse>(
                 new TdvSoapWsEndpoint<WSDL.Admin.introspectResourcesTaskRequest>("introspectResourcesTask", new WSDL.Admin.introspectResourcesTaskRequest()
                 {
                     path = dataSourcePath,
-                    runInBackgroundTransaction = runInBackgroundTransaction,
-                    // 2do!
+                    runInBackgroundTransaction = options.RunInBackgroundTransaction,
+                    plan = new WSDL.Admin.introspectionPlan()
+                    {
+                        autoRollback = options.AutoRollback,
+                        failFast = options.FailFast,
+                        commitOnFailure = options.CommitOnFailure,
+                        scanForNewResourcesToAutoAdd = options.ScanForNewResourcesToAutoAdd,
+                        updateAllIntrospectedResources = options.UpdateAllIntrospectedResources,
+                        entries = entries.ToArray()
+                    }
                 }
             ));
 
