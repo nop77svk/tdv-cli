@@ -1,12 +1,12 @@
 ﻿namespace NoP77svk.TibcoDV.API
 {
-    internal class TdvIntrospectionOptions
+    public class TdvIntrospectionOptions
     {
-        internal bool ScanForNewResourcesToAutoAdd { get; init; } = false;
-        internal bool UpdateAllIntrospectedResources { get; init; } = false;
-        internal bool RunInBackgroundTransaction { get; init; } = true;
-        internal bool FailFast { get; init; } = true;
-        internal bool CommitOnFailure { get; init; } = false;
-        internal bool AutoRollback { get; init; } = false;
+        public bool ScanForNewResourcesToAutoAdd { get; init; } = false;
+        public bool UpdateAllIntrospectedResources { get; init; } = false;
+        public bool RunInBackgroundTransaction { get; init; } = true;
+        public bool FailFast { get; init; } = true;
+        public bool CommitOnFailure { get; init; } = false;
+        public bool AutoRollback { get; init; } = false;
     }
 }
