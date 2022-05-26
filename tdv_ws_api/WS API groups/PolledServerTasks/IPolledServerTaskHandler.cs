@@ -9,7 +9,6 @@
     public interface IPolledServerTaskHandler<TResponse>
     {
         TimeSpan PollingInterval { get; set; }
-
         Task<int> StartTaskAsync();
         Task<TResponse> PollTaskResultAsync(int taskId);
         void HandleResponse(TResponse response);
