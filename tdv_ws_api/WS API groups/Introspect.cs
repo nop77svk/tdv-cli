@@ -20,66 +20,6 @@
             await response.LastAsync();
         }
 
-        public async IAsyncEnumerable<WSDL.Admin.introspectionChangeEntry> IntrospectWithDetails(
-            string dataSourcePath,
-            IEnumerable<WSDL.Admin.introspectionPlanEntry> resources,
-            TdvIntrospectionOptions options,
-            Action<WSDL.Admin.introspectResourcesResultResponse>? resultFeedback = null,
-            int pollingIntervalMS = 1000,
-            CancellationToken? cancellationToken = null
-        )
-        {
-            if (pollingIntervalMS < 0)
-                throw new ArgumentOutOfRangeException(nameof(pollingIntervalMS), pollingIntervalMS, "Invalid polling interval");
-
-            int taskId = await IntrospectResourcesTask(dataSourcePath, resources, options);
-
-            bool retrieveResultInBlockingFashion = pollingIntervalMS <= 0 || !options.RunInBackgroundTransaction;
-            WSDL.Admin.introspectResourcesResultResponse result;
-
-            while (true)
-            {
-                result = await IntrospectResourcesResult(taskId, blocking: retrieveResultInBlockingFashion, detailLevel: WSDL.Admin.detailLevel.FULL);
-
-                cancellationToken?.ThrowIfCancellationRequested();
-                resultFeedback?.Invoke(result);
-
-                for (int i = 0; i < result.status.report.Length; i++)
-                    yield return result.status.report[i];
-
-                bool noMoreResults = result.completed || result.status.status is WSDL.Admin.operationStatus.SUCCESS or WSDL.Admin.operationStatus.FAIL or WSDL.Admin.operationStatus.CANCELED;
-                if (noMoreResults) break;
-
-                cancellationToken?.ThrowIfCancellationRequested();
-
-                bool shouldWaitBeforeAnotherPolling = pollingIntervalMS > 0 && result.status.report.Length <= 0;
-                if (shouldWaitBeforeAnotherPolling)
-                {
-                    if (cancellationToken != null)
-                        await Task.Delay(pollingIntervalMS, (CancellationToken)cancellationToken);
-                    else
-                        await Task.Delay(pollingIntervalMS);
-                }
-            }
-
-            if (result.completed)
-            {
-                switch (result.status.status)
-                {
-                    case WSDL.Admin.operationStatus.SUCCESS: break;
-                    case WSDL.Admin.operationStatus.CANCELED: throw new ETdvIntrospectionCancelled(dataSourcePath, taskId);
-                    case WSDL.Admin.operationStatus.WAITING: throw new ETdvIntrospectionPrematureEnd(dataSourcePath, taskId);
-                    case WSDL.Admin.operationStatus.INCOMPLETE: throw new ETdvIntrospectionIncomplete(dataSourcePath, taskId);
-                    case WSDL.Admin.operationStatus.FAIL: throw new ETdvIntrospectionFailed(dataSourcePath, taskId);
-                    default: throw new ETdvIntrospectionError(dataSourcePath, taskId, $"Unknown status (\"{result.status.status}\" upon completion");
-                }
-            }
-            else
-            {
-                throw new ETdvIntrospectionPrematureEnd(dataSourcePath, taskId);
-            }
-        }
-
         internal async Task<int> GetIntrospectedResourceIdsTask(string dataSourcePath)
         {
             IAsyncEnumerable<WSDL.Admin.getIntrospectedResourceIdsTaskResponse> response = _wsClient.EndpointGetObject<WSDL.Admin.getIntrospectedResourceIdsTaskResponse>(
