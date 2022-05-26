@@ -2,7 +2,6 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -58,6 +57,7 @@
             TResponse response;
             while (true)
             {
+                // 2do! could be super-nice if polling results would run in a separate thread, producing data asynchronously for the consuming foreach+yield below
                 response = await taskHandler.PollTaskResultAsync(taskId);
 
                 cancellationToken?.ThrowIfCancellationRequested();
