@@ -16,7 +16,7 @@
         }
 
         public TdvWebServiceClient TdvClient { get; }
-        public TimeSpan PollingInterval { get; set; } = TimeSpan.FromMilliseconds(500);
+        public TimeSpan PollingInterval { get; set; } = TimeSpan.FromMilliseconds(1500);
         public string DataSourcePath { get; }
         public IEnumerable<WSDL.Admin.introspectionPlanEntry> Resources { get; }
         public TdvIntrospectionOptions IntrospectionOptions { get; init; } = new TdvIntrospectionOptions();
