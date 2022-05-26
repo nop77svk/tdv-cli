@@ -20,38 +20,6 @@
             await response.LastAsync();
         }
 
-        public async IAsyncEnumerable<WSDL.Admin.pathTypePair> GetIntrospectedResourceIds(string dataSourcePath, int pollingIntervalMS = 500, CancellationToken? cancellationToken = null)
-        {
-            if (pollingIntervalMS < 0)
-                throw new ArgumentOutOfRangeException(nameof(pollingIntervalMS), pollingIntervalMS, "Invalid polling interval");
-
-            int taskId = await GetIntrospectedResourceIdsTask(dataSourcePath);
-
-            WSDL.Admin.getIntrospectedResourceIdsResultResponse result;
-            while (true)
-            {
-                result = await GetIntrospectedResourceIdsResult(taskId);
-
-                cancellationToken?.ThrowIfCancellationRequested();
-
-                for (int i = 0; i < result.resourceIdentifiers.Length; i++)
-                    yield return result.resourceIdentifiers[i];
-
-                if (result.completed)
-                    break;
-
-                cancellationToken?.ThrowIfCancellationRequested();
-
-                if (pollingIntervalMS > 0 && result.resourceIdentifiers.Length <= 0)
-                {
-                    if (cancellationToken != null)
-                        await Task.Delay(pollingIntervalMS, (CancellationToken)cancellationToken);
-                    else
-                        await Task.Delay(pollingIntervalMS);
-                }
-            }
-        }
-
         public async IAsyncEnumerable<WSDL.Admin.linkableResourceId> GetIntrospectableResourceIds(string dataSourcePath, int pollingIntervalMS = 500, bool clearCachePriorToRefresh = true, CancellationToken? cancellationToken = null)
         {
             if (pollingIntervalMS < 0)
@@ -204,7 +172,7 @@
             }
         }
 
-        private async Task<int> GetIntrospectedResourceIdsTask(string dataSourcePath)
+        internal async Task<int> GetIntrospectedResourceIdsTask(string dataSourcePath)
         {
             IAsyncEnumerable<WSDL.Admin.getIntrospectedResourceIdsTaskResponse> response = _wsClient.EndpointGetObject<WSDL.Admin.getIntrospectedResourceIdsTaskResponse>(
                 new TdvSoapWsEndpoint<WSDL.Admin.getIntrospectedResourceIdsTaskRequest>("getIntrospectedResourceIdsTask", new WSDL.Admin.getIntrospectedResourceIdsTaskRequest()
@@ -217,7 +185,7 @@
             return int.Parse(result.taskId);
         }
 
-        private async Task<WSDL.Admin.getIntrospectedResourceIdsResultResponse> GetIntrospectedResourceIdsResult(int taskId)
+        internal async Task<WSDL.Admin.getIntrospectedResourceIdsResultResponse> GetIntrospectedResourceIdsResult(int taskId)
         {
             IAsyncEnumerable<WSDL.Admin.getIntrospectedResourceIdsResultResponse> response = _wsClient.EndpointGetObject<WSDL.Admin.getIntrospectedResourceIdsResultResponse>(
                 new TdvSoapWsEndpoint<WSDL.Admin.getIntrospectedResourceIdsResultRequest>("getIntrospectedResourceIdsResult", new WSDL.Admin.getIntrospectedResourceIdsResultRequest()
@@ -229,7 +197,7 @@
             return await response.FirstAsync();
         }
 
-        private async Task<int> GetIntrospectableResourceIdsTask(string dataSourcePath)
+        internal async Task<int> GetIntrospectableResourceIdsTask(string dataSourcePath)
         {
             IAsyncEnumerable<WSDL.Admin.getIntrospectableResourceIdsTaskResponse> response = _wsClient.EndpointGetObject<WSDL.Admin.getIntrospectableResourceIdsTaskResponse>(
                 new TdvSoapWsEndpoint<WSDL.Admin.getIntrospectableResourceIdsTaskRequest>("getIntrospectableResourceIdsTask", new WSDL.Admin.getIntrospectableResourceIdsTaskRequest()
@@ -242,7 +210,7 @@
             return int.Parse(result.taskId);
         }
 
-        private async Task<WSDL.Admin.getIntrospectableResourceIdsResultResponse> GetIntrospectableResourceIdsResult(int taskId)
+        internal async Task<WSDL.Admin.getIntrospectableResourceIdsResultResponse> GetIntrospectableResourceIdsResult(int taskId)
         {
             IAsyncEnumerable<WSDL.Admin.getIntrospectableResourceIdsResultResponse> response = _wsClient.EndpointGetObject<WSDL.Admin.getIntrospectableResourceIdsResultResponse>(
                 new TdvSoapWsEndpoint<WSDL.Admin.getIntrospectableResourceIdsResultRequest>("getIntrospectableResourceIdsResult", new WSDL.Admin.getIntrospectableResourceIdsResultRequest()
@@ -254,7 +222,7 @@
             return await response.FirstAsync();
         }
 
-        private async Task<int> IntrospectResourcesTask(string dataSourcePath, IEnumerable<WSDL.Admin.introspectionPlanEntry> resources, TdvIntrospectionOptions options)
+        internal async Task<int> IntrospectResourcesTask(string dataSourcePath, IEnumerable<WSDL.Admin.introspectionPlanEntry> resources, TdvIntrospectionOptions options)
         {
             IAsyncEnumerable<WSDL.Admin.introspectResourcesTaskResponse> response = _wsClient.EndpointGetObject<WSDL.Admin.introspectResourcesTaskResponse>(
                 new TdvSoapWsEndpoint<WSDL.Admin.introspectResourcesTaskRequest>("introspectResourcesTask", new WSDL.Admin.introspectResourcesTaskRequest()
@@ -277,7 +245,7 @@
             return int.Parse(result.taskId);
         }
 
-        private async Task<WSDL.Admin.introspectResourcesResultResponse> IntrospectResourcesResult(int taskId, bool blocking = false, WSDL.Admin.detailLevel detailLevel = WSDL.Admin.detailLevel.SIMPLE)
+        internal async Task<WSDL.Admin.introspectResourcesResultResponse> IntrospectResourcesResult(int taskId, bool blocking = false, WSDL.Admin.detailLevel detailLevel = WSDL.Admin.detailLevel.SIMPLE)
         {
             IAsyncEnumerable<WSDL.Admin.introspectResourcesResultResponse> response = _wsClient.EndpointGetObject<WSDL.Admin.introspectResourcesResultResponse>(
                 new TdvSoapWsEndpoint<WSDL.Admin.introspectResourcesResultRequest>("introspectResourcesResult", new WSDL.Admin.introspectResourcesResultRequest()
