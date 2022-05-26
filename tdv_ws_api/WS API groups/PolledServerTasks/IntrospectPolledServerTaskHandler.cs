@@ -1,6 +1,5 @@
 ﻿namespace NoP77svk.TibcoDV.API.PolledServerTasks
 {
-    using NoP77svk.TibcoDV.API.WSDL.Admin;
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
@@ -19,7 +18,7 @@
         public TdvWebServiceClient TdvClient { get; }
         public TimeSpan PollingInterval { get; set; } = TimeSpan.FromMilliseconds(500);
         public string DataSourcePath { get; }
-        public IEnumerable<introspectionPlanEntry> Resources { get; }
+        public IEnumerable<WSDL.Admin.introspectionPlanEntry> Resources { get; }
         public TdvIntrospectionOptions IntrospectionOptions { get; init; } = new TdvIntrospectionOptions();
 
         internal bool RetrieveResultInBlockingFashion { get => PollingInterval.CompareTo(TimeSpan.Zero) <= 0 || !IntrospectionOptions.RunInBackgroundTransaction; }
