@@ -20,41 +20,6 @@
             await response.LastAsync();
         }
 
-        public async IAsyncEnumerable<WSDL.Admin.linkableResourceId> GetIntrospectableResourceIds(string dataSourcePath, int pollingIntervalMS = 500, bool clearCachePriorToRefresh = true, CancellationToken? cancellationToken = null)
-        {
-            if (pollingIntervalMS < 0)
-                throw new ArgumentOutOfRangeException(nameof(pollingIntervalMS), pollingIntervalMS, "Invalid polling interval");
-
-            if (clearCachePriorToRefresh)
-                await ClearIntrospectableResourceIdCache(dataSourcePath);
-
-            int taskId = await GetIntrospectableResourceIdsTask(dataSourcePath);
-
-            WSDL.Admin.getIntrospectableResourceIdsResultResponse result;
-            while (true)
-            {
-                result = await GetIntrospectableResourceIdsResult(taskId);
-
-                cancellationToken?.ThrowIfCancellationRequested();
-
-                for (int i = 0; i < result.resourceIdentifiers.Length; i++)
-                    yield return result.resourceIdentifiers[i];
-
-                if (result.completed)
-                    break;
-
-                cancellationToken?.ThrowIfCancellationRequested();
-
-                if (pollingIntervalMS > 0 && result.resourceIdentifiers.Length <= 0)
-                {
-                    if (cancellationToken != null)
-                        await Task.Delay(pollingIntervalMS, (CancellationToken)cancellationToken);
-                    else
-                        await Task.Delay(pollingIntervalMS);
-                }
-            }
-        }
-
         public async Task Introspect(
             string dataSourcePath,
             IEnumerable<WSDL.Admin.introspectionPlanEntry> resources,
