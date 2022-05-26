@@ -8,18 +8,17 @@
     public class GetIntrospectableResourceIdsPolledServerTaskHandler
         : IPolledServerTaskEnumerableHandler<WSDL.Admin.getIntrospectableResourceIdsResultResponse, WSDL.Admin.linkableResourceId>
     {
-        public GetIntrospectableResourceIdsPolledServerTaskHandler(TdvWebServiceClient tdvClient, string dataSourcePath, bool clearCachePriorToRefresh = true, TimeSpan? pollingInterval = null)
+        public GetIntrospectableResourceIdsPolledServerTaskHandler(TdvWebServiceClient tdvClient, string dataSourcePath, bool clearCachePriorToRefresh = true)
         {
             TdvClient = tdvClient;
             DataSourcePath = dataSourcePath;
             ClearCachePriorToRefresh = clearCachePriorToRefresh;
-            PollingInterval = pollingInterval ?? TimeSpan.FromMilliseconds(500);
         }
 
         public TdvWebServiceClient TdvClient { get; }
+        public TimeSpan PollingInterval { get; set; } = TimeSpan.FromMilliseconds(500);
         public string DataSourcePath { get; }
         public bool ClearCachePriorToRefresh { get; }
-        public TimeSpan PollingInterval { get; set; }
 
         public IEnumerable<WSDL.Admin.linkableResourceId> ExtractResults(WSDL.Admin.getIntrospectableResourceIdsResultResponse response)
         {

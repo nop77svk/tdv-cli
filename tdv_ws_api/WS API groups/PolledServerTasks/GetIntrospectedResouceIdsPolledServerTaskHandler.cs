@@ -8,16 +8,15 @@
     public class GetIntrospectedResouceIdsPolledServerTaskHandler
         : IPolledServerTaskEnumerableHandler<WSDL.Admin.getIntrospectedResourceIdsResultResponse, WSDL.Admin.pathTypePair>
     {
-        public GetIntrospectedResouceIdsPolledServerTaskHandler(TdvWebServiceClient tdvClient, string dataSourcePath, TimeSpan? pollingInterval = null)
+        public GetIntrospectedResouceIdsPolledServerTaskHandler(TdvWebServiceClient tdvClient, string dataSourcePath)
         {
             TdvClient = tdvClient;
             DataSourcePath = dataSourcePath;
-            PollingInterval = pollingInterval ?? TimeSpan.FromMilliseconds(500);
         }
 
         public TdvWebServiceClient TdvClient { get; }
+        public TimeSpan PollingInterval { get; set; } = TimeSpan.FromMilliseconds(500)
         public string DataSourcePath { get; }
-        public TimeSpan PollingInterval { get; set; }
 
         public IEnumerable<WSDL.Admin.pathTypePair> ExtractResults(WSDL.Admin.getIntrospectedResourceIdsResultResponse response)
         {
