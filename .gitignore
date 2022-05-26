@@ -364,3 +364,4 @@ FodyWeavers.xsd
 /SoapDeserializePoC
 
 _publish.*
+td_ws_test/
