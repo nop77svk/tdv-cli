@@ -1,10 +1,6 @@
-﻿namespace NoP77svk.TibcoDV.API
+﻿namespace NoP77svk.TibcoDV.API.PolledServerTasks
 {
-    using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
 
     public interface IPolledServerTaskEnumerableHandler<TResponse, TResult>
         : IPolledServerTaskHandler<TResponse>

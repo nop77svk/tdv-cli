@@ -8,7 +8,7 @@
     public partial class TdvWebServiceClient
     {
         public async Task PolledServerTask<TResponse>(
-            IPolledServerTaskHandler<TResponse> taskHandler,
+            PolledServerTasks.IPolledServerTaskHandler<TResponse> taskHandler,
             Action<TResponse>? responseFeedback = null,
             CancellationToken? cancellationToken = null
         )
@@ -44,7 +44,7 @@
         }
 
         public async IAsyncEnumerable<TResult> PolledServerTaskEnumerable<TResponse, TResult>(
-            IPolledServerTaskEnumerableHandler<TResponse, TResult> taskHandler,
+            PolledServerTasks.IPolledServerTaskEnumerableHandler<TResponse, TResult> taskHandler,
             Action<TResponse>? responseFeedback = null,
             CancellationToken? cancellationToken = null
         )

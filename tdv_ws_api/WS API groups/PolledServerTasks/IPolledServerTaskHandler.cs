@@ -1,4 +1,4 @@
-﻿namespace NoP77svk.TibcoDV.API
+﻿namespace NoP77svk.TibcoDV.API.PolledServerTasks
 {
     using System;
     using System.Collections.Generic;
