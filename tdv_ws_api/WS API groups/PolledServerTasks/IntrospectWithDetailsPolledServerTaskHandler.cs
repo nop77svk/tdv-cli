@@ -51,7 +51,7 @@
 
         public bool IsFinished(WSDL.Admin.introspectResourcesResultResponse response)
         {
-            return response.completed || response.status.status is WSDL.Admin.operationStatus.SUCCESS or WSDL.Admin.operationStatus.FAIL or WSDL.Admin.operationStatus.CANCELED;
+            return response.completed;
         }
 
         public async Task<WSDL.Admin.introspectResourcesResultResponse> PollTaskResultAsync(int taskId)
