@@ -269,10 +269,14 @@ introspectTargetDataSourceOptionalCatalogList<IList<AST.Server.IntrospectTargetC
 introspectTargetCatalogList<IList<AST.Server.IntrospectTargetCatalog>> = v:introspectTargetCatalog<1,,_ "," _> { v }
 
 introspectTargetCatalog<AST.Server.IntrospectTargetCatalog> =
-	"catalog" __ name:resourceIdentifier slist:introspectTargetCatalogOptionalSchemaList
+	"catalog" __ cname:introspectTargetCatalogSpecifier slist:introspectTargetCatalogOptionalSchemaList
 {
-	new AST.Server.IntrospectTargetCatalog(name, slist)
+	new AST.Server.IntrospectTargetCatalog(cname, slist)
 }
+
+introspectTargetCatalogSpecifier<AST.Infra.MatchBy>
+	= a:matchIdentifierByRegExp { a }
+	/ x:matchIdentifierExactly { x }
 
 introspectTargetCatalogOptionalSchemaList<IList<AST.Server.IntrospectTargetSchema>> =
 	( _ "(" _ x:introspectTargetSchemaList _ ")" _ ) { x }
@@ -282,10 +286,14 @@ introspectTargetCatalogOptionalSchemaList<IList<AST.Server.IntrospectTargetSchem
 introspectTargetSchemaList<IList<AST.Server.IntrospectTargetSchema>> = v:introspectTargetSchema<1,,_ "," _> { v }
 
 introspectTargetSchema<AST.Server.IntrospectTargetSchema> =
-	"schema" __ name:resourceIdentifier tlist:introspectTargetSchemaOptionalTableList
+	"schema" __ sname:introspectTargetSchemaSpecifier tlist:introspectTargetSchemaOptionalTableList
 {
-	new AST.Server.IntrospectTargetSchema(name, tlist)
+	new AST.Server.IntrospectTargetSchema(sname, tlist)
 }
+
+introspectTargetSchemaSpecifier<AST.Infra.MatchBy>
+	= a:matchIdentifierByRegExp { a }
+	/ x:matchIdentifierExactly { x }
 
 introspectTargetSchemaOptionalTableList<IList<AST.Server.IntrospectTargetTable>> =
 	( _ "(" _ x:introspectTargetTableList _ ")" _ ) { x }
