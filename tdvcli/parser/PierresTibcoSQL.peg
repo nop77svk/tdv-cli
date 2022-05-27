@@ -269,7 +269,7 @@ introspectTargetDataSourceOptionalCatalogList<IList<AST.Server.IntrospectTargetC
 introspectTargetCatalogList<IList<AST.Server.IntrospectTargetCatalog>> = v:introspectTargetCatalog<1,,_ "," _> { v }
 
 introspectTargetCatalog<AST.Server.IntrospectTargetCatalog> =
-	"cat" "alog"? __ name:resourceIdentifier slist:introspectTargetCatalogOptionalSchemaList
+	"catalog" __ name:resourceIdentifier slist:introspectTargetCatalogOptionalSchemaList
 {
 	new AST.Server.IntrospectTargetCatalog(name, slist)
 }
@@ -282,7 +282,7 @@ introspectTargetCatalogOptionalSchemaList<IList<AST.Server.IntrospectTargetSchem
 introspectTargetSchemaList<IList<AST.Server.IntrospectTargetSchema>> = v:introspectTargetSchema<1,,_ "," _> { v }
 
 introspectTargetSchema<AST.Server.IntrospectTargetSchema> =
-	"sch" "ema"? __ name:resourceIdentifier tlist:introspectTargetSchemaOptionalTableList
+	"schema" __ name:resourceIdentifier tlist:introspectTargetSchemaOptionalTableList
 {
 	new AST.Server.IntrospectTargetSchema(name, tlist)
 }
