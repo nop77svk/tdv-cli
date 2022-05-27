@@ -233,13 +233,18 @@ cbsFilterPolicySpecifier<AST.Server.FilterPolicy> = ("cbs" / "cls") __ ( ("pol" 
 // ------------------------------------------------------------------------------------------------
 
 describeStatement<AST.IAsyncExecutable>
-	= describeCommand __
-	v:listOfPartialResourceSpecifiers
+	= describeCommand __ describeChoice __ v:listOfPartialResourceSpecifiers
 {
 	new AST.Server.CommandDescribe(v)
 }
 
 describeCommand = "desc" ("r" ("ibe")?)?
+
+describeChoice
+	= "resource" "s"?
+	/ "introspected"
+	/ "introspectable"
+	/ #ERROR{ "Unrecognized choice of describing" }
 
 // ------------------------------------------------------------------------------------------------
 
@@ -251,7 +256,7 @@ introspectStatement<AST.IAsyncExecutable> = "introspect" __ dslist:introspectTar
 introspectTargetDataSourceList<IList<AST.Server.IntrospectTargetDataSource>> = v:introspectTargetDataSource<1,,_ "," _> { v }
 
 introspectTargetDataSource<AST.Server.IntrospectTargetDataSource> =
-	( "datasource" / "data" __ "source" ) __ name:resourcePath clist:introspectTargetDataSourceOptionalCatalogList
+	"data" ( "_" / _ ) "source" __ name:resourcePath clist:introspectTargetDataSourceOptionalCatalogList
 {
 	new AST.Server.IntrospectTargetDataSource(name, clist)
 }
@@ -264,7 +269,7 @@ introspectTargetDataSourceOptionalCatalogList<IList<AST.Server.IntrospectTargetC
 introspectTargetCatalogList<IList<AST.Server.IntrospectTargetCatalog>> = v:introspectTargetCatalog<1,,_ "," _> { v }
 
 introspectTargetCatalog<AST.Server.IntrospectTargetCatalog> =
-	"catalog" __ name:resourceIdentifier slist:introspectTargetCatalogOptionalSchemaList
+	"cat" "alog"? __ name:resourceIdentifier slist:introspectTargetCatalogOptionalSchemaList
 {
 	new AST.Server.IntrospectTargetCatalog(name, slist)
 }
@@ -277,7 +282,7 @@ introspectTargetCatalogOptionalSchemaList<IList<AST.Server.IntrospectTargetSchem
 introspectTargetSchemaList<IList<AST.Server.IntrospectTargetSchema>> = v:introspectTargetSchema<1,,_ "," _> { v }
 
 introspectTargetSchema<AST.Server.IntrospectTargetSchema> =
-	"schema" __ name:resourceIdentifier tlist:introspectTargetSchemaOptionalTableList
+	"sch" "ema"? __ name:resourceIdentifier tlist:introspectTargetSchemaOptionalTableList
 {
 	new AST.Server.IntrospectTargetSchema(name, tlist)
 }
