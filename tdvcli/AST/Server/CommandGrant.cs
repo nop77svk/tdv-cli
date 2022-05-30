@@ -137,7 +137,7 @@
         private async Task<ValueTuple<Dictionary<string, List<string>>, Dictionary<string, List<string>>>> RetrieveDomainGroupsAndUsers(TdvWebServiceClient tdvClient)
         {
             IEnumerable<Principal> domainsForWildcardMatching = Principals
-                .Where(principal => principal.MatchingPrincipal is MatchExactly)
+                .Where(principal => principal.MatchingPrincipal is not MatchExactly)
                 .Where(principal => !string.IsNullOrEmpty(principal.Domain))
                 .ToList();
 
