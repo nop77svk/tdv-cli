@@ -1,12 +1,16 @@
 {
-  "profiles": {
-    "run _temp.sql on Dev": {
-      "commandName": "Project",
-      "commandLineArgs": "-u datavirt-dev.eb.lan.at --no-proxy --use-ssl=no -f d:\\_temp.sql"
-    },
-    "dry-run _test.sql on Dev": {
-      "commandName": "Project",
-      "commandLineArgs": "-u datavirt-dev.eb.lan.at --no-proxy --use-ssl=no -f d:\\_test.sql --dry-run"
-    }
-  }
+   "profiles": {
+      "run _temp.sql on Dev": {
+         "commandName": "Project",
+         "commandLineArgs": "-u datavirt-dev.eb.lan.at --no-proxy --use-ssl=no -f d:\\_temp.sql"
+      },
+      "run _temp.sql on UAT": {
+         "commandName": "Project",
+         "commandLineArgs": "-u 127.0.0.1:10023 --no-proxy --use-ssl=no -f d:\\_temp.sql"
+      },
+      "dry-run _test.sql on Dev": {
+         "commandName": "Project",
+         "commandLineArgs": "-u datavirt-dev.eb.lan.at --no-proxy --use-ssl=no -f d:\\_test.sql --dry-run"
+      }
+   }
 }
