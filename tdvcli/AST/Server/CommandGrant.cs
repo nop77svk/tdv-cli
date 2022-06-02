@@ -23,16 +23,16 @@
         internal updatePrivilegesMode ModusOperandi { get; }
         internal IList<TdvPrivilegeEnum> Privileges { get; }
         internal IList<ResourceSpecifier> Resources { get; }
-        internal IList<Principal> Principals { get; }
+        internal IList<Principal> PrincipalSpecifiers { get; }
         internal GrantPropagationDirections Propagate { get; }
 
-        internal CommandGrant(bool isRecursive, updatePrivilegesMode modusOperandi, IList<TdvPrivilegeEnum> privileges, IList<ResourceSpecifier> resources, IList<Principal> principals, GrantPropagationDirections propagate)
+        internal CommandGrant(bool isRecursive, updatePrivilegesMode modusOperandi, IList<TdvPrivilegeEnum> privileges, IList<ResourceSpecifier> resources, IList<Principal> principalSpecifiers, GrantPropagationDirections propagate)
         {
             IsRecursive = isRecursive;
             ModusOperandi = modusOperandi;
             Privileges = privileges;
             Resources = resources;
-            Principals = principals;
+            PrincipalSpecifiers = principalSpecifiers;
             Propagate = propagate;
         }
 
@@ -47,10 +47,10 @@
 
             // retrieve domain->group, domain->user mappings from server, if needed
             Dictionary<string, List<string>> allDomainGroups, allDomainUsers;
-            (allDomainGroups, allDomainUsers) = await RetrieveDomainGroupsAndUsers(tdvClient);
+            (allDomainGroups, allDomainUsers) = await RetrieveGroupsAndUsersForGranteeDomains(tdvClient);
 
             // calculate the final set of grantees
-            IEnumerable<privilege> granteesMatchedByEquality = Principals
+            IEnumerable<privilege> granteesMatchedByEquality = PrincipalSpecifiers
                 .Where(principal => principal.MatchingPrincipal is MatchExactly)
                 .Select(principal => new privilege()
                 {
@@ -93,7 +93,7 @@
                     domainUsers => domainUsers.Value,
                     (domainUsers, userName) => new { ServerDomain = domainUsers.Key, ServerUser = userName }
                 )
-                .CrossProduct(Principals
+                .CrossProduct(PrincipalSpecifiers
                     .Where(principal => principal.Type == userNameType.USER)
                     .Where(principal => principal.MatchingPrincipal is MatchByRegExp)
                     .Select(principal => new { GranteePrincipal = principal, GranteeWildcard = RegexExt.ParseSlashedRegexp(principal.MatchingPrincipal.Value, RegexOptions.IgnoreCase) })
@@ -117,7 +117,7 @@
                     domainGroups => domainGroups.Value,
                     (domainGroups, groupName) => new { ServerDomain = domainGroups.Key, ServerGroup = groupName }
                 )
-                .CrossProduct(Principals
+                .CrossProduct(PrincipalSpecifiers
                     .Where(principal => principal.Type == userNameType.GROUP)
                     .Where(principal => principal.MatchingPrincipal is MatchByRegExp)
                     .Select(principal => new { GranteePrincipal = principal, GranteeWildcard = RegexExt.ParseSlashedRegexp(principal.MatchingPrincipal.Value, RegexOptions.IgnoreCase) })
@@ -134,9 +134,9 @@
                 });
         }
 
-        private async Task<ValueTuple<Dictionary<string, List<string>>, Dictionary<string, List<string>>>> RetrieveDomainGroupsAndUsers(TdvWebServiceClient tdvClient)
+        private async Task<ValueTuple<Dictionary<string, List<string>>, Dictionary<string, List<string>>>> RetrieveGroupsAndUsersForGranteeDomains(TdvWebServiceClient tdvClient)
         {
-            IEnumerable<Principal> domainsForWildcardMatching = Principals
+            IEnumerable<Principal> domainsForWildcardMatching = PrincipalSpecifiers
                 .Where(principal => principal.MatchingPrincipal is not MatchExactly)
                 .Where(principal => !string.IsNullOrEmpty(principal.Domain))
                 .ToList();
