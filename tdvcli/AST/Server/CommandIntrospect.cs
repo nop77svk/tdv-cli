@@ -145,30 +145,47 @@
         {
             if (schemaJoin.Input != null && schemaJoin.Input.Tables.Any())
             {
-                IEnumerable<Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableObject, IntrospectTargetTable>> schemaJoinOnEquality = schemaJoin.Introspectable.Objects
-                    .Join(
-                        inner: schemaJoin.Input.Tables
-                            .Where(x => x.TableName is Infra.MatchExactly),
-                        outerKeySelector: x => x.ObjectName,
-                        innerKeySelector: x => x.TableName.Value,
-                        resultSelector: (outer, inner) => new Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableObject, IntrospectTargetTable>(outer, inner)
-                    );
+                var inputs = schemaJoin.Input.Tables.ToArray();
 
-                IEnumerable<Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableObject, IntrospectTargetTable>> schemaJoinOnRegExp = schemaJoin.Introspectable.Objects
-                    .JoinByRegexpMatch(
-                        valueSelector: x => x.ObjectName,
-                        regexps: schemaJoin.Input.Tables
-                            .Where(x => x.TableName is Infra.MatchByRegExp),
-                        regexpSelector: x => RegexExt.ParseSlashedRegexp(x.TableName.Value)
-                    )
-                    .Select(x => new Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableObject, IntrospectTargetTable>(x.Item1, x.Item2));
+                foreach (var introspectable in schemaJoin.Introspectable.Objects)
+                {
+                    // if the inclusion/exclusion list starts with "include", then assume no objects are to be included automatically
+                    // if the inclusion/exclusion list starts with "exclude", then assume all objects are to be included automatically
+                    // if the inclusion/exclusion list is empty, then assume all objects are to be included automatically
+                    bool spoolTheIntrospectable = inputs.Length <= 0 || inputs[0].ElementOperation == Infra.SetElementOperation.Exclude;
 
-                return schemaJoinOnEquality.Concat(schemaJoinOnRegExp);
+                    for (int i = 0; i < inputs.Length; i++)
+                    {
+                        bool objectNameMatch = inputs[i].TableName switch
+                        {
+                            Infra.MatchExactly exactInput => introspectable.ObjectName == exactInput.Value,
+                            Infra.MatchByRegExp rxInput => rxInput.RegExp.IsMatch(introspectable.ObjectName),
+                            _ => throw new NotImplementedException($"Don't know how to handle {inputs[i].TableName.GetType()} input")
+                        };
+
+                        if (objectNameMatch)
+                        {
+                            spoolTheIntrospectable = inputs[i].ElementOperation switch
+                            {
+                                Infra.SetElementOperation.Include => true,
+                                Infra.SetElementOperation.Exclude => false,
+                                _ => throw new NotImplementedException($"Don't know how to handle element set operation {inputs[i].ElementOperation}")
+                            };
+                        }
+                    }
+
+                    if (spoolTheIntrospectable)
+                    {
+                        yield return new Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableObject, IntrospectTargetTable>(introspectable, null);
+                    }
+                }
             }
             else
             {
-                return schemaJoin.Introspectable.Objects
-                    .Select(x => new Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableObject, IntrospectTargetTable>(x, null));
+                foreach (var row in schemaJoin.Introspectable.Objects
+                    .Select(x => new Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableObject, IntrospectTargetTable>(x, null))
+                )
+                    yield return row;
             }
         }
 
