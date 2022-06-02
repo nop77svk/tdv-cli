@@ -71,15 +71,8 @@
                 .Select(x => new Internal.IntrospectableDataSource(x.Key, x.ToArray()))
                 .ToArray();
 
-            IEnumerable<Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableDataSource, IntrospectTargetDataSource>> dataSourceJoinOnEquality = multiGetIntrospectableResourcesGrouped
-                .Join(
-                    inner: DataSources,
-                    outerKeySelector: x => x.DataSource,
-                    innerKeySelector: x => x.DataSourcePath,
-                    resultSelector: (outer, inner) => new Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableDataSource, IntrospectTargetDataSource>(outer, inner)
-                );
-
-            foreach (var dataSourceJoin in dataSourceJoinOnEquality)
+            IEnumerable<Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableDataSource, IntrospectTargetDataSource>> dataSourcesToIntrospect = IdentifyDataSourcesToIntrospect(multiGetIntrospectableResourcesGrouped);
+            foreach (var dataSourceJoin in dataSourcesToIntrospect)
             {
                 output.Info($"... matched data source {dataSourceJoin.Introspectable.DataSource}");
 
@@ -132,13 +125,27 @@
                     )
                     .Select(x => new Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableCatalog, IntrospectTargetCatalog>(x.Item1, x.Item2));
 
-                return catalogJoinOnEquality.Concat(catalogJoinOnRegExp);
+                return catalogJoinOnEquality
+                    .Concat(catalogJoinOnRegExp)
+                    .Where(x => x.Introspectable.CatalogName != string.Empty);
             }
             else
             {
                 return dataSourceJoin.Introspectable.Catalogs
-                    .Select(x => new Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableCatalog, IntrospectTargetCatalog>(x, null));
+                    .Select(x => new Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableCatalog, IntrospectTargetCatalog>(x, null))
+                    .Where(x => x.Introspectable.CatalogName != string.Empty);
             }
+        }
+
+        private IEnumerable<Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableDataSource, IntrospectTargetDataSource>> IdentifyDataSourcesToIntrospect(IEnumerable<Internal.IntrospectableDataSource> multiGetIntrospectableResourcesGrouped)
+        {
+            return multiGetIntrospectableResourcesGrouped
+                .Join(
+                    inner: DataSources,
+                    outerKeySelector: x => x.DataSource,
+                    innerKeySelector: x => x.DataSourcePath,
+                    resultSelector: (outer, inner) => new Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableDataSource, IntrospectTargetDataSource>(outer, inner)
+                );
         }
 
         private IEnumerable<Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableObject, IntrospectTargetTable>> IdentifyObjectsToIntrospect(Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableSchema, IntrospectTargetSchema> schemaJoin)
@@ -149,6 +156,9 @@
 
                 foreach (var introspectable in schemaJoin.Introspectable.Objects)
                 {
+                    if (introspectable.ObjectName == string.Empty)
+                        continue;
+
                     // if the inclusion/exclusion list starts with "include", then assume no objects are to be included automatically
                     // if the inclusion/exclusion list starts with "exclude", then assume all objects are to be included automatically
                     // if the inclusion/exclusion list is empty, then assume all objects are to be included automatically
@@ -184,6 +194,7 @@
             {
                 foreach (var row in schemaJoin.Introspectable.Objects
                     .Select(x => new Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableObject, IntrospectTargetTable>(x, null))
+                    .Where(x => x.Introspectable.ObjectName != string.Empty)
                 )
                     yield return row;
             }
@@ -211,12 +222,15 @@
                     )
                     .Select(x => new Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableSchema, IntrospectTargetSchema>(x.Item1, x.Item2));
 
-                return schemaJoinOnEquality.Concat(schemaJoinOnRegExp);
+                return schemaJoinOnEquality
+                    .Concat(schemaJoinOnRegExp)
+                    .Where(x => x.Introspectable.SchemaName != string.Empty);
             }
             else
             {
                 return catalogJoin.Introspectable.Schemas
-                    .Select(x => new Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableSchema, IntrospectTargetSchema>(x, null));
+                    .Select(x => new Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableSchema, IntrospectTargetSchema>(x, null))
+                    .Where(x => x.Introspectable.SchemaName != string.Empty);
             }
         }
     }
