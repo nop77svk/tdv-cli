@@ -3,7 +3,7 @@ namespace NoP77svk.TibcoDV.CLI.AST.Server
 {
     using System.Collections.Generic;
 
-    internal record IntrospectTargetCatalog(Infra.MatchBy CatalogName, IList<IntrospectTargetSchema> SchemaList)
+    internal record IntrospectTargetCatalog(Infra.MatchBy CatalogName, IList<IntrospectTargetSchema> Schemas)
     {
     }
 }

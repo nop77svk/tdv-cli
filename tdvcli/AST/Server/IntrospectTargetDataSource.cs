@@ -3,7 +3,7 @@ namespace NoP77svk.TibcoDV.CLI.AST.Server
 {
     using System.Collections.Generic;
 
-    internal record IntrospectTargetDataSource(string DataSourceName, IList<IntrospectTargetCatalog> CatalogList)
+    internal record IntrospectTargetDataSource(string DataSourcePath, IList<IntrospectTargetCatalog> Catalogs)
     {
     }
 }
