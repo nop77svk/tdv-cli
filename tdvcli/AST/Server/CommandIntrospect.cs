@@ -24,7 +24,7 @@
 
         public override string? ToString()
         {
-            return base.ToString() + $"[{DataSources.Count}]";
+            return $"{base.ToString()}[{DataSources.Count}]";
         }
     }
 }
