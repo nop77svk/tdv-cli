@@ -44,13 +44,13 @@
 
             throw new NotImplementedException();
         }
+
         public override string? ToString()
         {
             return $"{base.ToString()}[{DataSources.Count}]";
         }
 
-
-        private void FilterIntrospectablesByInput(IEnumerable<ValueTuple<string, Task<WSDL.Admin.linkableResourceId[]>>> multiGetIntrospectableResources)
+        private IEnumerable<ValueTuple<string, string, string, TdvResourceType, string>> FilterIntrospectablesByInput(IEnumerable<ValueTuple<string, Task<WSDL.Admin.linkableResourceId[]>>> multiGetIntrospectableResources)
         {
             Internal.IntrospectableDataSource[] multiGetIntrospectableResourcesGrouped = multiGetIntrospectableResources
                 .Unnest(
@@ -83,7 +83,7 @@
                 .Select(x => new Internal.IntrospectableDataSource(x.Key, x.ToArray()))
                 .ToArray();
 
-            IEnumerable<Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableDataSource, IntrospectTargetDataSource>> dataSourcesToIntrospect = IdentifyDataSourcesToIntrospect(multiGetIntrospectableResourcesGrouped);
+            IEnumerable<Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableDataSource, IntrospectTargetDataSource>> dataSourcesToIntrospect = IdentifyDataSourcesToIntrospect(DataSources, multiGetIntrospectableResourcesGrouped);
             foreach (var dataSourceJoin in dataSourcesToIntrospect)
             {
                 IEnumerable<Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableCatalog, IntrospectTargetCatalog>> catalogsToIntrospect = IdentifyCatalogsToIntrospect(dataSourceJoin);
@@ -95,6 +95,7 @@
                         IEnumerable<Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableObject, IntrospectTargetTable>> objectsToIntrospect = IdentifyObjectsToIntrospect(schemaJoin);
                         foreach (var objectJoin in objectsToIntrospect)
                         {
+                            yield return new ValueTuple<string, string, string, TdvResourceType, string>(dataSourceJoin.Introspectable.DataSource, catalogJoin.Introspectable.CatalogName, schemaJoin.Introspectable.SchemaName, objectJoin.Introspectable.ObjectType, objectJoin.Introspectable.ObjectName);
                         }
                     }
                 }
@@ -135,11 +136,11 @@
             }
         }
 
-        private IEnumerable<Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableDataSource, IntrospectTargetDataSource>> IdentifyDataSourcesToIntrospect(IEnumerable<Internal.IntrospectableDataSource> multiGetIntrospectableResourcesGrouped)
+        private static IEnumerable<Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableDataSource, IntrospectTargetDataSource>> IdentifyDataSourcesToIntrospect(IEnumerable<IntrospectTargetDataSource> dataSources, IEnumerable<Internal.IntrospectableDataSource> multiGetIntrospectableResourcesGrouped)
         {
             return multiGetIntrospectableResourcesGrouped
                 .Join(
-                    inner: DataSources,
+                    inner: dataSources,
                     outerKeySelector: x => x.DataSource,
                     innerKeySelector: x => x.DataSourcePath,
                     resultSelector: (outer, inner) => new Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableDataSource, IntrospectTargetDataSource>(outer, inner)
