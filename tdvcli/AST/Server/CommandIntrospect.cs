@@ -30,14 +30,14 @@
                 .Distinct()
                 .ToArray();
 
-            ValueTuple<string, Task<WSDL.Admin.linkableResourceId[]>>[] multiGetIntrospectableResources = uniqueDataSourcePaths
-                .Select(dataSourcePath => new ValueTuple<string, Task<WSDL.Admin.linkableResourceId[]>>(
+            NamedTask<WSDL.Admin.linkableResourceId[]>[] multiGetIntrospectableResources = uniqueDataSourcePaths
+                .Select(dataSourcePath => new NamedTask<WSDL.Admin.linkableResourceId[]>(
                     dataSourcePath,
                     tdvClient.PolledServerTaskEnumerable(new API.PolledServerTasks.GetIntrospectableResourceIdsPolledServerTaskHandler(tdvClient, dataSourcePath, true))
                         .ToArrayAsync().AsTask()
                 ))
                 .ToArray();
-            await Task.WhenAll(multiGetIntrospectableResources.Select(x => x.Item2));
+            await Task.WhenAll(multiGetIntrospectableResources.Select(x => x.Task));
             output.Info("... introspectable resource list retrieved");
 
             FilterIntrospectablesByInput(multiGetIntrospectableResources, DataSources);
@@ -50,12 +50,12 @@
             return $"{base.ToString()}[{DataSources.Count}]";
         }
 
-        private static IEnumerable<ValueTuple<string, string, string, TdvResourceType, string>> FilterIntrospectablesByInput(IEnumerable<ValueTuple<string, Task<WSDL.Admin.linkableResourceId[]>>> multiGetIntrospectableResources, IEnumerable<Server.IntrospectTargetDataSource> commandInput)
+        private static IEnumerable<ValueTuple<string, string, string, TdvResourceType, string>> FilterIntrospectablesByInput(IEnumerable<NamedTask<WSDL.Admin.linkableResourceId[]>> multiGetIntrospectableResources, IEnumerable<Server.IntrospectTargetDataSource> commandInput)
         {
             Internal.IntrospectableDataSource[] multiGetIntrospectableResourcesGrouped = multiGetIntrospectableResources
                 .Unnest(
-                    retrieveNestedCollection: x => x.Item2.Result,
-                    resultSelector: (outer, inner) => new ValueTuple<string, WSDL.Admin.linkableResourceId>(outer.Item1, inner)
+                    retrieveNestedCollection: x => x.Task.Result,
+                    resultSelector: (outer, inner) => new ValueTuple<string, WSDL.Admin.linkableResourceId>(outer.Name, inner)
                 )
                 .Select(x =>
                 {
