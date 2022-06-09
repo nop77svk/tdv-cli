@@ -40,6 +40,18 @@
             await Task.WhenAll(multiGetIntrospectableResources.Select(x => x.Item2));
             output.Info("... introspectable resource list retrieved");
 
+            FilterIntrospectablesByInput(multiGetIntrospectableResources);
+
+            throw new NotImplementedException();
+        }
+        public override string? ToString()
+        {
+            return $"{base.ToString()}[{DataSources.Count}]";
+        }
+
+
+        private void FilterIntrospectablesByInput(IEnumerable<ValueTuple<string, Task<WSDL.Admin.linkableResourceId[]>>> multiGetIntrospectableResources)
+        {
             Internal.IntrospectableDataSource[] multiGetIntrospectableResourcesGrouped = multiGetIntrospectableResources
                 .Unnest(
                     retrieveNestedCollection: x => x.Item2.Result,
@@ -74,33 +86,19 @@
             IEnumerable<Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableDataSource, IntrospectTargetDataSource>> dataSourcesToIntrospect = IdentifyDataSourcesToIntrospect(multiGetIntrospectableResourcesGrouped);
             foreach (var dataSourceJoin in dataSourcesToIntrospect)
             {
-                output.Info($"... matched data source {dataSourceJoin.Introspectable.DataSource}");
-
                 IEnumerable<Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableCatalog, IntrospectTargetCatalog>> catalogsToIntrospect = IdentifyCatalogsToIntrospect(dataSourceJoin);
                 foreach (var catalogJoin in catalogsToIntrospect)
                 {
-                    output.Info($"... ... matched catalog {catalogJoin.Introspectable.CatalogName}");
-
                     IEnumerable<Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableSchema, IntrospectTargetSchema>> schemasToIntrospect = IdentifySchemasToIntrospect(catalogJoin);
                     foreach (var schemaJoin in schemasToIntrospect)
                     {
-                        output.Info($"... ... ... matched schema {schemaJoin.Introspectable.SchemaName}");
-
                         IEnumerable<Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableObject, IntrospectTargetTable>> objectsToIntrospect = IdentifyObjectsToIntrospect(schemaJoin);
                         foreach (var objectJoin in objectsToIntrospect)
                         {
-                            output.Info($"... ... ... ... matched {objectJoin.Introspectable.ObjectType.Type.ToString().ToLower()} {objectJoin.Introspectable.ObjectName}");
                         }
                     }
                 }
             }
-
-            throw new NotImplementedException();
-        }
-
-        public override string? ToString()
-        {
-            return $"{base.ToString()}[{DataSources.Count}]";
         }
 
         private static IEnumerable<Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableCatalog, IntrospectTargetCatalog>> IdentifyCatalogsToIntrospect(Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableDataSource, IntrospectTargetDataSource> dataSourceJoin)
