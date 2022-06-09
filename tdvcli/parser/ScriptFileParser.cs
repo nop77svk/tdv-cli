@@ -33,7 +33,7 @@
                 {
                     if (scriptFile is not null)
                     {
-                        StreamReader reader = new StreamReader(scriptFile);
+                        using StreamReader reader = new StreamReader(scriptFile);
 
                         StringBuilder command = new StringBuilder();
                         bool isStartOfCommand = true;
