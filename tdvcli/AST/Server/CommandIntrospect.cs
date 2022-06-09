@@ -40,9 +40,8 @@
             await Task.WhenAll(multiGetIntrospectableResources.Select(x => x.Task));
             output.Info("... introspectable resource list retrieved");
 
-            FilterIntrospectablesByInput(multiGetIntrospectableResources, DataSources);
-
-            throw new NotImplementedException();
+            await RunTheIntrospection(tdvClient, output, multiGetIntrospectableResources);
+            output.Info("Introspection done");
         }
 
         public override string? ToString()
@@ -60,17 +59,19 @@
                 .Select(x =>
                 {
                     var splitPath = x.Item2.resourceId.path.Split('/', 3);
-                    return new ValueTuple<string, string, string, string, TdvResourceType>(
+                    return new ValueTuple<string, string, string, TdvResourceType, string>(
                         x.Item1,
                         splitPath.Length >= 1 ? splitPath[0] : string.Empty,
                         splitPath.Length >= 2 ? splitPath[1] : string.Empty,
-                        splitPath.Length >= 3 ? splitPath[2] : string.Empty,
-                        new TdvResourceType(x.Item2.resourceId.type, x.Item2.resourceId.subtype)
+                        new TdvResourceType(x.Item2.resourceId.type, x.Item2.resourceId.subtype),
+                        splitPath.Length >= 3 ? splitPath[2] : string.Empty
                     );
                 })
+                .Where(x => !string.IsNullOrEmpty(x.Item5) && !string.IsNullOrEmpty(x.Item3) && !string.IsNullOrEmpty(x.Item2) && !string.IsNullOrEmpty(x.Item1))
+                .Distinct()
                 .GroupBy(
                     keySelector: x => new ValueTuple<string, string, string>(x.Item1, x.Item2, x.Item3),
-                    elementSelector: x => new Internal.IntrospectableObject(x.Item5, x.Item4)
+                    elementSelector: x => new Internal.IntrospectableObject(x.Item4, x.Item5)
                 )
                 .GroupBy(
                     keySelector: x => new ValueTuple<string, string>(x.Key.Item1, x.Key.Item2),
@@ -231,6 +232,66 @@
                     .Select(x => new Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableSchema, IntrospectTargetSchema>(x, null))
                     .Where(x => x.Introspectable.SchemaName != string.Empty);
             }
+        }
+
+        private async Task RunTheIntrospection(TdvWebServiceClient tdvClient, IInfoOutput output, NamedTask<WSDL.Admin.linkableResourceId[]>[] multiGetIntrospectableResources)
+        {
+            Dictionary<string, WSDL.Admin.introspectResourcesResultResponse> introspectionProgress = new Dictionary<string, WSDL.Admin.introspectResourcesResultResponse>();
+            var multiIntrospection = FilterIntrospectablesByInput(multiGetIntrospectableResources, DataSources)
+                .Select(x => new ValueTuple<string, WSDL.Admin.introspectionPlanEntry>(
+                    x.Item1,
+                    new WSDL.Admin.introspectionPlanEntry()
+                    {
+                        action = WSDL.Admin.introspectionPlanAction.ADD_OR_UPDATE,
+                        resourceId = new WSDL.Admin.pathTypeSubtype()
+                        {
+                            path = $"{x.Item2}/{x.Item3}/{x.Item5}",
+                            type = x.Item4.WsType,
+                            subtype = x.Item4.WsSubType
+                        }
+                    }
+                ))
+                .GroupBy(
+                    keySelector: x => x.Item1,
+                    elementSelector: x => x.Item2
+                )
+                .Select(x => tdvClient.PolledServerTask(
+                    new API.PolledServerTasks.IntrospectPolledServerTaskHandler(tdvClient, x.Key, x.AsEnumerable()),
+                    y =>
+                    {
+                        if (introspectionProgress.ContainsKey(y.taskId))
+                            introspectionProgress[y.taskId] = y;
+                        else
+                            introspectionProgress.Add(y.taskId, y);
+
+                        var overallProgress = introspectionProgress
+                            .Where(x => x.Value != null)
+                            .Select(x => x.Value)
+                            .Aggregate(
+                                seed: new Internal.IntrospectionProgress(),
+                                func: (aggregate, element) =>
+                                {
+                                    aggregate.JobsRunning += element.completed ? 1 : 0;
+                                    aggregate.JobsTotal++;
+                                    aggregate.Added += element.status.addedCount;
+                                    aggregate.ToBeAdded += element.status.toBeAddedCount;
+                                    aggregate.Updated += element.status.updatedCount;
+                                    aggregate.ToBeUpdated += element.status.toBeUpdatedCount;
+                                    aggregate.Removed += element.status.removedCount;
+                                    aggregate.ToBeRemoved += element.status.toBeRemovedCount;
+                                    aggregate.Skipped += element.status.skippedCount;
+                                    aggregate.Warnings += element.status.warningCount;
+                                    aggregate.Errors += element.status.errorCount;
+                                    return aggregate;
+                                }
+                            );
+
+                        output.Info($"{overallProgress.ProgressPct:#####0%} done ({overallProgress.JobsRunning}/{overallProgress.JobsTotal} jobs, +{overallProgress.Added}/{overallProgress.ToBeAdded}, *{overallProgress.Updated}+{overallProgress.Skipped}/{overallProgress.ToBeUpdated}, -{overallProgress.Removed}/{overallProgress.ToBeRemoved}, warn {overallProgress.Warnings}, err {overallProgress.Errors})");
+                    }
+                ))
+                .ToArray();
+
+            await Task.WhenAll(multiIntrospection);
         }
     }
 }
