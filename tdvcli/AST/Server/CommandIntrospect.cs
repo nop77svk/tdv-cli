@@ -293,7 +293,7 @@
                                 }
                             );
 
-                        output.Info($"{overallProgress.ProgressPct:#####0%} done ({overallProgress.JobsDone}/{overallProgress.JobsTotal} jobs, +{overallProgress.Added}/{overallProgress.ToBeAdded}, *{overallProgress.Updated}+{overallProgress.Skipped}/{overallProgress.ToBeUpdated}, -{overallProgress.Removed}/{overallProgress.ToBeRemoved}, warn {overallProgress.Warnings}, err {overallProgress.Errors})");
+                        output.Info($"{overallProgress.ProgressPct:#####0%} done ({overallProgress.JobsDone}/{overallProgress.JobsRunning} jobs, +{overallProgress.Added}/{overallProgress.ToBeAdded}, *{overallProgress.Updated}+{overallProgress.Skipped}/{overallProgress.ToBeUpdated}, -{overallProgress.Removed}/{overallProgress.ToBeRemoved}, W {overallProgress.Warnings}, E {overallProgress.Errors})");
                     }
                 ))
                 .ToArray();
