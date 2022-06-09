@@ -40,7 +40,7 @@
             await Task.WhenAll(multiGetIntrospectableResources.Select(x => x.Item2));
             output.Info("... introspectable resource list retrieved");
 
-            FilterIntrospectablesByInput(multiGetIntrospectableResources);
+            FilterIntrospectablesByInput(DataSources, multiGetIntrospectableResources);
 
             throw new NotImplementedException();
         }
@@ -50,7 +50,7 @@
             return $"{base.ToString()}[{DataSources.Count}]";
         }
 
-        private IEnumerable<ValueTuple<string, string, string, TdvResourceType, string>> FilterIntrospectablesByInput(IEnumerable<ValueTuple<string, Task<WSDL.Admin.linkableResourceId[]>>> multiGetIntrospectableResources)
+        private static IEnumerable<ValueTuple<string, string, string, TdvResourceType, string>> FilterIntrospectablesByInput(IEnumerable<Server.IntrospectTargetDataSource> commandInput, IEnumerable<ValueTuple<string, Task<WSDL.Admin.linkableResourceId[]>>> multiGetIntrospectableResources)
         {
             Internal.IntrospectableDataSource[] multiGetIntrospectableResourcesGrouped = multiGetIntrospectableResources
                 .Unnest(
@@ -83,7 +83,7 @@
                 .Select(x => new Internal.IntrospectableDataSource(x.Key, x.ToArray()))
                 .ToArray();
 
-            IEnumerable<Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableDataSource, IntrospectTargetDataSource>> dataSourcesToIntrospect = IdentifyDataSourcesToIntrospect(DataSources, multiGetIntrospectableResourcesGrouped);
+            IEnumerable<Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableDataSource, IntrospectTargetDataSource>> dataSourcesToIntrospect = IdentifyDataSourcesToIntrospect(commandInput, multiGetIntrospectableResourcesGrouped);
             foreach (var dataSourceJoin in dataSourcesToIntrospect)
             {
                 IEnumerable<Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableCatalog, IntrospectTargetCatalog>> catalogsToIntrospect = IdentifyCatalogsToIntrospect(dataSourceJoin);
@@ -147,7 +147,7 @@
                 );
         }
 
-        private IEnumerable<Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableObject, IntrospectTargetTable>> IdentifyObjectsToIntrospect(Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableSchema, IntrospectTargetSchema> schemaJoin)
+        private static IEnumerable<Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableObject, IntrospectTargetTable>> IdentifyObjectsToIntrospect(Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableSchema, IntrospectTargetSchema> schemaJoin)
         {
             if (schemaJoin.Input != null && schemaJoin.Input.Tables.Any())
             {
@@ -199,7 +199,7 @@
             }
         }
 
-        private IEnumerable<Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableSchema, IntrospectTargetSchema>> IdentifySchemasToIntrospect(Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableCatalog, IntrospectTargetCatalog> catalogJoin)
+        private static IEnumerable<Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableSchema, IntrospectTargetSchema>> IdentifySchemasToIntrospect(Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableCatalog, IntrospectTargetCatalog> catalogJoin)
         {
             if (catalogJoin.Input != null && catalogJoin.Input.Schemas.Any())
             {
