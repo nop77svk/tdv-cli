@@ -236,8 +236,7 @@
 
         private async Task RunTheIntrospection(TdvWebServiceClient tdvClient, IInfoOutput output, NamedTask<WSDL.Admin.linkableResourceId[]>[] multiGetIntrospectableResources)
         {
-            Dictionary<string, WSDL.Admin.introspectResourcesResultResponse> introspectionProgress = new Dictionary<string, WSDL.Admin.introspectResourcesResultResponse>();
-            var multiIntrospection = FilterIntrospectablesByInput(multiGetIntrospectableResources, DataSources)
+            var filteredIntrospectablesByDataSource = FilterIntrospectablesByInput(multiGetIntrospectableResources, DataSources)
                 .Select(x => new ValueTuple<string, WSDL.Admin.introspectionPlanEntry>(
                     x.Item1,
                     new WSDL.Admin.introspectionPlanEntry()
@@ -255,6 +254,11 @@
                     keySelector: x => x.Item1,
                     elementSelector: x => x.Item2
                 )
+                .ToArray();
+
+            Dictionary<string, WSDL.Admin.introspectResourcesResultResponse> introspectionProgress = new Dictionary<string, WSDL.Admin.introspectResourcesResultResponse>();
+
+            var multiIntrospection = filteredIntrospectablesByDataSource
                 .Select(x => tdvClient.PolledServerTask(
                     new API.PolledServerTasks.IntrospectPolledServerTaskHandler(tdvClient, x.Key, x.AsEnumerable()),
                     y =>
@@ -268,11 +272,14 @@
                             .Where(x => x.Value != null)
                             .Select(x => x.Value)
                             .Aggregate(
-                                seed: new Internal.IntrospectionProgress(),
+                                seed: new Internal.IntrospectionProgress()
+                                {
+                                    JobsTotal = filteredIntrospectablesByDataSource.Length,
+                                    JobsRunning = introspectionProgress.Count
+                                },
                                 func: (aggregate, element) =>
                                 {
-                                    aggregate.JobsRunning += element.completed ? 1 : 0;
-                                    aggregate.JobsTotal++;
+                                    aggregate.JobsDone += element.completed ? 1 : 0;
                                     aggregate.Added += element.status.addedCount;
                                     aggregate.ToBeAdded += element.status.toBeAddedCount;
                                     aggregate.Updated += element.status.updatedCount;
@@ -286,7 +293,7 @@
                                 }
                             );
 
-                        output.Info($"{overallProgress.ProgressPct:#####0%} done ({overallProgress.JobsRunning}/{overallProgress.JobsTotal} jobs, +{overallProgress.Added}/{overallProgress.ToBeAdded}, *{overallProgress.Updated}+{overallProgress.Skipped}/{overallProgress.ToBeUpdated}, -{overallProgress.Removed}/{overallProgress.ToBeRemoved}, warn {overallProgress.Warnings}, err {overallProgress.Errors})");
+                        output.Info($"{overallProgress.ProgressPct:#####0%} done ({overallProgress.JobsDone}/{overallProgress.JobsTotal} jobs, +{overallProgress.Added}/{overallProgress.ToBeAdded}, *{overallProgress.Updated}+{overallProgress.Skipped}/{overallProgress.ToBeUpdated}, -{overallProgress.Removed}/{overallProgress.ToBeRemoved}, warn {overallProgress.Warnings}, err {overallProgress.Errors})");
                     }
                 ))
                 .ToArray();
