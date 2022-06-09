@@ -40,7 +40,7 @@
             await Task.WhenAll(multiGetIntrospectableResources.Select(x => x.Item2));
             output.Info("... introspectable resource list retrieved");
 
-            FilterIntrospectablesByInput(DataSources, multiGetIntrospectableResources);
+            FilterIntrospectablesByInput(multiGetIntrospectableResources, DataSources);
 
             throw new NotImplementedException();
         }
@@ -50,7 +50,7 @@
             return $"{base.ToString()}[{DataSources.Count}]";
         }
 
-        private static IEnumerable<ValueTuple<string, string, string, TdvResourceType, string>> FilterIntrospectablesByInput(IEnumerable<Server.IntrospectTargetDataSource> commandInput, IEnumerable<ValueTuple<string, Task<WSDL.Admin.linkableResourceId[]>>> multiGetIntrospectableResources)
+        private static IEnumerable<ValueTuple<string, string, string, TdvResourceType, string>> FilterIntrospectablesByInput(IEnumerable<ValueTuple<string, Task<WSDL.Admin.linkableResourceId[]>>> multiGetIntrospectableResources, IEnumerable<Server.IntrospectTargetDataSource> commandInput)
         {
             Internal.IntrospectableDataSource[] multiGetIntrospectableResourcesGrouped = multiGetIntrospectableResources
                 .Unnest(
