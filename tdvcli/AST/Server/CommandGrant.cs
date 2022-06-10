@@ -40,6 +40,9 @@
         {
             using var log = new TraceLog(_log, nameof(Execute));
 
+            if (this.IsRecursive && this.Propagate.ToAnyDirection)
+                throw new NotImplementedException("Recursive granting with privilege propagation not implemented/supported in TDV Server as of version 8.4");
+
             string privilegesConcatenated = string.Join(
                 ' ',
                 Privileges.Select(x => x.ToString().ToUpper())
