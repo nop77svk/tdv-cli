@@ -3,9 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Text;
     using System.Threading.Tasks;
-    using NoP77svk.IO;
     using NoP77svk.Linq;
     using NoP77svk.Text.RegularExpressions;
     using NoP77svk.TibcoDV.API;
@@ -23,12 +21,12 @@
 
         public async Task Execute(TdvWebServiceClient tdvClient, IInfoOutput output, ParserState parserState)
         {
-            output.Info($"Introspecting {DataSources.Count} data sources...");
-
             string[] uniqueDataSourcePaths = DataSources
                 .Select(x => x.DataSourcePath)
                 .Distinct()
                 .ToArray();
+
+            output.Info($"Introspecting {uniqueDataSourcePaths.Length} data sources...");
 
             NamedTask<WSDL.Admin.linkableResourceId[]>[] multiGetIntrospectableResources = uniqueDataSourcePaths
                 .Select(dataSourcePath => new NamedTask<WSDL.Admin.linkableResourceId[]>(
@@ -37,8 +35,16 @@
                         .ToArrayAsync().AsTask()
                 ))
                 .ToArray();
-            await Task.WhenAll(multiGetIntrospectableResources.Select(x => x.Task));
-            output.Info("... introspectable resource list retrieved");
+
+            try
+            {
+                await Task.WhenAll(multiGetIntrospectableResources.Select(x => x.Task));
+            }
+            finally
+            {
+                foreach (var task in multiGetIntrospectableResources)
+                    task.Dispose();
+            }
 
             await RunTheIntrospection(tdvClient, output, multiGetIntrospectableResources);
             output.Info("Introspection done");
@@ -258,6 +264,8 @@
 
             Dictionary<string, WSDL.Admin.introspectResourcesResultResponse> introspectionProgress = new Dictionary<string, WSDL.Admin.introspectResourcesResultResponse>();
 
+            Internal.IntrospectionProgress? previousProgressState = null;
+
             var multiIntrospection = filteredIntrospectablesByDataSource
                 .Select(x => tdvClient.PolledServerTask(
                     new API.PolledServerTasks.IntrospectPolledServerTaskHandler(tdvClient, x.Key, x.AsEnumerable()),
@@ -268,14 +276,14 @@
                         else
                             introspectionProgress.Add(y.taskId, y);
 
-                        var overallProgress = introspectionProgress
+                        Internal.IntrospectionProgress overallProgress = introspectionProgress
                             .Where(x => x.Value != null)
                             .Select(x => x.Value)
                             .Aggregate(
                                 seed: new Internal.IntrospectionProgress()
                                 {
-                                    JobsTotal = filteredIntrospectablesByDataSource.Length,
-                                    JobsRunning = introspectionProgress.Count
+                                    JobsTotalToBeSpawned = filteredIntrospectablesByDataSource.Length,
+                                    JobsSpawned = introspectionProgress.Count
                                 },
                                 func: (aggregate, element) =>
                                 {
@@ -293,12 +301,37 @@
                                 }
                             );
 
-                        output.Info($"{overallProgress.ProgressPct:#####0%} done ({overallProgress.JobsDone}/{overallProgress.JobsRunning} jobs, +{overallProgress.Added}/{overallProgress.ToBeAdded}, *{overallProgress.Updated}+{overallProgress.Skipped}/{overallProgress.ToBeUpdated}, -{overallProgress.Removed}/{overallProgress.ToBeRemoved}, W {overallProgress.Warnings}, E {overallProgress.Errors})");
+                        if (overallProgress.Equals(previousProgressState))
+                        {
+                            output.InfoNoEoln(". \b");
+                        }
+                        else
+                        {
+                            output.InfoCR($"{overallProgress.ProgressPct:#####0%} done ("
+                                + $"{overallProgress.JobsSpawned - overallProgress.JobsDone}/{overallProgress.JobsTotalToBeSpawned} jobs"
+                                + (overallProgress.ToBeAdded > 0 ? $", add:{overallProgress.Added}/{overallProgress.ToBeAdded}" : string.Empty)
+                                + (overallProgress.ToBeUpdated > 0 ? $", upd:{overallProgress.Updated}(+{overallProgress.Skipped})/{overallProgress.ToBeUpdated}" : string.Empty)
+                                + (overallProgress.ToBeRemoved > 0 ? $", del:{overallProgress.Removed}/{overallProgress.ToBeRemoved}" : string.Empty)
+                                + (overallProgress.Warnings > 0 ? $", warn:{overallProgress.Warnings}" : string.Empty)
+                                + (overallProgress.Errors > 0 ? $", err:{overallProgress.Errors}" : string.Empty)
+                                + ")"
+                            );
+                            previousProgressState = overallProgress;
+                        }
                     }
                 ))
                 .ToArray();
 
-            await Task.WhenAll(multiIntrospection);
+            try
+            {
+                await Task.WhenAll(multiIntrospection);
+                output.EndCR();
+            }
+            finally
+            {
+                foreach (var task in multiIntrospection)
+                    task.Dispose();
+            }
         }
     }
 }
