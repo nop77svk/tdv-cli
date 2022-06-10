@@ -63,6 +63,29 @@
             _thereWasEoln = true;
         }
 
+        public void InfoCR(string message)
+        {
+            Console.ForegroundColor = InfoForegroundColor;
+            Console.BackgroundColor = InfoBackgroundColor;
+
+            _thereWasEoln = true;
+            OutputWriter.Write("\r");
+            OptionalDisplayTimestamp();
+            OutputWriter.Write(message);
+
+            _thereWasEoln = false;
+        }
+
+        public void EndCR()
+        {
+            Console.ForegroundColor = InfoForegroundColor;
+            Console.BackgroundColor = InfoBackgroundColor;
+
+            OutputWriter.WriteLine();
+
+            _thereWasEoln = true;
+        }
+
         public void InfoNoEoln(string message)
         {
             Console.ForegroundColor = InfoForegroundColor;

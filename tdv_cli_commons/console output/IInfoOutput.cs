@@ -8,6 +8,10 @@
 
         void InfoNoEoln(string message);
 
+        void InfoCR(string message);
+
+        void EndCR();
+
         void Error(Exception e);
 
         void Error(string message, Exception? e = null);
