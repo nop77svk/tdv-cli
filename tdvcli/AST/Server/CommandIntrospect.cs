@@ -28,23 +28,7 @@
 
             output.Info($"Introspecting {uniqueDataSourcePaths.Length} data sources...");
 
-            NamedTask<WSDL.Admin.linkableResourceId[]>[] multiGetIntrospectableResources = uniqueDataSourcePaths
-                .Select(dataSourcePath => new NamedTask<WSDL.Admin.linkableResourceId[]>(
-                    dataSourcePath,
-                    tdvClient.PolledServerTaskEnumerable(new API.PolledServerTasks.GetIntrospectableResourceIdsPolledServerTaskHandler(tdvClient, dataSourcePath, true))
-                        .ToArrayAsync().AsTask()
-                ))
-                .ToArray();
-
-            try
-            {
-                await Task.WhenAll(multiGetIntrospectableResources.Select(x => x.Task));
-            }
-            finally
-            {
-                foreach (var task in multiGetIntrospectableResources)
-                    task.Dispose();
-            }
+            NamedTask<WSDL.Admin.linkableResourceId[]>[] multiGetIntrospectableResources = await RetrieveIntrospectables(tdvClient, uniqueDataSourcePaths);
 
             await RunTheIntrospection(tdvClient, output, multiGetIntrospectableResources);
             output.Info("Introspection done");
@@ -238,6 +222,29 @@
                     .Select(x => new Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableSchema, IntrospectTargetSchema>(x, null))
                     .Where(x => x.Introspectable.SchemaName != string.Empty);
             }
+        }
+
+        private static async Task<NamedTask<WSDL.Admin.linkableResourceId[]>[]> RetrieveIntrospectables(TdvWebServiceClient tdvClient, string[] uniqueDataSourcePaths)
+        {
+            NamedTask<WSDL.Admin.linkableResourceId[]>[] multiGetIntrospectableResources = uniqueDataSourcePaths
+                .Select(dataSourcePath => new NamedTask<WSDL.Admin.linkableResourceId[]>(
+                    dataSourcePath,
+                    tdvClient.PolledServerTaskEnumerable(new API.PolledServerTasks.GetIntrospectableResourceIdsPolledServerTaskHandler(tdvClient, dataSourcePath, true))
+                        .ToArrayAsync().AsTask()
+                ))
+                .ToArray();
+
+            try
+            {
+                await Task.WhenAll(multiGetIntrospectableResources.Select(x => x.Task));
+            }
+            finally
+            {
+                foreach (var task in multiGetIntrospectableResources)
+                    task.Dispose();
+            }
+
+            return multiGetIntrospectableResources;
         }
 
         private async Task RunTheIntrospection(TdvWebServiceClient tdvClient, IInfoOutput output, NamedTask<WSDL.Admin.linkableResourceId[]>[] multiGetIntrospectableResources)
