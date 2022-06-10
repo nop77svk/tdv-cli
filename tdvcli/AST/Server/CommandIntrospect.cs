@@ -221,7 +221,7 @@
                             splitPath.Length >= 3 ? splitPath[2] : string.Empty
                         );
                     })
-                    .Where(x => !string.IsNullOrEmpty(x.Item5) && !string.IsNullOrEmpty(x.Item3) && !string.IsNullOrEmpty(x.Item2) && !string.IsNullOrEmpty(x.Item1))
+                    .Where(x => !string.IsNullOrEmpty(x.Item5) && !string.IsNullOrEmpty(x.Item3) && !string.IsNullOrEmpty(x.Item2) && !string.IsNullOrEmpty(x.Item1)) // 2do! should maybe throw an exception instead of silently out-filtering stuff
                     .Distinct()
                     .GroupBy(
                         keySelector: x => new ValueTuple<string, string, string>(x.Item1, x.Item2, x.Item3),
