@@ -27,10 +27,8 @@
                 .ToArray();
 
             output.Info($"Introspecting {uniqueDataSourcePaths.Length} data sources...");
-
-            NamedTask<WSDL.Admin.linkableResourceId[]>[] multiGetIntrospectableResources = await RetrieveIntrospectables(tdvClient, uniqueDataSourcePaths);
-
-            await RunTheIntrospection(tdvClient, output, multiGetIntrospectableResources);
+            IEnumerable<Internal.IntrospectableDataSource> introspectables = await RetrieveIntrospectables(tdvClient, uniqueDataSourcePaths);
+            await RunTheIntrospection(tdvClient, output, introspectables);
             output.Info("Introspection done");
         }
 
@@ -39,51 +37,18 @@
             return $"{base.ToString()}[{DataSources.Count}]";
         }
 
-        private static IEnumerable<ValueTuple<string, string, string, TdvResourceType, string>> FilterIntrospectablesByInput(IEnumerable<NamedTask<WSDL.Admin.linkableResourceId[]>> multiGetIntrospectableResources, IEnumerable<Server.IntrospectTargetDataSource> commandInput)
+        private static IEnumerable<ValueTuple<string, string, string, TdvResourceType, string>> FilterIntrospectablesByInput(IEnumerable<Internal.IntrospectableDataSource> introspectablesGrouped, IEnumerable<Server.IntrospectTargetDataSource> commandInput)
         {
-            Internal.IntrospectableDataSource[] multiGetIntrospectableResourcesGrouped = multiGetIntrospectableResources
-                .Unnest(
-                    retrieveNestedCollection: x => x.Task.Result,
-                    resultSelector: (outer, inner) => new ValueTuple<string, WSDL.Admin.linkableResourceId>(outer.Name, inner)
-                )
-                .Select(x =>
-                {
-                    var splitPath = x.Item2.resourceId.path.Split('/', 3);
-                    return new ValueTuple<string, string, string, TdvResourceType, string>(
-                        x.Item1,
-                        splitPath.Length >= 1 ? splitPath[0] : string.Empty,
-                        splitPath.Length >= 2 ? splitPath[1] : string.Empty,
-                        new TdvResourceType(x.Item2.resourceId.type, x.Item2.resourceId.subtype),
-                        splitPath.Length >= 3 ? splitPath[2] : string.Empty
-                    );
-                })
-                .Where(x => !string.IsNullOrEmpty(x.Item5) && !string.IsNullOrEmpty(x.Item3) && !string.IsNullOrEmpty(x.Item2) && !string.IsNullOrEmpty(x.Item1))
-                .Distinct()
-                .GroupBy(
-                    keySelector: x => new ValueTuple<string, string, string>(x.Item1, x.Item2, x.Item3),
-                    elementSelector: x => new Internal.IntrospectableObject(x.Item4, x.Item5)
-                )
-                .GroupBy(
-                    keySelector: x => new ValueTuple<string, string>(x.Key.Item1, x.Key.Item2),
-                    elementSelector: x => new Internal.IntrospectableSchema(x.Key.Item3, x.ToArray())
-                )
-                .GroupBy(
-                    keySelector: x => x.Key.Item1,
-                    elementSelector: x => new Internal.IntrospectableCatalog(x.Key.Item2, x.ToArray())
-                )
-                .Select(x => new Internal.IntrospectableDataSource(x.Key, x.ToArray()))
-                .ToArray();
-
-            IEnumerable<Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableDataSource, IntrospectTargetDataSource>> dataSourcesToIntrospect = IdentifyDataSourcesToIntrospect(commandInput, multiGetIntrospectableResourcesGrouped);
+            IEnumerable<Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableDataSource, IntrospectTargetDataSource>> dataSourcesToIntrospect = FilterDataSourcesToIntrospect(commandInput, introspectablesGrouped);
             foreach (var dataSourceJoin in dataSourcesToIntrospect)
             {
-                IEnumerable<Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableCatalog, IntrospectTargetCatalog>> catalogsToIntrospect = IdentifyCatalogsToIntrospect(dataSourceJoin);
+                IEnumerable<Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableCatalog, IntrospectTargetCatalog>> catalogsToIntrospect = FilterCatalogsToIntrospect(dataSourceJoin);
                 foreach (var catalogJoin in catalogsToIntrospect)
                 {
-                    IEnumerable<Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableSchema, IntrospectTargetSchema>> schemasToIntrospect = IdentifySchemasToIntrospect(catalogJoin);
+                    IEnumerable<Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableSchema, IntrospectTargetSchema>> schemasToIntrospect = FilterSchemasToIntrospect(catalogJoin);
                     foreach (var schemaJoin in schemasToIntrospect)
                     {
-                        IEnumerable<Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableObject, IntrospectTargetTable>> objectsToIntrospect = IdentifyObjectsToIntrospect(schemaJoin);
+                        IEnumerable<Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableObject, IntrospectTargetTable>> objectsToIntrospect = FilterObjectsToIntrospect(schemaJoin);
                         foreach (var objectJoin in objectsToIntrospect)
                         {
                             yield return new ValueTuple<string, string, string, TdvResourceType, string>(dataSourceJoin.Introspectable.DataSource, catalogJoin.Introspectable.CatalogName, schemaJoin.Introspectable.SchemaName, objectJoin.Introspectable.ObjectType, objectJoin.Introspectable.ObjectName);
@@ -93,7 +58,7 @@
             }
         }
 
-        private static IEnumerable<Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableCatalog, IntrospectTargetCatalog>> IdentifyCatalogsToIntrospect(Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableDataSource, IntrospectTargetDataSource> dataSourceJoin)
+        private static IEnumerable<Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableCatalog, IntrospectTargetCatalog>> FilterCatalogsToIntrospect(Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableDataSource, IntrospectTargetDataSource> dataSourceJoin)
         {
             if (dataSourceJoin.Input != null && dataSourceJoin.Input.Catalogs.Count > 0)
             {
@@ -127,7 +92,7 @@
             }
         }
 
-        private static IEnumerable<Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableDataSource, IntrospectTargetDataSource>> IdentifyDataSourcesToIntrospect(IEnumerable<IntrospectTargetDataSource> dataSources, IEnumerable<Internal.IntrospectableDataSource> multiGetIntrospectableResourcesGrouped)
+        private static IEnumerable<Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableDataSource, IntrospectTargetDataSource>> FilterDataSourcesToIntrospect(IEnumerable<IntrospectTargetDataSource> dataSources, IEnumerable<Internal.IntrospectableDataSource> multiGetIntrospectableResourcesGrouped)
         {
             return multiGetIntrospectableResourcesGrouped
                 .Join(
@@ -138,7 +103,7 @@
                 );
         }
 
-        private static IEnumerable<Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableObject, IntrospectTargetTable>> IdentifyObjectsToIntrospect(Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableSchema, IntrospectTargetSchema> schemaJoin)
+        private static IEnumerable<Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableObject, IntrospectTargetTable>> FilterObjectsToIntrospect(Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableSchema, IntrospectTargetSchema> schemaJoin)
         {
             if (schemaJoin.Input != null && schemaJoin.Input.Tables.Any())
             {
@@ -190,7 +155,7 @@
             }
         }
 
-        private static IEnumerable<Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableSchema, IntrospectTargetSchema>> IdentifySchemasToIntrospect(Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableCatalog, IntrospectTargetCatalog> catalogJoin)
+        private static IEnumerable<Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableSchema, IntrospectTargetSchema>> FilterSchemasToIntrospect(Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableCatalog, IntrospectTargetCatalog> catalogJoin)
         {
             if (catalogJoin.Input != null && catalogJoin.Input.Schemas.Any())
             {
@@ -224,8 +189,10 @@
             }
         }
 
-        private static async Task<NamedTask<WSDL.Admin.linkableResourceId[]>[]> RetrieveIntrospectables(TdvWebServiceClient tdvClient, string[] uniqueDataSourcePaths)
+        private static async Task<Internal.IntrospectableDataSource[]> RetrieveIntrospectables(TdvWebServiceClient tdvClient, IEnumerable<string> uniqueDataSourcePaths)
         {
+            Internal.IntrospectableDataSource[] result;
+
             NamedTask<WSDL.Admin.linkableResourceId[]>[] multiGetIntrospectableResources = uniqueDataSourcePaths
                 .Select(dataSourcePath => new NamedTask<WSDL.Admin.linkableResourceId[]>(
                     dataSourcePath,
@@ -237,19 +204,52 @@
             try
             {
                 await Task.WhenAll(multiGetIntrospectableResources.Select(x => x.Task));
+
+                result = multiGetIntrospectableResources
+                    .Unnest(
+                        retrieveNestedCollection: x => x.Task.Result,
+                        resultSelector: (outer, inner) => new ValueTuple<string, WSDL.Admin.linkableResourceId>(outer.Name, inner)
+                    )
+                    .Select(x =>
+                    {
+                        var splitPath = x.Item2.resourceId.path.Split('/', 3);
+                        return new ValueTuple<string, string, string, TdvResourceType, string>(
+                            x.Item1,
+                            splitPath.Length >= 1 ? splitPath[0] : string.Empty,
+                            splitPath.Length >= 2 ? splitPath[1] : string.Empty,
+                            new TdvResourceType(x.Item2.resourceId.type, x.Item2.resourceId.subtype),
+                            splitPath.Length >= 3 ? splitPath[2] : string.Empty
+                        );
+                    })
+                    .Where(x => !string.IsNullOrEmpty(x.Item5) && !string.IsNullOrEmpty(x.Item3) && !string.IsNullOrEmpty(x.Item2) && !string.IsNullOrEmpty(x.Item1))
+                    .Distinct()
+                    .GroupBy(
+                        keySelector: x => new ValueTuple<string, string, string>(x.Item1, x.Item2, x.Item3),
+                        elementSelector: x => new Internal.IntrospectableObject(x.Item4, x.Item5)
+                    )
+                    .GroupBy(
+                        keySelector: x => new ValueTuple<string, string>(x.Key.Item1, x.Key.Item2),
+                        elementSelector: x => new Internal.IntrospectableSchema(x.Key.Item3, x.ToArray())
+                    )
+                    .GroupBy(
+                        keySelector: x => x.Key.Item1,
+                        elementSelector: x => new Internal.IntrospectableCatalog(x.Key.Item2, x.ToArray())
+                    )
+                    .Select(x => new Internal.IntrospectableDataSource(x.Key, x.ToArray()))
+                    .ToArray();
+
+                return result;
             }
             finally
             {
                 foreach (var task in multiGetIntrospectableResources)
                     task.Dispose();
             }
-
-            return multiGetIntrospectableResources;
         }
 
-        private async Task RunTheIntrospection(TdvWebServiceClient tdvClient, IInfoOutput output, NamedTask<WSDL.Admin.linkableResourceId[]>[] multiGetIntrospectableResources)
+        private async Task RunTheIntrospection(TdvWebServiceClient tdvClient, IInfoOutput output, IEnumerable<Internal.IntrospectableDataSource> introspectablesGrouped)
         {
-            var filteredIntrospectablesByDataSource = FilterIntrospectablesByInput(multiGetIntrospectableResources, DataSources)
+            var filteredIntrospectablesByDataSource = FilterIntrospectablesByInput(introspectablesGrouped, DataSources)
                 .Select(x => new ValueTuple<string, WSDL.Admin.introspectionPlanEntry>(
                     x.Item1,
                     new WSDL.Admin.introspectionPlanEntry()
