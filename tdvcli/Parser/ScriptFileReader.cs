@@ -70,7 +70,7 @@
                         }
 
                         if (command.Length > 0)
-                            throw new PrematureEndOfScriptFile(scriptFile, lineNo++, (scriptLine?.Length + 1) ?? 1, CommandDelimiter);
+                            throw new E.PrematureEndOfScriptFile(scriptFile, lineNo++, (scriptLine?.Length + 1) ?? 1, CommandDelimiter);
                     }
                 }
             }
