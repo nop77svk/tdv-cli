@@ -265,6 +265,8 @@
             Dictionary<string, WSDL.Admin.introspectResourcesResultResponse> introspectionProgress = new Dictionary<string, WSDL.Admin.introspectResourcesResultResponse>();
 
             Internal.IntrospectionProgress? previousProgressState = null;
+            char[] hourglass = { '/', '-', '\\', '|' };
+            int hourglassState = 0;
 
             var multiIntrospection = filteredIntrospectablesByDataSource
                 .Select(x => tdvClient.PolledServerTask(
@@ -303,12 +305,13 @@
 
                         if (overallProgress.Equals(previousProgressState))
                         {
-                            output.InfoNoEoln(". \b");
+                            output.InfoNoEoln((hourglassState == 0 ? " " : "\b") + hourglass[hourglassState % hourglass.Length]);
+                            hourglassState++;
                         }
                         else
                         {
                             output.InfoCR($"{overallProgress.ProgressPct:#####0%} done ("
-                                + $"{overallProgress.JobsSpawned - overallProgress.JobsDone}/{overallProgress.JobsTotalToBeSpawned} jobs"
+                                + $"{overallProgress.JobsRunning}/{overallProgress.JobsTotalToBeSpawned} jobs"
                                 + (overallProgress.ToBeAdded > 0 ? $", add:{overallProgress.Added}/{overallProgress.ToBeAdded}" : string.Empty)
                                 + (overallProgress.ToBeUpdated > 0 ? $", upd:{overallProgress.Updated}(+{overallProgress.Skipped})/{overallProgress.ToBeUpdated}" : string.Empty)
                                 + (overallProgress.ToBeRemoved > 0 ? $", del:{overallProgress.Removed}/{overallProgress.ToBeRemoved}" : string.Empty)
@@ -316,6 +319,7 @@
                                 + (overallProgress.Errors > 0 ? $", err:{overallProgress.Errors}" : string.Empty)
                                 + ")"
                             );
+                            hourglassState = 0;
                             previousProgressState = overallProgress;
                         }
                     }
