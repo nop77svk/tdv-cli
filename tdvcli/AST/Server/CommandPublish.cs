@@ -44,7 +44,7 @@
                 else if (targetType.Type is TdvResourceTypeEnumAgr.PublishedCatalog or TdvResourceTypeEnumAgr.DataSourceRelational)
                     flattenFolderTreesToSchemas = true;
                 else
-                    throw new CannotHandleResourceType(targetType);
+                    throw new Infra.CannotHandleResourceType(targetType);
 
                 List<TdvRest_ContainerContents> subtreeContents = await tdvClient.RetrieveContainerContentsRecursive(Source, sourceType.Type).ToListAsync();
                 output.InfoNoEoln(".");
@@ -97,7 +97,7 @@
             else
             {
                 if (targetType.Type is not TdvResourceTypeEnumAgr.PublishedSchema and not TdvResourceTypeEnumAgr.PublishedCatalog and not TdvResourceTypeEnumAgr.DataSourceRelational)
-                    throw new CannotHandleResourceType(targetType);
+                    throw new Infra.CannotHandleResourceType(targetType);
 
                 if (FlattenString != null)
                     throw new ArgumentOutOfRangeException(nameof(FlattenString), FlattenString, "Hierarchy flattening string is invalid in single-resource publish mode");

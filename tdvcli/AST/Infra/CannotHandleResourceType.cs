@@ -1,4 +1,4 @@
-﻿namespace NoP77svk.TibcoDV.CLI
+﻿namespace NoP77svk.TibcoDV.CLI.AST.Infra
 {
     using System;
     using NoP77svk.TibcoDV.API;

@@ -1,4 +1,4 @@
-﻿namespace NoP77svk.TibcoDV.CLI
+﻿namespace NoP77svk.TibcoDV.CLI.Parser
 {
     using System;
 

@@ -13,6 +13,7 @@
     using NoP77svk.IO;
     using NoP77svk.TibcoDV.API;
     using NoP77svk.TibcoDV.CLI.Commons;
+    using NoP77svk.TibcoDV.CLI.Parser;
     using NoP77svk.TibcoDV.Commons;
     using NoP77svk.Web.WS;
     using Pegasus.Common;
