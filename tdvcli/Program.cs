@@ -36,7 +36,7 @@
 
             try
             {
-                await Parser
+                await CommandLine.Parser
                     .Default
                     .ParseArguments<CommandLineOptions>(args)
                     .WithParsedAsync(async argsParsed => await MainWithParsedOptions(argsParsed));
@@ -116,15 +116,15 @@
 
             try
             {
-                ParserState parserState = new ParserState()
+                Parser.ParserState parserState = new Parser.ParserState()
                 {
                     CommandDelimiter = ";"
                 };
-                ScriptFileParser fileParser = new ScriptFileParser(() => parserState.CommandDelimiter);
-                PierresTibcoSqlParser sqlParser = new PierresTibcoSqlParser();
+                Parser.ScriptFileReader fileParser = new Parser.ScriptFileReader(() => parserState.CommandDelimiter);
+                Parser.PierresTibcoSqlParser sqlParser = new Parser.PierresTibcoSqlParser();
 
                 // do your stuff
-                foreach (ScriptFileParserOutPOCO statement in fileParser.SplitScriptsToStatements(args.PrivilegeDefinitionFiles))
+                foreach (Parser.InputStatement statement in fileParser.ReadStatements(args.PrivilegeDefinitionFiles))
                 {
                     _log.Debug(statement);
                     object commandAST;
@@ -155,7 +155,7 @@
             _out.Info("All done");
         }
 
-        private static async Task ExecuteParsedStatement(TdvWebServiceClient tdvClient, object commandAST, ParserState parserState)
+        private static async Task ExecuteParsedStatement(TdvWebServiceClient tdvClient, object commandAST, Parser.ParserState parserState)
         {
             using var log = new TraceLog(_log, nameof(ExecuteParsedStatement));
 

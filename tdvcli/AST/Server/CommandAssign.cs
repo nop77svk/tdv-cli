@@ -8,6 +8,7 @@
     using NoP77svk.TibcoDV.API;
     using NoP77svk.TibcoDV.API.WSDL.Admin;
     using NoP77svk.TibcoDV.CLI.Commons;
+    using NoP77svk.TibcoDV.CLI.Parser;
     using NoP77svk.TibcoDV.Commons;
 
     internal class CommandAssign : IAsyncExecutable

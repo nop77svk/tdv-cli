@@ -8,6 +8,7 @@
     using NoP77svk.Text.RegularExpressions;
     using NoP77svk.TibcoDV.API;
     using NoP77svk.TibcoDV.CLI.Commons;
+    using NoP77svk.TibcoDV.CLI.Parser;
     using WSDL = NoP77svk.TibcoDV.API.WSDL;
 
     internal class CommandIntrospect : IAsyncExecutable

@@ -1,31 +1,31 @@
-﻿namespace NoP77svk.TibcoDV.CLI
+﻿namespace NoP77svk.TibcoDV.CLI.Parser
 {
     using System;
     using System.Collections.Generic;
     using System.IO;
     using System.Text;
 
-    internal class ScriptFileParser
+    internal class ScriptFileReader
     {
-        private Func<string> getCommandDelimiter;
+        private Func<string> getCommandDelimiterFromParserState;
 
         public string CommandDelimiter
         {
             get
             {
-                string result = getCommandDelimiter();
+                string result = getCommandDelimiterFromParserState();
                 if (result != ";")
                     throw new ArgumentOutOfRangeException(nameof(result), result, "Invalid command delimiter");
                 return result;
             }
         }
 
-        public ScriptFileParser(Func<string> commandDelimiterGetter)
+        public ScriptFileReader(Func<string> commandDelimiterGetter)
         {
-            getCommandDelimiter = commandDelimiterGetter;
+            getCommandDelimiterFromParserState = commandDelimiterGetter;
         }
 
-        internal IEnumerable<ScriptFileParserOutPOCO> SplitScriptsToStatements(IEnumerable<string?>? scriptFiles)
+        internal IEnumerable<InputStatement> ReadStatements(IEnumerable<string?>? scriptFiles)
         {
             if (scriptFiles is not null)
             {
@@ -59,7 +59,7 @@
                             if (isEndOfCommand)
                             {
                                 command.AppendLine(scriptLine[0..^endingSlackLength]);
-                                yield return new ScriptFileParserOutPOCO(scriptFile, lineNo, command.ToString());
+                                yield return new InputStatement(scriptFile, lineNo, command.ToString());
                                 command = new StringBuilder();
                                 isStartOfCommand = true;
                             }

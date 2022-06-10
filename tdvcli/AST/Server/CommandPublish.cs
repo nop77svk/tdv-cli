@@ -8,6 +8,7 @@
     using NoP77svk.Linq;
     using NoP77svk.TibcoDV.API;
     using NoP77svk.TibcoDV.CLI.Commons;
+    using NoP77svk.TibcoDV.CLI.Parser;
     using WSDL = NoP77svk.TibcoDV.API.WSDL.Admin;
 
     internal class CommandPublish : IAsyncExecutable
