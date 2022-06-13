@@ -61,7 +61,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PegGrammar Include="Parser\PierresTibcoSQL.peg" />
+    <PegGrammar Include="ParserStuff\PierresTibcoSQL.peg" />
   </ItemGroup>
 
   <ItemGroup>
