@@ -14,10 +14,12 @@
     internal class CommandIntrospect : IAsyncExecutable
     {
         public IList<IntrospectTargetDataSource> DataSources { get; }
+        public IntrospectionOptionHandleResources OptionHandleResources { get; }
 
-        public CommandIntrospect(IList<IntrospectTargetDataSource> dataSources)
+        public CommandIntrospect(IList<IntrospectTargetDataSource> dataSources, IntrospectionOptionHandleResources optionHandleResources)
         {
             DataSources = dataSources;
+            OptionHandleResources = optionHandleResources;
         }
 
         public async Task Execute(TdvWebServiceClient tdvClient, IInfoOutput output, ParserState parserState)

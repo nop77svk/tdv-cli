@@ -248,9 +248,10 @@ describeChoice
 
 // ------------------------------------------------------------------------------------------------
 
-introspectStatement<AST.IAsyncExecutable> = "introspect" __ dslist:introspectTargetDataSourceList opt:introspectionOptions
+introspectStatement<AST.IAsyncExecutable> = "introspect" __ dslist:introspectTargetDataSourceList
+	optHI:optionalIntrospectOptionHandleIntrospectables
 {
-	new AST.Server.CommandIntrospect(dslist)
+	new AST.Server.CommandIntrospect(dslist, optHI)
 }
 
 introspectTargetDataSourceList<IList<AST.Server.IntrospectTargetDataSource>> = v:introspectTargetDataSource<1,,_ "," _> { v }
@@ -312,19 +313,29 @@ introspectTargetTableSpecifier<AST.Infra.MatchBy>
 	/ x:matchIdentifierExactly { x }
 
 
-introspectionOptions<IList<AST.Server.IntrospectionOption>> = v:introspectionOption<0,,__> { v }
+optionalIntrospectOptionHandleIntrospectables<AST.Server.IntrospectionOptionHandleResources>
+	= _ v:introspectOptionHandleIntrospectables { v }
+	/ "" { new AST.Server.IntrospectionOptionHandleResources() }
+	
+introspectOptionHandleIntrospectables<AST.Server.IntrospectionOptionHandleResources> = v:introspectOptionHandleIntrospectablesAction __ ("resources" / "introspectables") { v }
 
-introspectionOption<AST.Server.IntrospectionOption>
-	= v:introspectOptionUnmatchedResources { v }
+introspectOptionHandleIntrospectablesAction<AST.Server.IntrospectionOptionHandleResources>
+	= a:introspectOptionDropUnmatched __ "and" __ b:introspectOptionUpdateExisting { new AST.Server.IntrospectionOptionHandleResources() { DropUnmatched = a, UpdateExisting = b } }
+	/ b:introspectOptionUpdateExisting __ "and" __ a:introspectOptionDropUnmatched { new AST.Server.IntrospectionOptionHandleResources() { DropUnmatched = a, UpdateExisting = b } }
+	/ a:introspectOptionDropUnmatched { new AST.Server.IntrospectionOptionHandleResources() { DropUnmatched = a } }
+	/ b:introspectOptionUpdateExisting { new AST.Server.IntrospectionOptionHandleResources() { UpdateExisting = b } }
 
-introspectOptionUnmatchedResources<AST.Server.IntrospectionOptionKeepUnmatchedResources> = a:introspectOptionUnmatchedResourcesAction __ "unmatched" __ ( "introspectables" / "resources" )
-{
-	new AST.Server.IntrospectionOptionKeepUnmatchedResources(a)
-}
+introspectOptionDropUnmatched<bool> = v:introspectOptionDropUnmatchedAction __ "unmatched" { v }
 
-introspectOptionUnmatchedResourcesAction<bool>
-	= "keep" { true }
-	/ "drop" { false }
+introspectOptionDropUnmatchedAction<bool>
+	= "drop" { true }
+	/ "keep" { false }
+
+introspectOptionUpdateExisting<bool> = v:introspectOptionUpdateExistingAction __ "existing" { v }
+
+introspectOptionUpdateExistingAction<bool>
+	= "update" { true }
+	/ "skip" { false }
 
 // ================================================================================================
 // general language elements
