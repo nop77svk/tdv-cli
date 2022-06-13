@@ -248,7 +248,7 @@ describeChoice
 
 // ------------------------------------------------------------------------------------------------
 
-introspectStatement<AST.IAsyncExecutable> = "introspect" __ dslist:introspectTargetDataSourceList
+introspectStatement<AST.IAsyncExecutable> = "introspect" __ dslist:introspectTargetDataSourceList opt:introspectionOptions
 {
 	new AST.Server.CommandIntrospect(dslist)
 }
@@ -310,6 +310,21 @@ introspectTargetTable<AST.Server.IntrospectTargetTable> = tabOp:setElementOperat
 introspectTargetTableSpecifier<AST.Infra.MatchBy>
 	= a:matchIdentifierByRegExp { a }
 	/ x:matchIdentifierExactly { x }
+
+
+introspectionOptions<IList<AST.Server.IntrospectionOption>> = v:introspectionOption<0,,__> { v }
+
+introspectionOption<AST.Server.IntrospectionOption>
+	= v:introspectOptionUnmatchedResources { v }
+
+introspectOptionUnmatchedResources<AST.Server.IntrospectionOptionKeepUnmatchedResources> = a:introspectOptionUnmatchedResourcesAction __ "unmatched" __ ( "introspectables" / "resources" )
+{
+	new AST.Server.IntrospectionOptionKeepUnmatchedResources(a)
+}
+
+introspectOptionUnmatchedResourcesAction<bool>
+	= "keep" { true }
+	/ "drop" { false }
 
 // ================================================================================================
 // general language elements
