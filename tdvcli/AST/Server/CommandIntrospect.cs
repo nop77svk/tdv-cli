@@ -31,7 +31,13 @@
 
             output.Info($"Introspecting {uniqueDataSourcePaths.Length} data sources...");
             IEnumerable<Internal.IntrospectableDataSource> introspectables = await RetrieveIntrospectables(tdvClient, uniqueDataSourcePaths);
-            await RunTheIntrospection(tdvClient, output, introspectables);
+            IEnumerable<Internal.IntrospectableDataSource> introspectedResources;
+            if (OptionHandleResources.DropUnmatched)
+                introspectedResources = await RetrieveIntrospectedResources(tdvClient, uniqueDataSourcePaths);
+            else
+                introspectedResources = new Internal.IntrospectableDataSource[0];
+
+            await RunTheIntrospection(tdvClient, output, introspectables, resourcesToDrop: introspectedResources);
             output.Info("Introspection done");
         }
 
@@ -250,9 +256,73 @@
             }
         }
 
-        private async Task RunTheIntrospection(TdvWebServiceClient tdvClient, IInfoOutput output, IEnumerable<Internal.IntrospectableDataSource> introspectablesGrouped)
+        private static async Task<Internal.IntrospectableDataSource[]> RetrieveIntrospectedResources(TdvWebServiceClient tdvClient, IEnumerable<string> uniqueDataSourcePaths)
         {
-            var filteredIntrospectablesByDataSource = FilterIntrospectablesByInput(introspectablesGrouped, DataSources)
+            Internal.IntrospectableDataSource[] result;
+
+            NamedTask<TdvRest_ContainerContents[]>[] multiGetIntrospectedResources = uniqueDataSourcePaths
+                .Select(dataSourcePath => new NamedTask<TdvRest_ContainerContents[]>(dataSourcePath, tdvClient.RetrieveContainerContentsRecursive(dataSourcePath, TdvResourceTypeEnumAgr.UnknownDataSource)
+                    .ToArrayAsync().AsTask()))
+                .ToArray();
+
+            try
+            {
+                await Task.WhenAll(multiGetIntrospectedResources.Select(x => x.Task));
+
+                result = multiGetIntrospectedResources
+                    .Unnest(
+                        retrieveNestedCollection: x => x.Task.Result,
+                        resultSelector: (outer, inner) => new ValueTuple<string, TdvRest_ContainerContents>(outer.Name, inner)
+                    )
+                    .Select(x =>
+                    {
+                        if (x.Item2.Path == null)
+                            throw new NullReferenceException("NULL resource path detected");
+                        if (x.Item2.Type == null)
+                            throw new NullReferenceException($"NULL resource type detected for {x.Item2.Path}");
+                        if (x.Item2.SubType == null)
+                            throw new NullReferenceException($"NULL resource subtype detected for {x.Item2.Type.ToLower()} {x.Item2.Path}");
+
+                        string[] splitPath = x.Item2.Path.Split('/', 3);
+                        return new ValueTuple<string, string, string, TdvResourceType, string>(
+                            x.Item1,
+                            splitPath.Length >= 1 ? splitPath[0] : string.Empty,
+                            splitPath.Length >= 2 ? splitPath[1] : string.Empty,
+                            new TdvResourceType(Enum.Parse<WSDL.Admin.resourceType>(x.Item2.Type), Enum.Parse<WSDL.Admin.resourceSubType>(x.Item2.SubType)),
+                            splitPath.Length >= 3 ? splitPath[2] : string.Empty
+                        );
+                    })
+                    .Where(x => !string.IsNullOrEmpty(x.Item5) && !string.IsNullOrEmpty(x.Item3) && !string.IsNullOrEmpty(x.Item2) && !string.IsNullOrEmpty(x.Item1)) // 2do! should maybe throw an exception instead of silently out-filtering stuff
+                    .Distinct()
+                    .GroupBy(
+                        keySelector: x => new ValueTuple<string, string, string>(x.Item1, x.Item2, x.Item3),
+                        elementSelector: x => new Internal.IntrospectableObject(x.Item4, x.Item5)
+                    )
+                    .GroupBy(
+                        keySelector: x => new ValueTuple<string, string>(x.Key.Item1, x.Key.Item2),
+                        elementSelector: x => new Internal.IntrospectableSchema(x.Key.Item3, x.ToArray())
+                    )
+                    .GroupBy(
+                        keySelector: x => x.Key.Item1,
+                        elementSelector: x => new Internal.IntrospectableCatalog(x.Key.Item2, x.ToArray())
+                    )
+                    .Select(x => new Internal.IntrospectableDataSource(x.Key, x.ToArray()))
+                    .ToArray();
+
+                return result;
+            }
+            finally
+            {
+                foreach (var task in multiGetIntrospectedResources)
+                    task.Dispose();
+            }
+        }
+
+        private async Task RunTheIntrospection(TdvWebServiceClient tdvClient, IInfoOutput output, IEnumerable<Internal.IntrospectableDataSource> introspectablesGrouped, IEnumerable<Internal.IntrospectableDataSource> resourcesToDrop)
+        {
+            var filteredIntrospectables = FilterIntrospectablesByInput(introspectablesGrouped, DataSources).ToArray();
+
+            var filteredIntrospectablesByDataSource = filteredIntrospectables
                 .Select(x => new ValueTuple<string, WSDL.Admin.introspectionPlanEntry>(
                     x.Item1,
                     new WSDL.Admin.introspectionPlanEntry()
