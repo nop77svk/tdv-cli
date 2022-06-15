@@ -37,7 +37,7 @@
             else
                 introspectedResources = new ValueTuple<string, string, string, TdvResourceType, string>[0];
 
-            await RunTheIntrospection(tdvClient, output, introspectables, resourcesToDrop: introspectedResources);
+            await RunTheIntrospection(tdvClient, output, introspectables: FilterIntrospectablesByInput(introspectables, DataSources), resourcesToDrop: introspectedResources);
             output.Info("Introspection done");
         }
 
@@ -309,11 +309,9 @@
             }
         }
 
-        private async Task RunTheIntrospection(TdvWebServiceClient tdvClient, IInfoOutput output, IEnumerable<Internal.IntrospectableDataSource> introspectablesGrouped, IEnumerable<ValueTuple<string, string, string, TdvResourceType, string>> resourcesToDrop)
+        private async Task RunTheIntrospection(TdvWebServiceClient tdvClient, IInfoOutput output, IEnumerable<ValueTuple<string, string, string, TdvResourceType, string>> introspectables, IEnumerable<ValueTuple<string, string, string, TdvResourceType, string>> resourcesToDrop)
         {
-            var filteredIntrospectables = FilterIntrospectablesByInput(introspectablesGrouped, DataSources).ToArray();
-
-            var filteredIntrospectablesByDataSource = filteredIntrospectables
+            var filteredIntrospectablesByDataSource = introspectables
                 .Select(x => new ValueTuple<string, WSDL.Admin.introspectionPlanEntry>(
                     x.Item1,
                     new WSDL.Admin.introspectionPlanEntry()
