@@ -60,7 +60,7 @@
                 (WSDL.Admin.resourceType.LINK, WSDL.Admin.resourceSubType.NONE, _, _) => TdvResourceTypeEnumAgr.PublishedResource,
                 (WSDL.Admin.resourceType.DEFINITION_SET, _, _, _) => TdvResourceTypeEnumAgr.DefinitionSet,
                 (WSDL.Admin.resourceType.MODEL, WSDL.Admin.resourceSubType.NONE, _, _) => TdvResourceTypeEnumAgr.Model,
-                (WSDL.Admin.resourceType.TRIGGER, WSDL.Admin.resourceSubType.NONE, WSDL.Admin.resourceType.TRIGGER, _) => TdvResourceTypeEnumAgr.Trigger,
+                (WSDL.Admin.resourceType.TRIGGER, WSDL.Admin.resourceSubType.NONE, _, _) => TdvResourceTypeEnumAgr.Trigger,
                 _ => throw new ArgumentOutOfRangeException(nameof(type) + ":" + nameof(subType) + ":" + nameof(targetType) + ":" + nameof(targetSubType), $"Unrecognized combination of resource type \"{type}\", subtype \"{subType}\" and target type \"{targetType}\"/\"{targetSubType}\"")
             };
         }
