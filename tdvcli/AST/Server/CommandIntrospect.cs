@@ -379,7 +379,7 @@
 
                         if (overallProgress.Equals(previousProgressState))
                         {
-                            output.InfoNoEoln((hourglassState == 0 ? " " : "\b") + hourglass[hourglassState % hourglass.Length]);
+                            output.InfoNoEoln((hourglassState == 0 ? " " : "\b\b") + hourglass[hourglassState % hourglass.Length] + " ");
                             hourglassState++;
                         }
                         else
