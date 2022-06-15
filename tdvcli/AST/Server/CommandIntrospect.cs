@@ -13,18 +13,18 @@
 
     internal class CommandIntrospect : IAsyncExecutable
     {
-        public IList<IntrospectTargetDataSource> DataSources { get; }
+        public IList<IntrospectTargetDataSource> ScriptInputs { get; }
         public IntrospectionOptionHandleResources OptionHandleResources { get; }
 
-        public CommandIntrospect(IList<IntrospectTargetDataSource> dataSources, IntrospectionOptionHandleResources optionHandleResources)
+        public CommandIntrospect(IList<IntrospectTargetDataSource> scriptInputs, IntrospectionOptionHandleResources optionHandleResources)
         {
-            DataSources = dataSources;
+            ScriptInputs = scriptInputs;
             OptionHandleResources = optionHandleResources;
         }
 
         public async Task Execute(TdvWebServiceClient tdvClient, IInfoOutput output, ParserState parserState)
         {
-            string[] uniqueDataSourcePaths = DataSources
+            string[] uniqueDataSourcePaths = ScriptInputs
                 .Select(x => x.DataSourcePath)
                 .Distinct()
                 .ToArray();
@@ -37,13 +37,13 @@
             else
                 introspectedResources = new ValueTuple<string, string, string, TdvResourceType, string>[0];
 
-            await RunTheIntrospection(tdvClient, output, introspectables: FilterIntrospectablesByInput(introspectables, DataSources), resourcesToDrop: introspectedResources);
+            await RunTheIntrospection(tdvClient, output, introspectables: FilterIntrospectablesByInput(introspectables, ScriptInputs), resourcesToDrop: introspectedResources);
             output.Info("Introspection done");
         }
 
         public override string? ToString()
         {
-            return $"{base.ToString()}[{DataSources.Count}]";
+            return $"{base.ToString()}[{ScriptInputs.Count}]";
         }
 
         private static IEnumerable<ValueTuple<string, string, string, TdvResourceType, string>> FilterIntrospectablesByInput(IEnumerable<Internal.IntrospectableDataSource> introspectablesGrouped, IEnumerable<Server.IntrospectTargetDataSource> commandInput)
