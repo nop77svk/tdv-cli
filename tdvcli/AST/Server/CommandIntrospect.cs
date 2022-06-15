@@ -395,7 +395,8 @@
             Dictionary<string, WSDL.Admin.introspectResourcesResultResponse> introspectionProgress = new Dictionary<string, WSDL.Admin.introspectResourcesResultResponse>();
 
             Internal.IntrospectionProgress? previousProgressState = null;
-            char[] hourglass = { '/', '-', '\\', '|' };
+            // char[] hourglass = { '/', '-', '\\', '|' };
+            char[] hourglass = { ' ', '.', 'o', 'O', '\u0002', 'O', 'o', '.' };
             int hourglassState = 0;
 
             var multiIntrospection = filteredIntrospectablesByDataSource
