@@ -54,9 +54,13 @@
                 IEnumerable<Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableCatalog, IntrospectTargetCatalog>> catalogsToIntrospect = FilterCatalogsToIntrospect(dataSourceJoin);
                 foreach (var catalogJoin in catalogsToIntrospect)
                 {
+                    yield return new ValueTuple<string, string, string, TdvResourceType, string>(dataSourceJoin.Introspectable.DataSource, catalogJoin.Introspectable.CatalogName, string.Empty, new TdvResourceType(TdvResourceTypeEnumAgr.PublishedCatalog), string.Empty);
+
                     IEnumerable<Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableSchema, IntrospectTargetSchema>> schemasToIntrospect = FilterSchemasToIntrospect(catalogJoin);
                     foreach (var schemaJoin in schemasToIntrospect)
                     {
+                        yield return new ValueTuple<string, string, string, TdvResourceType, string>(dataSourceJoin.Introspectable.DataSource, catalogJoin.Introspectable.CatalogName, schemaJoin.Introspectable.SchemaName, new TdvResourceType(TdvResourceTypeEnumAgr.PublishedSchema), string.Empty);
+
                         IEnumerable<Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableObject, IntrospectTargetTable>> objectsToIntrospect = FilterObjectsToIntrospect(schemaJoin);
                         foreach (var objectJoin in objectsToIntrospect)
                         {
@@ -317,7 +321,12 @@
                         action = WSDL.Admin.introspectionPlanAction.ADD_OR_UPDATE,
                         resourceId = new WSDL.Admin.pathTypeSubtype()
                         {
-                            path = $"{x.Item2}/{x.Item3}/{x.Item5}",
+                            path = x.Item4.Type switch
+                            {
+                                TdvResourceTypeEnumAgr.PublishedCatalog => x.Item2,
+                                TdvResourceTypeEnumAgr.PublishedSchema => string.Join('/', x.Item2, x.Item3),
+                                _ => string.Join('/', x.Item2, x.Item3, x.Item5)
+                            },
                             type = x.Item4.WsType,
                             subtype = x.Item4.WsSubType
                         }
