@@ -391,7 +391,7 @@
                         else
                         {
                             output.InfoCR($"{overallProgress.ProgressPct:#####0%} done ("
-                                + $"{overallProgress.JobsRunning}/{overallProgress.JobsTotalToBeSpawned} jobs"
+                                + $"{overallProgress.JobsRunning}+{overallProgress.JobsDone}/{overallProgress.JobsTotalToBeSpawned} jobs"
                                 + (overallProgress.ToBeAdded > 0 ? $", add:{overallProgress.Added}/{overallProgress.ToBeAdded}" : string.Empty)
                                 + (overallProgress.ToBeUpdated > 0 ? $", upd:{overallProgress.Updated}(+{overallProgress.Skipped})/{overallProgress.ToBeUpdated}" : string.Empty)
                                 + (overallProgress.ToBeRemoved > 0 ? $", del:{overallProgress.Removed}/{overallProgress.ToBeRemoved}" : string.Empty)
