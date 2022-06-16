@@ -19,7 +19,7 @@ namespace NoP77svk.TibcoDV.CLI.AST.Internal
         internal int Errors = 0;
 
         internal int JobsRunning { get => JobsSpawned - JobsDone; }
-        internal int ObjectsProcessed { get => Added + Updated + Removed + Skipped + Warnings + Errors + JobsDone; }
+        internal int ObjectsProcessed { get => Added + Updated + Removed + Skipped + Errors + JobsDone; }
         internal int ObjectsTotal { get => ToBeAdded + ToBeUpdated + ToBeRemoved + JobsTotalToBeSpawned; }
         internal float ProgressPct { get => ObjectsTotal > 0 && JobsSpawned == JobsTotalToBeSpawned ? (float)ObjectsProcessed / ObjectsTotal : 0.0f; }
 
