@@ -41,8 +41,8 @@
             return (type, subType, targetType, targetSubType) switch
             {
                 (WSDL.Admin.resourceType.CONTAINER, WSDL.Admin.resourceSubType.FOLDER_CONTAINER, _, _) => TdvResourceTypeEnumAgr.Folder,
-                (WSDL.Admin.resourceType.CONTAINER, WSDL.Admin.resourceSubType.CATALOG_CONTAINER, _, _) => TdvResourceTypeEnumAgr.PublishedCatalog,
-                (WSDL.Admin.resourceType.CONTAINER, WSDL.Admin.resourceSubType.SCHEMA_CONTAINER, _, _) => TdvResourceTypeEnumAgr.PublishedSchema,
+                (WSDL.Admin.resourceType.CONTAINER, WSDL.Admin.resourceSubType.CATALOG_CONTAINER, _, _) => TdvResourceTypeEnumAgr.Catalog,
+                (WSDL.Admin.resourceType.CONTAINER, WSDL.Admin.resourceSubType.SCHEMA_CONTAINER, _, _) => TdvResourceTypeEnumAgr.Schema,
                 (WSDL.Admin.resourceType.CONTAINER, _, _, _) => TdvResourceTypeEnumAgr.UnknownContainer,
                 (WSDL.Admin.resourceType.DATA_SOURCE, WSDL.Admin.resourceSubType.RELATIONAL_DATA_SOURCE, _, _) => TdvResourceTypeEnumAgr.DataSourceRelational,
                 (WSDL.Admin.resourceType.DATA_SOURCE, WSDL.Admin.resourceSubType.COMPOSITE_WEB_SERVICE, _, _) => TdvResourceTypeEnumAgr.DataSourceCompositeWebService,
@@ -138,8 +138,8 @@
             return type switch
             {
                 TdvResourceTypeEnumAgr.Folder => new (WSDL.Admin.resourceType.CONTAINER, WSDL.Admin.resourceSubType.FOLDER_CONTAINER, null, null),
-                TdvResourceTypeEnumAgr.PublishedCatalog => new (WSDL.Admin.resourceType.CONTAINER, WSDL.Admin.resourceSubType.CATALOG_CONTAINER, null, WSDL.Admin.resourceSubType.CATALOG_CONTAINER),
-                TdvResourceTypeEnumAgr.PublishedSchema => new (WSDL.Admin.resourceType.CONTAINER, WSDL.Admin.resourceSubType.SCHEMA_CONTAINER, null, WSDL.Admin.resourceSubType.SCHEMA_CONTAINER),
+                TdvResourceTypeEnumAgr.Catalog => new (WSDL.Admin.resourceType.CONTAINER, WSDL.Admin.resourceSubType.CATALOG_CONTAINER, null, WSDL.Admin.resourceSubType.CATALOG_CONTAINER),
+                TdvResourceTypeEnumAgr.Schema => new (WSDL.Admin.resourceType.CONTAINER, WSDL.Admin.resourceSubType.SCHEMA_CONTAINER, null, WSDL.Admin.resourceSubType.SCHEMA_CONTAINER),
                 TdvResourceTypeEnumAgr.DataSourceRelational => new (WSDL.Admin.resourceType.DATA_SOURCE, WSDL.Admin.resourceSubType.RELATIONAL_DATA_SOURCE, null, null),
                 TdvResourceTypeEnumAgr.DataSourceCompositeWebService => new (WSDL.Admin.resourceType.DATA_SOURCE, WSDL.Admin.resourceSubType.COMPOSITE_WEB_SERVICE, null, null),
                 TdvResourceTypeEnumAgr.DataSourceFile => new (WSDL.Admin.resourceType.DATA_SOURCE, WSDL.Admin.resourceSubType.FILE_DATA_SOURCE, null, null),

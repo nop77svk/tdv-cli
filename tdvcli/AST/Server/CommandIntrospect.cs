@@ -59,12 +59,12 @@
                 IEnumerable<Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableCatalog, IntrospectTargetCatalog>> catalogsToIntrospect = FilterCatalogsToIntrospect(dataSourceJoin);
                 foreach (var catalogJoin in catalogsToIntrospect)
                 {
-                    yield return new ValueTuple<string, string, string, TdvResourceType, string>(dataSourceJoin.Introspectable.DataSource, catalogJoin.Introspectable.CatalogName, string.Empty, new TdvResourceType(TdvResourceTypeEnumAgr.PublishedCatalog), string.Empty);
+                    yield return new ValueTuple<string, string, string, TdvResourceType, string>(dataSourceJoin.Introspectable.DataSource, catalogJoin.Introspectable.CatalogName, string.Empty, new TdvResourceType(TdvResourceTypeEnumAgr.Catalog), string.Empty);
 
                     IEnumerable<Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableSchema, IntrospectTargetSchema>> schemasToIntrospect = FilterSchemasToIntrospect(catalogJoin);
                     foreach (var schemaJoin in schemasToIntrospect)
                     {
-                        yield return new ValueTuple<string, string, string, TdvResourceType, string>(dataSourceJoin.Introspectable.DataSource, catalogJoin.Introspectable.CatalogName, schemaJoin.Introspectable.SchemaName, new TdvResourceType(TdvResourceTypeEnumAgr.PublishedSchema), string.Empty);
+                        yield return new ValueTuple<string, string, string, TdvResourceType, string>(dataSourceJoin.Introspectable.DataSource, catalogJoin.Introspectable.CatalogName, schemaJoin.Introspectable.SchemaName, new TdvResourceType(TdvResourceTypeEnumAgr.Schema), string.Empty);
 
                         IEnumerable<Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableObject, IntrospectTargetTable>> objectsToIntrospect = FilterObjectsToIntrospect(schemaJoin);
                         foreach (var objectJoin in objectsToIntrospect)
@@ -358,8 +358,8 @@
                         {
                             path = x.Item4.Type switch
                             {
-                                TdvResourceTypeEnumAgr.PublishedCatalog => x.Item2,
-                                TdvResourceTypeEnumAgr.PublishedSchema => string.Join('/', x.Item2, x.Item3),
+                                TdvResourceTypeEnumAgr.Catalog => x.Item2,
+                                TdvResourceTypeEnumAgr.Schema => string.Join('/', x.Item2, x.Item3),
                                 _ => string.Join('/', x.Item2, x.Item3, x.Item5)
                             },
                             type = x.Item4.WsType,
@@ -377,8 +377,8 @@
                             {
                                 path = x.Item4.Type switch
                                 {
-                                    TdvResourceTypeEnumAgr.PublishedCatalog => x.Item2,
-                                    TdvResourceTypeEnumAgr.PublishedSchema => string.Join('/', x.Item2, x.Item3),
+                                    TdvResourceTypeEnumAgr.Catalog => x.Item2,
+                                    TdvResourceTypeEnumAgr.Schema => string.Join('/', x.Item2, x.Item3),
                                     _ => string.Join('/', x.Item2, x.Item3, x.Item5)
                                 },
                                 type = x.Item4.WsType,

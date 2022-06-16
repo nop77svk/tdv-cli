@@ -39,9 +39,9 @@
             if (sourceType.Type == TdvResourceTypeEnumAgr.Folder)
             {
                 bool flattenFolderTreesToSchemas;
-                if (targetType.Type == TdvResourceTypeEnumAgr.PublishedSchema)
+                if (targetType.Type == TdvResourceTypeEnumAgr.Schema)
                     flattenFolderTreesToSchemas = false;
-                else if (targetType.Type is TdvResourceTypeEnumAgr.PublishedCatalog or TdvResourceTypeEnumAgr.DataSourceRelational)
+                else if (targetType.Type is TdvResourceTypeEnumAgr.Catalog or TdvResourceTypeEnumAgr.DataSourceRelational)
                     flattenFolderTreesToSchemas = true;
                 else
                     throw new Infra.E.CannotHandleResourceType(targetType);
@@ -96,7 +96,7 @@
             }
             else
             {
-                if (targetType.Type is not TdvResourceTypeEnumAgr.PublishedSchema and not TdvResourceTypeEnumAgr.PublishedCatalog and not TdvResourceTypeEnumAgr.DataSourceRelational)
+                if (targetType.Type is not TdvResourceTypeEnumAgr.Schema and not TdvResourceTypeEnumAgr.Catalog and not TdvResourceTypeEnumAgr.DataSourceRelational)
                     throw new Infra.E.CannotHandleResourceType(targetType);
 
                 if (FlattenString != null)

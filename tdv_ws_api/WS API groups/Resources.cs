@@ -87,11 +87,11 @@
                 {
                     dropTasks.Add(DropFolders(pathOnlyResources, ifExists: ifExists));
                 }
-                else if (singleTypeResources.Key == TdvResourceTypeEnumAgr.PublishedCatalog)
+                else if (singleTypeResources.Key == TdvResourceTypeEnumAgr.Catalog)
                 {
                     dropTasks.Add(DropCatalogs(pathOnlyResources, ifExists: ifExists));
                 }
-                else if (singleTypeResources.Key == TdvResourceTypeEnumAgr.PublishedSchema)
+                else if (singleTypeResources.Key == TdvResourceTypeEnumAgr.Schema)
                 {
                     dropTasks.Add(DropSchemas(pathOnlyResources, ifExists: ifExists));
                 }

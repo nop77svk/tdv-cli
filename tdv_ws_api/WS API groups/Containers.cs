@@ -59,21 +59,21 @@
                 ));
             }
 
-            if (pathsSanitized.Where(folderItem => folderItem.TdvResourceType == TdvResourceTypeEnumAgr.PublishedSchema).Any())
+            if (pathsSanitized.Where(folderItem => folderItem.TdvResourceType == TdvResourceTypeEnumAgr.Schema).Any())
             {
                 dropContainerTasks.Add(DropSchemas(
                     pathsSanitized
-                        .Where(folderItem => folderItem.TdvResourceType == TdvResourceTypeEnumAgr.PublishedSchema)
+                        .Where(folderItem => folderItem.TdvResourceType == TdvResourceTypeEnumAgr.Schema)
                         .Select(folderItem => folderItem.Path ?? "???"),
                     ifExists: ifExists
                 ));
             }
 
-            if (pathsSanitized.Where(folderItem => folderItem.TdvResourceType == TdvResourceTypeEnumAgr.PublishedCatalog).Any())
+            if (pathsSanitized.Where(folderItem => folderItem.TdvResourceType == TdvResourceTypeEnumAgr.Catalog).Any())
             {
                 dropContainerTasks.Add(DropCatalogs(
                     pathsSanitized
-                        .Where(folderItem => folderItem.TdvResourceType == TdvResourceTypeEnumAgr.PublishedCatalog)
+                        .Where(folderItem => folderItem.TdvResourceType == TdvResourceTypeEnumAgr.Catalog)
                         .Select(folderItem => folderItem.Path ?? "???"),
                     ifExists: ifExists
                 ));
@@ -96,9 +96,9 @@
         {
             if (folderType == TdvResourceTypeEnumAgr.Folder)
                 return await DropFolders(paths, ifExists: ifExists);
-            else if (folderType == TdvResourceTypeEnumAgr.PublishedCatalog)
+            else if (folderType == TdvResourceTypeEnumAgr.Catalog)
                 return await DropCatalogs(paths, ifExists: ifExists);
-            else if (folderType == TdvResourceTypeEnumAgr.PublishedSchema)
+            else if (folderType == TdvResourceTypeEnumAgr.Schema)
                 return await DropSchemas(paths, ifExists: ifExists);
             else
                 throw new ArgumentOutOfRangeException(nameof(folderType), folderType.ToString());
@@ -167,8 +167,8 @@
                     foreach (TdvRest_ContainerContents folderItem in finishedSubfolderReader.Result)
                     {
                         if (folderItem.TdvResourceType is TdvResourceTypeEnumAgr.Folder
-                            or TdvResourceTypeEnumAgr.PublishedCatalog
-                            or TdvResourceTypeEnumAgr.PublishedSchema
+                            or TdvResourceTypeEnumAgr.Catalog
+                            or TdvResourceTypeEnumAgr.Schema
                             or TdvResourceTypeEnumAgr.DataSourceCompositeWebService
                             or TdvResourceTypeEnumAgr.DataSourceRelational)
                         {
