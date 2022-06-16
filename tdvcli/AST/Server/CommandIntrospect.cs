@@ -175,12 +175,13 @@
 
         private static IEnumerable<ValueTuple<string, string, string, TdvResourceType, string>> FilterResourcesToDrop(IEnumerable<ValueTuple<string, string, string, TdvResourceType, string>> introspectedResources, IEnumerable<ValueTuple<string, string, string, TdvResourceType, string>> filteredIntrospectables)
         {
-            return introspectedResources
+            return filteredIntrospectables
                 .RightAntiSemiJoin(
-                    outerTable: filteredIntrospectables,
+                    outerTable: introspectedResources
+                        .Where(x => !(x.Item4.Type == TdvResourceTypeEnumAgr.Trigger && x.Item2.Equals("ScheduledReintrospection", StringComparison.OrdinalIgnoreCase))),
                     antiJoinedKeySelector: innerRow => new ValueTuple<string, string, string, string>(innerRow.Item1, innerRow.Item2, innerRow.Item3, innerRow.Item5),
                     outerKeySelector: outerRow => new ValueTuple<string, string, string, string>(outerRow.Item1, outerRow.Item2, outerRow.Item3, outerRow.Item5),
-                    resultSelector: (innerRow, outerRow) => innerRow
+                    resultSelector: (innerRow, outerRow) => outerRow
                 );
         }
 
