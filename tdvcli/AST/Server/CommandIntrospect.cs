@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
+    using log4net;
     using NoP77svk.IO;
     using NoP77svk.Linq;
     using NoP77svk.Linq.Ext;
@@ -11,10 +12,13 @@
     using NoP77svk.TibcoDV.API;
     using NoP77svk.TibcoDV.CLI.Commons;
     using NoP77svk.TibcoDV.CLI.Parser;
+    using NoP77svk.TibcoDV.Commons;
     using WSDL = NoP77svk.TibcoDV.API.WSDL;
 
     internal class CommandIntrospect : IAsyncExecutable
     {
+        private static readonly ILog _log = LogManager.GetLogger(typeof(CommandIntrospect));
+
         public IList<IntrospectTargetDataSource> ScriptInputs { get; }
         public IntrospectionOptionHandleResources OptionHandleResources { get; }
 
@@ -26,21 +30,38 @@
 
         public async Task Execute(TdvWebServiceClient tdvClient, IInfoOutput output, ParserState parserState)
         {
+            using var traceLog = new TraceLog(_log, nameof(Execute));
+
             string[] uniqueDataSourcePaths = ScriptInputs
                 .Select(x => x.DataSourcePath)
                 .Distinct()
                 .ToArray();
+            _log.Debug(string.Join('\n', uniqueDataSourcePaths.Prepend("Unique data source paths to introspect:\n")));
 
             output.Info($"Introspecting {uniqueDataSourcePaths.Length} data sources...");
-            IEnumerable<Internal.IntrospectableDataSource> introspectables = await RetrieveIntrospectables(tdvClient, uniqueDataSourcePaths);
-            IEnumerable<ValueTuple<string, string, string, TdvResourceType, string>> introspectedResources;
+            Internal.IntrospectableDataSource[] introspectables = await RetrieveIntrospectables(tdvClient, uniqueDataSourcePaths);
+            if (_log.IsDebugEnabled)
+                _log.Debug(string.Join('\n', introspectables.Select(x => x.ToString()).Prepend("Introspectable resources (prior to filter):")));
+
+            ValueTuple<string, string, string, TdvResourceType, string>[] introspectedResources;
             if (OptionHandleResources.DropUnmatched)
+            {
                 introspectedResources = await RetrieveIntrospectedResources(tdvClient, uniqueDataSourcePaths);
+                if (_log.IsDebugEnabled)
+                    _log.Debug(string.Join('\n', introspectedResources.Select(x => x.ToString()).Prepend("Introspected resources (prior to filter):")));
+            }
             else
+            {
                 introspectedResources = new ValueTuple<string, string, string, TdvResourceType, string>[0];
+            }
 
             var filteredIntrospectables = FilterIntrospectablesByInput(introspectables, ScriptInputs).ToArray();
-            var resourcesToDrop = FilterResourcesToDrop(introspectedResources, filteredIntrospectables);
+            if (_log.IsDebugEnabled)
+                _log.Debug(string.Join('\n', filteredIntrospectables.Select(x => x.ToString()).Prepend("Introspectables (filtered):")));
+
+            var resourcesToDrop = FilterResourcesToDrop(introspectedResources, filteredIntrospectables).ToArray();
+            if (_log.IsDebugEnabled)
+                _log.Debug(string.Join('\n', resourcesToDrop.Select(x => x.ToString()).Prepend("Resources to be dropped:")));
 
             await RunTheIntrospection(tdvClient, output, filteredIntrospectables, resourcesToDrop);
             output.Info("Introspection done");
@@ -397,7 +418,7 @@
 
             Internal.IntrospectionProgress? previousProgressState = null;
             // char[] hourglass = { '/', '-', '\\', '|' };
-            char[] hourglass = { ' ', '.', 'o', 'O', '\u0002', 'O', 'o', '.' };
+            char[] hourglass = { ' ', '.', 'o', 'O', '\u0001', '\u0002', 'o', '.' };
             int hourglassState = 0;
 
             var multiIntrospection = filteredIntrospectablesByDataSource
@@ -451,7 +472,6 @@
                                 + (overallProgress.Errors > 0 ? $", err:{overallProgress.Errors}" : string.Empty)
                                 + ")"
                             );
-                            hourglassState = 0;
                             previousProgressState = overallProgress;
                         }
                     }
