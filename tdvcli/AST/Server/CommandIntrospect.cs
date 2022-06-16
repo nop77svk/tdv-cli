@@ -38,15 +38,16 @@
                 .ToArray();
             _log.Debug(string.Join('\n', uniqueDataSourcePaths.Prepend("Unique data source paths to introspect:\n")));
 
-            output.Info($"Introspecting {uniqueDataSourcePaths.Length} data sources...");
-            Internal.IntrospectableDataSource[] introspectables = await RetrieveIntrospectables(tdvClient, uniqueDataSourcePaths);
+            output.InfoNoEoln($"Resolving introspection metadata for {uniqueDataSourcePaths.Length} data sources");
+
+            Internal.IntrospectableDataSource[] introspectables = await RetrieveIntrospectables(tdvClient, uniqueDataSourcePaths, () => { output.InfoNoEoln("."); });
             if (_log.IsDebugEnabled)
                 _log.Debug(string.Join('\n', introspectables.Select(x => x.ToString()).Prepend("Introspectable resources (prior to filter):")));
 
             ValueTuple<string, string, string, TdvResourceType, string>[] introspectedResources;
             if (OptionHandleResources.DropUnmatched)
             {
-                introspectedResources = await RetrieveIntrospectedResources(tdvClient, uniqueDataSourcePaths);
+                introspectedResources = await RetrieveIntrospectedResources(tdvClient, uniqueDataSourcePaths, () => { output.InfoNoEoln("."); });
                 if (_log.IsDebugEnabled)
                     _log.Debug(string.Join('\n', introspectedResources.Select(x => x.ToString()).Prepend("Introspected resources (prior to filter):")));
             }
@@ -63,6 +64,9 @@
             if (_log.IsDebugEnabled)
                 _log.Debug(string.Join('\n', resourcesToDrop.Select(x => x.ToString()).Prepend("Resources to be dropped:")));
 
+            output.Info(" done");
+
+            output.Info($"Introspecting {uniqueDataSourcePaths.Length} data sources...");
             await RunTheIntrospection(tdvClient, output, filteredIntrospectables, resourcesToDrop, updateExisting: OptionHandleResources.UpdateExisting);
             output.Info("Introspection done");
         }
@@ -240,21 +244,28 @@
             }
         }
 
-        private static async Task<Internal.IntrospectableDataSource[]> RetrieveIntrospectables(TdvWebServiceClient tdvClient, IEnumerable<string> uniqueDataSourcePaths)
+        private static async Task<Internal.IntrospectableDataSource[]> RetrieveIntrospectables(TdvWebServiceClient tdvClient, IEnumerable<string> uniqueDataSourcePaths, Action? progressFeedback = null)
         {
             Internal.IntrospectableDataSource[] result;
 
             NamedTask<WSDL.Admin.linkableResourceId[]>[] multiGetIntrospectableResources = uniqueDataSourcePaths
+                .Select(x =>
+                {
+                    progressFeedback?.Invoke();
+                    return x;
+                })
                 .Select(dataSourcePath => new NamedTask<WSDL.Admin.linkableResourceId[]>(
                     dataSourcePath,
-                    tdvClient.PolledServerTaskEnumerable(new API.PolledServerTasks.GetIntrospectableResourceIdsPolledServerTaskHandler(tdvClient, dataSourcePath, true))
+                    tdvClient.PolledServerTaskEnumerable(new API.PolledServerTasks.GetIntrospectableResourceIdsPolledServerTaskHandler(tdvClient, dataSourcePath, true), responseFeedback: x => { progressFeedback?.Invoke(); })
                         .ToArrayAsync().AsTask()
                 ))
                 .ToArray();
 
             try
             {
+                progressFeedback?.Invoke();
                 await Task.WhenAll(multiGetIntrospectableResources.Select(x => x.Task));
+                progressFeedback?.Invoke();
 
                 result = multiGetIntrospectableResources
                     .Unnest(
@@ -298,21 +309,40 @@
             }
         }
 
-        private static async Task<ValueTuple<string, string, string, TdvResourceType, string>[]> RetrieveIntrospectedResources(TdvWebServiceClient tdvClient, IEnumerable<string> uniqueDataSourcePaths)
+        private static async Task<ValueTuple<string, string, string, TdvResourceType, string>[]> RetrieveIntrospectedResources(TdvWebServiceClient tdvClient, IEnumerable<string> uniqueDataSourcePaths, Action? progressFeedback = null)
         {
             ValueTuple<string, string, string, TdvResourceType, string>[] result;
 
             NamedTask<WSDL.Admin.resource>[] multiGetResourceInfo = uniqueDataSourcePaths
+                .Select(x =>
+                {
+                    progressFeedback?.Invoke();
+                    return x;
+                })
                 .Select(dataSourcePath => new NamedTask<WSDL.Admin.resource>(
                     dataSourcePath,
-                    tdvClient.GetResourceInfo(dataSourcePath).FirstAsync().AsTask()
+                    tdvClient.GetResourceInfo(dataSourcePath)
+                        .Select(x =>
+                        {
+                            progressFeedback?.Invoke();
+                            return x;
+                        })
+                        .FirstAsync().AsTask()
                 ))
                 .ToArray();
+
             try
             {
+                progressFeedback?.Invoke();
                 await Task.WhenAll(multiGetResourceInfo.Select(x => x.Task));
+                progressFeedback?.Invoke();
 
                 NamedTask<TdvRest_ContainerContents[]>[] multiGetIntrospectedResources = multiGetResourceInfo
+                    .Select(x =>
+                    {
+                        progressFeedback?.Invoke();
+                        return x;
+                    })
                     .Select(gri => new ValueTuple<string, TdvResourceType>(gri.Name, new TdvResourceType(gri.Task.Result.type, gri.Task.Result.subtype)))
                     .Select(x => new NamedTask<TdvRest_ContainerContents[]>(
                         x.Item1,
@@ -320,11 +350,12 @@
                             .ToArrayAsync().AsTask()
                     ))
                     .ToArray();
-                await Task.WhenAll(multiGetIntrospectedResources.Select(x => x.Task));
 
                 try
                 {
+                    progressFeedback?.Invoke();
                     await Task.WhenAll(multiGetIntrospectedResources.Select(x => x.Task));
+                    progressFeedback?.Invoke();
 
                     result = multiGetIntrospectedResources
                         .Unnest(
