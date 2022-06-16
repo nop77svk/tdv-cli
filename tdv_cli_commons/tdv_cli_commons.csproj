@@ -44,8 +44,8 @@
   <ItemGroup>
     <PackageReference Include="CommandLineParser" Version="2.8.0" />
     <PackageReference Include="log4net" Version="2.0.13" />
-    <PackageReference Include="NoP77svk.ConnectionStringParsers" Version="2022.1.2" />
-    <PackageReference Include="NoP77svk.MiscellaneousHelpers" Version="2022.1.2" />
+    <PackageReference Include="NoP77svk.ConnectionStringParsers" Version="2022.6.2" />
+    <PackageReference Include="NoP77svk.MiscellaneousHelpers" Version="2022.6.2" />
   </ItemGroup>
 
   <ItemGroup>
