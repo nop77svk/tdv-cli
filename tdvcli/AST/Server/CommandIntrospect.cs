@@ -63,7 +63,7 @@
             if (_log.IsDebugEnabled)
                 _log.Debug(string.Join('\n', resourcesToDrop.Select(x => x.ToString()).Prepend("Resources to be dropped:")));
 
-            await RunTheIntrospection(tdvClient, output, filteredIntrospectables, resourcesToDrop);
+            await RunTheIntrospection(tdvClient, output, filteredIntrospectables, resourcesToDrop, updateExisting: OptionHandleResources.UpdateExisting);
             output.Info("Introspection done");
         }
 
@@ -367,7 +367,7 @@
             }
         }
 
-        private async Task RunTheIntrospection(TdvWebServiceClient tdvClient, IInfoOutput output, IEnumerable<ValueTuple<string, string, string, TdvResourceType, string>> introspectables, IEnumerable<ValueTuple<string, string, string, TdvResourceType, string>> resourcesToDrop)
+        private async Task RunTheIntrospection(TdvWebServiceClient tdvClient, IInfoOutput output, IEnumerable<ValueTuple<string, string, string, TdvResourceType, string>> introspectables, IEnumerable<ValueTuple<string, string, string, TdvResourceType, string>> resourcesToDrop, bool updateExisting)
         {
             var filteredIntrospectablesByDataSource = introspectables
                 .Select(x => new ValueTuple<string, WSDL.Admin.introspectionPlanEntry>(
@@ -423,7 +423,13 @@
 
             var multiIntrospection = filteredIntrospectablesByDataSource
                 .Select(x => tdvClient.PolledServerTask(
-                    new API.PolledServerTasks.IntrospectPolledServerTaskHandler(tdvClient, x.Key, x.AsEnumerable()),
+                    new API.PolledServerTasks.IntrospectPolledServerTaskHandler(tdvClient, x.Key, x.AsEnumerable())
+                    {
+                        IntrospectionOptions = new TdvIntrospectionOptions()
+                        {
+                            UpdateAllIntrospectedResources = updateExisting
+                        }
+                    },
                     y =>
                     {
                         if (introspectionProgress.ContainsKey(y.taskId))
@@ -473,6 +479,7 @@
                                 + ")"
                             );
                             previousProgressState = overallProgress;
+                            hourglassState = 0;
                         }
                     }
                 ))

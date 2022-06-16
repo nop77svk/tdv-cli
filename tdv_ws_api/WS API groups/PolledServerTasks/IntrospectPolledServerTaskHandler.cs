@@ -8,18 +8,19 @@
     public class IntrospectPolledServerTaskHandler
         : IPolledServerTaskHandler<WSDL.Admin.introspectResourcesResultResponse>
     {
-        public IntrospectPolledServerTaskHandler(TdvWebServiceClient tdvClient, string dataSourcePath, IEnumerable<WSDL.Admin.introspectionPlanEntry> resources)
+        public IntrospectPolledServerTaskHandler(TdvWebServiceClient tdvClient, string dataSourcePath, IEnumerable<WSDL.Admin.introspectionPlanEntry> resources, TdvIntrospectionOptions? options = null)
         {
             TdvClient = tdvClient;
             DataSourcePath = dataSourcePath;
             Resources = resources;
+            IntrospectionOptions = options ?? new TdvIntrospectionOptions();
         }
 
         public TdvWebServiceClient TdvClient { get; }
         public TimeSpan PollingInterval { get; set; } = TimeSpan.FromMilliseconds(1500);
         public string DataSourcePath { get; }
         public IEnumerable<WSDL.Admin.introspectionPlanEntry> Resources { get; }
-        public TdvIntrospectionOptions IntrospectionOptions { get; init; } = new TdvIntrospectionOptions();
+        public TdvIntrospectionOptions IntrospectionOptions { get; init; }
 
         internal bool RetrieveResultInBlockingFashion { get => PollingInterval.CompareTo(TimeSpan.Zero) <= 0 || !IntrospectionOptions.RunInBackgroundTransaction; }
 
