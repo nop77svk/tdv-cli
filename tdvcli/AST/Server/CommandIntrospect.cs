@@ -495,7 +495,7 @@
 
                         if (overallProgress.Equals(previousProgressState))
                         {
-                            output.InfoNoEoln((hourglassState == 0 ? " " : "\b\b") + hourglass[hourglassState % hourglass.Length] + " ");
+                            output.InfoNoEoln((hourglassState == 0 ? string.Empty : "\b\b") + hourglass[hourglassState % hourglass.Length] + " ");
                             hourglassState++;
                         }
                         else
@@ -507,7 +507,7 @@
                                 + (overallProgress.ToBeRemoved > 0 ? $", del:{overallProgress.Removed}/{overallProgress.ToBeRemoved}" : string.Empty)
                                 + (overallProgress.Warnings > 0 ? $", warn:{overallProgress.Warnings}" : string.Empty)
                                 + (overallProgress.Errors > 0 ? $", err:{overallProgress.Errors}" : string.Empty)
-                                + ")"
+                                + ") "
                             );
                             previousProgressState = overallProgress;
                             hourglassState = 0;
