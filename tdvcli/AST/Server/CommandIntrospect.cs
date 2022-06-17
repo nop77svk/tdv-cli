@@ -502,6 +502,9 @@
                                 func: (aggregate, element) =>
                                 {
                                     aggregate.JobsDone += element.completed ? 1 : 0;
+                                    aggregate.JobsWaiting += element.status.status == WSDL.Admin.operationStatus.WAITING ? 1 : 0;
+                                    aggregate.JobsFailed += element.status.status == WSDL.Admin.operationStatus.FAIL ? 1 : 0;
+                                    aggregate.JobsCancelled += element.status.status == WSDL.Admin.operationStatus.CANCELED ? 1 : 0;
                                     aggregate.Added += element.status.addedCount;
                                     aggregate.ToBeAdded += element.status.toBeAddedCount;
                                     aggregate.Updated += element.status.updatedCount;
@@ -523,7 +526,12 @@
                         else
                         {
                             output.InfoCR($"{overallProgress.ProgressPct:#####0%} done ("
-                                + $"{overallProgress.JobsRunning}/{overallProgress.JobsTotalToBeSpawned}(-{overallProgress.JobsDone}) jobs"
+                                + $"{overallProgress.JobsRunning}"
+                                + (overallProgress.JobsWaiting > 0 ? $"(-{overallProgress.JobsWaiting})" : string.Empty)
+                                + $"/{overallProgress.JobsTotalToBeSpawned}(-{overallProgress.JobsDone} ok"
+                                + (overallProgress.JobsCancelled > 0 ? $",{overallProgress.JobsCancelled} cancelled" : string.Empty)
+                                + (overallProgress.JobsFailed > 0 ? $",{overallProgress.JobsFailed} failed" : string.Empty)
+                                + ") jobs"
                                 + (overallProgress.ToBeAdded > 0 ? $", add:{overallProgress.Added}/{overallProgress.ToBeAdded}" : string.Empty)
                                 + (overallProgress.ToBeUpdated > 0 ? $", upd:{overallProgress.Updated}(+{overallProgress.Skipped})/{overallProgress.ToBeUpdated}" : string.Empty)
                                 + (overallProgress.ToBeRemoved > 0 ? $", del:{overallProgress.Removed}/{overallProgress.ToBeRemoved}" : string.Empty)

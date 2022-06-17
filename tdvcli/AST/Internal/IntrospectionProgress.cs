@@ -7,6 +7,9 @@ namespace NoP77svk.TibcoDV.CLI.AST.Internal
     {
         internal int JobsSpawned = 0;
         internal int JobsDone = 0;
+        internal int JobsWaiting = 0;
+        internal int JobsFailed = 0;
+        internal int JobsCancelled = 0;
         internal int JobsTotalToBeSpawned = 0;
         internal int Added = 0;
         internal int ToBeAdded = 0;
@@ -27,6 +30,9 @@ namespace NoP77svk.TibcoDV.CLI.AST.Internal
         {
             return JobsSpawned == other?.JobsSpawned
                 && JobsDone == other?.JobsDone
+                && JobsWaiting == other?.JobsWaiting
+                && JobsFailed == other?.JobsFailed
+                && JobsCancelled == other?.JobsCancelled
                 && JobsTotalToBeSpawned == other?.JobsTotalToBeSpawned
                 && Added == other?.Added
                 && ToBeAdded == other?.ToBeAdded
