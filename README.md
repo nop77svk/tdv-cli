@@ -6,6 +6,61 @@ Run `tdvcli --help` to get the overview on available command line parameters.
 
 ## "Pierre's Tibco SQL" Script -- Server-side commands
 
+### Introspection
+
+`introspect ` <_multi-datasource clause_> [<_handling of introspectables_>] `;`
+
+<_multi-datasource clause_> = comma-delimited list of any number of <_data source clause_>
+
+<_data source clause_> = `data source `<_data source path_> [<_multi-catalog subclause_>]
+
+<_handling of introspectables_>
+    = ( `drop` | `keep` ) ` unmatched and ` ( `skip` | `update` ) ` existing resources`
+    | ( `skip` | `update` ) ` existing resources`
+    | ( `drop` | `keep` ) ` unmatched existing resources`
+
+<_multi-catalog subclause_> = `(` comma-delimited list of any number of <_catalog specifier_> `)`
+
+<_catalog specifier_> = `catalog ` <_liberal resource identifier_> [<_multi-schema subclause_>]
+
+<_multi-schema subclause_> = `(` comma-delimited list of any number of <_schema clause_> `)`
+
+<_schema clause_> = `schema ` <_liberal resource identifier_> [<_multi-object subclause_>]
+
+<_multi-object subclause_> = `(` comma-delimited list of any number of <_object specifier_> `)`
+
+<_object specifier_> = <_object operation_> ` ` <_liberal resource identifier_>
+
+<_object operation_> = `include` | `exclude`
+
+<_liberal resource identifier_> = <_regexp identifier matching_> | <_exact identifier matching_>
+
+<_exact identifier matching_> = [`equal to `] <_any valid resource identifier_>
+
+<_regexp identifier matching_> = ( `matching` | `rlike` | `rxlike` | `regexlike` | `regexplike` ) ` /` <_regular expression in .NET Core syntax_> `/`
+
+Run introspection on listed data sources. Each data source listed must exist. At least one data source must be specified.
+
+Optionally, for each data source you may restrict catalogs to be introspected. The catalogs listed are matched against real introspectables as retrieved from the remote data source. Any unmatched catalogs are silently ignored.
+
+Optionally, for each catalog you may restrict schemas to be introspected. The schemas listed are matched against real introspectables as retrieved from the remote data source and matched catalog. Any unmatched schemas are silently ignored.
+
+Optionally, for each schema you may restrict objects(tables) to be introspected. The objects listed are matched against real introspectables as retrieved from the remote data source and matched catalog and schema. Restriction of objects(tables) is done via inclusions and exclusions in an ordered manner from first to last, i.e. if a table matches an exclusion specifier, but matches a later inclusion specifier, the table gets introspected.
+
+If an object restriction list starts with `exclude`, then all introspectables retrieved from remote data sources are implicitly considered included for introspection at the start, i.e., as if the object restriction list started with (an invisible) `include matching /^/`.
+
+Vice versa, if an object restriction list starts with `include`, then all introspectables retrieved from remote data sources are implicitly considered excluded for introspection at the start, i.e., as if the object restriction list started with (an invisible) `exclude matching /^/`.
+
+#### Handling of introspectables (optional clause)
+
+`drop unmatched resources` causes the introspection to remove all existing objects(tables), schemas and catalogs under each listed data source that are not present on the remote data source anymore.
+
+Vice versa, `keep unmatched resources` causes the introspection to keep all existing objects(tables), schemas and catalogs under each listed data source, even if they are not present on the remote data source.
+
+`update existing resources` causes the introspection to re-introspect all existing objects(tables) under each listed data source.
+
+Vice versa, `skip existing resources` causes the introspection to ignore/skip re-introspecting existing objects(tables) under each listed data source.
+
 ### Create folder
 
 `create `[`if not exists`]` folder `<_resource path_>`;`
