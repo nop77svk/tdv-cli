@@ -37,7 +37,7 @@ Run `tdvcli --help` to get the overview on available command line parameters.
 
 <_exact identifier matching_> = [`equal to `] <_any valid resource identifier_>
 
-<_regexp identifier matching_> = ( `matching` | `rlike` | `rxlike` | `regexlike` | `regexplike` ) ` /` <_regular expression in .NET Core syntax_> `/`
+<_regexp identifier matching_> = ( `matching ` | `rlike ` | `rxlike ` | `regexlike ` | `regexplike ` ) `/` <_regular expression in .NET Core syntax_> `/`
 
 Run introspection on listed data sources. Each data source listed must exist. At least one data source must be specified.
 
