@@ -14,10 +14,10 @@ Run `tdvcli --help` to get the overview on available command line parameters.
 
 <_data source clause_> = `data source `<_data source path_> [<_multi-catalog subclause_>]
 
-<_handling of introspectables_>
-    = ( `drop` | `keep` ) ` unmatched and ` ( `skip` | `update` ) ` existing resources`
-    | ( `skip` | `update` ) ` existing resources`
-    | ( `drop` | `keep` ) ` unmatched existing resources`
+<_handling of introspectables_>\
+    = ( `drop` | `keep` ) ` unmatched and ` ( `skip` | `update` ) ` existing resources`\
+    | ( `skip` | `update` ) ` existing resources`\
+    | ( `drop` | `keep` ) ` unmatched existing resources`
 
 <_multi-catalog subclause_> = `(` comma-delimited list of any number of <_catalog specifier_> `)`
 
