@@ -45,29 +45,52 @@
                 _log.Debug(string.Join('\n', introspectables.Select(x => x.ToString()).Prepend("Introspectable resources (prior to filter):")));
 
             ValueTuple<string, string, string, TdvResourceType, string>[] introspectedResources;
-            if (OptionHandleResources.DropUnmatched)
+            if (OptionHandleResources.DropUnmatched || !OptionHandleResources.UpdateExisting)
             {
                 introspectedResources = await RetrieveIntrospectedResources(tdvClient, uniqueDataSourcePaths, () => { output.InfoNoEoln("."); });
                 if (_log.IsDebugEnabled)
-                    _log.Debug(string.Join('\n', introspectedResources.Select(x => x.ToString()).Prepend("Introspected resources (prior to filter):")));
+                    _log.Debug(string.Join('\n', introspectedResources.Select(x => x.ToString()).Prepend("Introspected resources (prior to filters):")));
             }
             else
             {
                 introspectedResources = new ValueTuple<string, string, string, TdvResourceType, string>[0];
             }
 
-            var filteredIntrospectables = FilterIntrospectablesByInput(introspectables, ScriptInputs).ToArray();
+            var filteredIntrospectablesEnumerable = FilterIntrospectablesByInput(introspectables, ScriptInputs);
+            filteredIntrospectablesEnumerable = filteredIntrospectablesEnumerable.ToArray();
             if (_log.IsDebugEnabled)
-                _log.Debug(string.Join('\n', filteredIntrospectables.Select(x => x.ToString()).Prepend("Introspectables (filtered):")));
+                _log.Debug(string.Join('\n', filteredIntrospectablesEnumerable.Select(x => x.ToString()).Prepend("Introspectables (filtered by input):")));
 
-            var resourcesToDrop = FilterResourcesToDrop(introspectedResources, filteredIntrospectables).ToArray();
+            var resourcesToDrop = FilterResourcesToDrop(introspectedResources, filteredIntrospectablesEnumerable).ToArray();
             if (_log.IsDebugEnabled)
                 _log.Debug(string.Join('\n', resourcesToDrop.Select(x => x.ToString()).Prepend("Resources to be dropped:")));
 
+            if (!OptionHandleResources.UpdateExisting)
+            {
+                filteredIntrospectablesEnumerable = filteredIntrospectablesEnumerable
+                    .AntiJoin(
+                        antiJoinedTable: introspectedResources,
+                        outerKeySelector: outer => (outer.Item1, outer.Item2, outer.Item3, outer.Item4.Type, outer.Item5),
+                        antiJoinKeySelector: anti => (anti.Item1, anti.Item2, anti.Item3, anti.Item4.Type, anti.Item5)
+                    );
+            }
+
+            var filteredIntrospectables = filteredIntrospectablesEnumerable.ToArray();
+            if (_log.IsDebugEnabled)
+                _log.Debug(string.Join('\n', filteredIntrospectables.Select(x => x.ToString()).Prepend("Resources to be added:")));
+
             output.Info(" done");
 
-            output.Info($"Introspecting {uniqueDataSourcePaths.Length} data sources...");
-            await RunTheIntrospection(tdvClient, output, filteredIntrospectables, resourcesToDrop, updateExisting: OptionHandleResources.UpdateExisting);
+            if (filteredIntrospectables.Length > 0 || resourcesToDrop.Length > 0)
+            {
+                output.Info($"Introspecting {uniqueDataSourcePaths.Length} data sources...");
+                await RunTheIntrospection(tdvClient, output, filteredIntrospectablesEnumerable, resourcesToDrop, updateExisting: OptionHandleResources.UpdateExisting);
+            }
+            else
+            {
+                output.Info("No introspectable/droppable resources identified");
+            }
+
             output.Info("Introspection done");
         }
 
