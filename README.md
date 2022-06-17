@@ -10,7 +10,7 @@ Run `tdvcli --help` to get the overview on available command line parameters.
 
 `introspect ` <_multi-datasource clause_> [<_handling of introspectables_>] `;`
 
-<_multi-datasource clause_> = comma-delimited list of any number of <_data source clause_>
+<_multi-datasource clause_> = comma-delimited list of 1 or more of <_data source clause_>
 
 <_data source clause_> = `data source `<_data source path_> [<_multi-catalog subclause_>]
 
@@ -19,15 +19,15 @@ Run `tdvcli --help` to get the overview on available command line parameters.
     | ( `skip` | `update` ) ` existing resources`\
     | ( `drop` | `keep` ) ` unmatched existing resources`
 
-<_multi-catalog subclause_> = `(` comma-delimited list of any number of <_catalog specifier_> `)`
+<_multi-catalog subclause_> = `(` comma-delimited list of 1 or more of <_catalog specifier_> `)`
 
 <_catalog specifier_> = `catalog ` <_liberal resource identifier_> [<_multi-schema subclause_>]
 
-<_multi-schema subclause_> = `(` comma-delimited list of any number of <_schema clause_> `)`
+<_multi-schema subclause_> = `(` comma-delimited list of 1 or more of <_schema clause_> `)`
 
 <_schema clause_> = `schema ` <_liberal resource identifier_> [<_multi-object subclause_>]
 
-<_multi-object subclause_> = `(` comma-delimited list of any number of <_object specifier_> `)`
+<_multi-object subclause_> = `(` comma-delimited list of 1 or more of <_object specifier_> `)`
 
 <_object specifier_> = <_object operation_> ` ` <_liberal resource identifier_>
 
