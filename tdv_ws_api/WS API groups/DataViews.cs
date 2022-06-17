@@ -10,7 +10,7 @@
     {
         public async Task CreateDataViews(IEnumerable<TdvRest_CreateDataView> requestBody)
         {
-            await _wsClient.EndpointGetStream(TdvRestWsEndpoint.DataViewApi(HttpMethod.Post)
+            await _wsClient.EndpointCall(TdvRestWsEndpoint.DataViewApi(HttpMethod.Post)
                 .WithContent(requestBody)
             );
         }
@@ -41,7 +41,7 @@
                 .Where(path => !string.IsNullOrWhiteSpace(path))
                 .Select(x => PathExt.Sanitize(x, FolderDelimiter) ?? string.Empty);
 
-            await _wsClient.EndpointGetStream(TdvRestWsEndpoint.DataViewApi(HttpMethod.Delete)
+            await _wsClient.EndpointCall(TdvRestWsEndpoint.DataViewApi(HttpMethod.Delete)
                 .AddTdvQuery(TdvRestEndpointParameterConst.IfExists, ifExists)
                 .WithContent(pathsSanitized)
             );

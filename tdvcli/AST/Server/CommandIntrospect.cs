@@ -189,7 +189,7 @@
                 }
             }
             else
-            { 
+            {
                 foreach (var row in schemaJoin.Introspectable.Objects
                     .Select(x => new Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableObject, IntrospectTargetTable>(x, null))
                     .Where(x => x.Introspectable.ObjectName != string.Empty)
@@ -200,13 +200,12 @@
 
         private static IEnumerable<ValueTuple<string, string, string, TdvResourceType, string>> FilterResourcesToDrop(IEnumerable<ValueTuple<string, string, string, TdvResourceType, string>> introspectedResources, IEnumerable<ValueTuple<string, string, string, TdvResourceType, string>> filteredIntrospectables)
         {
-            return filteredIntrospectables
+            return introspectedResources
+                .Where(x => !(x.Item4.Type == TdvResourceTypeEnumAgr.Trigger && x.Item2.Equals("ScheduledReintrospection", StringComparison.OrdinalIgnoreCase)))
                 .AntiJoin(
-                    antiJoinedTable: introspectedResources
-                        .Where(x => !(x.Item4.Type == TdvResourceTypeEnumAgr.Trigger && x.Item2.Equals("ScheduledReintrospection", StringComparison.OrdinalIgnoreCase))),
+                    antiJoinedTable: filteredIntrospectables,
                     outerKeySelector: outer => new ValueTuple<string, string, string, string>(outer.Item1, outer.Item2, outer.Item3, outer.Item5),
-                    antiJoinKeySelector: inner => new ValueTuple<string, string, string, string>(inner.Item1, inner.Item2, inner.Item3, inner.Item5),
-                    resultSelector: (outerRow, antiRow) => outerRow
+                    antiJoinKeySelector: inner => new ValueTuple<string, string, string, string>(inner.Item1, inner.Item2, inner.Item3, inner.Item5)
                 );
         }
 
