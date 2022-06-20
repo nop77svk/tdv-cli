@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Text.RegularExpressions;
     using System.Threading.Tasks;
     using log4net;
     using NoP77svk.IO;
@@ -18,6 +19,9 @@
     internal class CommandIntrospect : IAsyncExecutable
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(CommandIntrospect));
+
+        private static readonly Regex AddedColumnRX = new Regex(@"^Added\s+column\s+#\d+\s+'");
+        private static readonly Regex DeletedColumnRX = new Regex(@"^Deleted\s+column\s+'");
 
         public IList<IntrospectTargetDataSource> ScriptInputs { get; }
         public IntrospectionOptionHandleResources OptionHandleResources { get; }
@@ -99,6 +103,8 @@
                 output.Info($"Introspecting {uniqueDataSourcePaths.Length} data sources...");
                 ValueTuple<string, WSDL.Admin.introspectionChangeEntry[]>[] introspectionResult = await RunTheIntrospection(tdvClient, filteredIntrospectablesEnumerable, resourcesToDrop, updateExisting: OptionHandleResources.UpdateExisting, response =>
                 {
+                    // 2do! locking needed in this delegate!
+
                     if (introspectionProgress.ContainsKey(response.taskId))
                         introspectionProgress[response.taskId] = response;
                     else
@@ -139,6 +145,28 @@
                 });
 
                 output.EndCR();
+
+                foreach (var ds in introspectionResult)
+                {
+                    Console.WriteLine($"data source {ds.Item1}");
+                    foreach (var res in ds.Item2)
+                    {
+                        // action in {ADD, REMOVE, SKIP, UPDATE}
+                        Console.WriteLine($"  {res.action.ToString().ToLower()}: {res.type.ToString().ToLower()}/{res.subtype.ToString().ToLower()} {res.path}");
+                        if (res.messages?.Length > 0)
+                        {
+                            for (int i = 0; i < res.messages.Length; i++)
+                            {
+                                var msg = res.messages[i];
+                                Console.WriteLine($"    [{i}] {msg.severity.ToString().ToLower()}");
+                                Console.WriteLine($"      name = \"{msg.name}\"");
+                                Console.WriteLine($"      code = \"{msg.code}\"");
+                                Console.WriteLine($"      detail = \"{msg.detail}\"");
+                                Console.WriteLine($"      message = \"{msg.message}\"");
+                            }
+                        }
+                    }
+                }
             }
             else
             {
@@ -538,7 +566,20 @@
                             }
                         },
                         progressIndicator
-                    ).ToArrayAsync().AsTask()
+                    )
+                    .Where(res => res.status is WSDL.Admin.messageSeverity.CRITICAL or WSDL.Admin.messageSeverity.ERROR or WSDL.Admin.messageSeverity.WARNING
+                        || (res.action == WSDL.Admin.introspectionAction.ADD
+                            && !res.messages
+                                .Where(msg => msg.severity == WSDL.Admin.messageSeverity.INFO)
+                                .Where(msg => AddedColumnRX.IsMatch(msg.message))
+                                .Any())
+                        || (res.action == WSDL.Admin.introspectionAction.UPDATE
+                            && res.messages
+                                .Where(msg => msg.severity == WSDL.Admin.messageSeverity.INFO)
+                                .Where(msg => DeletedColumnRX.IsMatch(msg.message))
+                                .Any())
+                    )
+                    .ToArrayAsync().AsTask()
                 ))
                 .ToArray();
 
