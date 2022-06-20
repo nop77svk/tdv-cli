@@ -18,9 +18,9 @@
         public TimeSpan PollingInterval { get; set; } = TimeSpan.FromMilliseconds(500);
         public string DataSourcePath { get; }
 
-        public IEnumerable<WSDL.Admin.pathTypePair> ExtractResults(WSDL.Admin.getIntrospectedResourceIdsResultResponse response)
+        public IEnumerable<WSDL.Admin.pathTypePair>? ExtractResults(WSDL.Admin.getIntrospectedResourceIdsResultResponse response)
         {
-            return response.resourceIdentifiers;
+            return response?.resourceIdentifiers;
         }
 
         public void Finalize(WSDL.Admin.getIntrospectedResourceIdsResultResponse response)

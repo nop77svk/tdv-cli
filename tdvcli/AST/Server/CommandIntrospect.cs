@@ -97,7 +97,7 @@
                     .Count();
 
                 output.Info($"Introspecting {uniqueDataSourcePaths.Length} data sources...");
-                await RunTheIntrospection(tdvClient, filteredIntrospectablesEnumerable, resourcesToDrop, updateExisting: OptionHandleResources.UpdateExisting, y =>
+                ValueTuple<string, WSDL.Admin.introspectionChangeEntry[]>[] introspectionResult = await RunTheIntrospection(tdvClient, filteredIntrospectablesEnumerable, resourcesToDrop, updateExisting: OptionHandleResources.UpdateExisting, y =>
                 {
                     if (introspectionProgress.ContainsKey(y.taskId))
                         introspectionProgress[y.taskId] = y;
@@ -474,7 +474,7 @@
             }
         }
 
-        private async Task RunTheIntrospection(
+        private async Task<ValueTuple<string, WSDL.Admin.introspectionChangeEntry[]>[]> RunTheIntrospection(
             TdvWebServiceClient tdvClient,
             IEnumerable<ValueTuple<string, string, string, TdvResourceType, string>> introspectables,
             IEnumerable<ValueTuple<string, string, string, TdvResourceType, string>> resourcesToDrop,
@@ -482,7 +482,7 @@
             Action<WSDL.Admin.introspectResourcesResultResponse>? progressIndicator = null
         )
         {
-            var filteredIntrospectablesByDataSource = introspectables
+            var introspectionPlan = introspectables
                 .Select(x => new ValueTuple<string, WSDL.Admin.introspectionPlanEntry>(
                     x.Item1,
                     new WSDL.Admin.introspectionPlanEntry()
@@ -524,27 +524,31 @@
                 .GroupBy(
                     keySelector: x => x.Item1,
                     elementSelector: x => x.Item2
-                )
-                .ToArray();
+                );
 
-            Dictionary<string, WSDL.Admin.introspectResourcesResultResponse> introspectionProgress = new Dictionary<string, WSDL.Admin.introspectResourcesResultResponse>();
-
-            var multiIntrospection = filteredIntrospectablesByDataSource
-                .Select(x => tdvClient.PolledServerTask(
-                    new API.PolledServerTasks.IntrospectPolledServerTaskHandler(tdvClient, x.Key, x.AsEnumerable())
-                    {
-                        IntrospectionOptions = new TdvIntrospectionOptions()
+            var multiIntrospection = introspectionPlan
+                .Select(x => new NamedTask<WSDL.Admin.introspectionChangeEntry[]>(
+                    x.Key,
+                    tdvClient.PolledServerTaskEnumerable(
+                        new API.PolledServerTasks.IntrospectWithDetailsPolledServerTaskHandler(tdvClient, x.Key, x.AsEnumerable())
                         {
-                            UpdateAllIntrospectedResources = updateExisting
-                        }
-                    },
-                    progressIndicator
+                            IntrospectionOptions = new TdvIntrospectionOptions()
+                            {
+                                UpdateAllIntrospectedResources = updateExisting
+                            }
+                        },
+                        progressIndicator
+                    ).ToArrayAsync().AsTask()
                 ))
                 .ToArray();
 
             try
             {
-                await Task.WhenAll(multiIntrospection);
+                await Task.WhenAll(multiIntrospection.Select(x => x.Task));
+
+                return multiIntrospection
+                    .Select(x => new ValueTuple<string, WSDL.Admin.introspectionChangeEntry[]>(x.Name, x.Task.Result))
+                    .ToArray();
             }
             finally
             {

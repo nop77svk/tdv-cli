@@ -20,9 +20,9 @@
         public string DataSourcePath { get; }
         public bool ClearCachePriorToRefresh { get; }
 
-        public IEnumerable<WSDL.Admin.linkableResourceId> ExtractResults(WSDL.Admin.getIntrospectableResourceIdsResultResponse response)
+        public IEnumerable<WSDL.Admin.linkableResourceId>? ExtractResults(WSDL.Admin.getIntrospectableResourceIdsResultResponse response)
         {
-            return response.resourceIdentifiers;
+            return response?.resourceIdentifiers;
         }
 
         public void Finalize(WSDL.Admin.getIntrospectableResourceIdsResultResponse response)

@@ -61,7 +61,7 @@
 
         public bool ShouldWaitBeforeAnotherPolling(WSDL.Admin.introspectResourcesResultResponse response)
         {
-            return PollingInterval.CompareTo(TimeSpan.Zero) > 0 && response.status.report.Length <= 0;
+            return PollingInterval.CompareTo(TimeSpan.Zero) > 0 && (response.status?.report == null || response.status.report.Length <= 0);
         }
 
         public async Task<int> StartTaskAsync()
@@ -70,7 +70,7 @@
             return _taskId;
         }
 
-        public IEnumerable<WSDL.Admin.introspectionChangeEntry> ExtractResults(WSDL.Admin.introspectResourcesResultResponse response)
+        public IEnumerable<WSDL.Admin.introspectionChangeEntry>? ExtractResults(WSDL.Admin.introspectResourcesResultResponse response)
         {
             return response.status.report;
         }

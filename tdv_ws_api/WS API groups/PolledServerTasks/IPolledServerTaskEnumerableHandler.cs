@@ -5,6 +5,6 @@
     public interface IPolledServerTaskEnumerableHandler<TResponse, TResult>
         : IPolledServerTaskHandler<TResponse>
     {
-        IEnumerable<TResult> ExtractResults(TResponse response);
+        IEnumerable<TResult>? ExtractResults(TResponse response);
     }
 }

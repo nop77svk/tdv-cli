@@ -70,8 +70,12 @@
                 cancellationToken?.ThrowIfCancellationRequested();
                 responseFeedback?.Invoke(response);
 
-                foreach (TResult result in taskHandler.ExtractResults(response))
-                    yield return result;
+                IEnumerable<TResult>? resultsExtracted = taskHandler.ExtractResults(response);
+                if (resultsExtracted != null)
+                {
+                    foreach (TResult result in resultsExtracted)
+                        yield return result;
+                }
 
                 if (taskHandler.IsFinished(response)) break;
                 cancellationToken?.ThrowIfCancellationRequested();
