@@ -21,11 +21,13 @@
 
         public IList<IntrospectTargetDataSource> ScriptInputs { get; }
         public IntrospectionOptionHandleResources OptionHandleResources { get; }
+        public IntrospectionOptionListResults OptionListResults { get; }
 
-        public CommandIntrospect(IList<IntrospectTargetDataSource> scriptInputs, IntrospectionOptionHandleResources optionHandleResources)
+        public CommandIntrospect(IList<IntrospectTargetDataSource> scriptInputs, IntrospectionOptionHandleResources optionHandleResources, IntrospectionOptionListResults optionListResults)
         {
             ScriptInputs = scriptInputs;
             OptionHandleResources = optionHandleResources;
+            OptionListResults = optionListResults;
         }
 
         public async Task Execute(TdvWebServiceClient tdvClient, IInfoOutput output, ParserState parserState)
