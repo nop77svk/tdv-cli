@@ -56,7 +56,7 @@
 
         public async Task<WSDL.Admin.introspectResourcesResultResponse> PollTaskResultAsync(int taskId)
         {
-            return await TdvClient.IntrospectResourcesResult(taskId, blocking: RetrieveResultInBlockingFashion, detailLevel: WSDL.Admin.detailLevel.SIMPLE);
+            return await TdvClient.IntrospectResourcesResult(taskId, blocking: RetrieveResultInBlockingFashion, detailLevel: WSDL.Admin.detailLevel.FULL);
         }
 
         public bool ShouldWaitBeforeAnotherPolling(WSDL.Admin.introspectResourcesResultResponse response)
