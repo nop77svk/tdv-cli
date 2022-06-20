@@ -108,28 +108,8 @@
                         .Where(x => x.Value != null)
                         .Select(x => x.Value)
                         .Aggregate(
-                            seed: new Internal.IntrospectionProgress()
-                            {
-                                JobsTotalToBeSpawned = jobsToBeSpawned,
-                                JobsSpawned = introspectionProgress.Count
-                            },
-                            func: (aggregate, element) =>
-                            {
-                                aggregate.JobsDone += element.completed ? 1 : 0;
-                                aggregate.JobsWaiting += element.status.status == WSDL.Admin.operationStatus.WAITING ? 1 : 0;
-                                aggregate.JobsFailed += element.status.status == WSDL.Admin.operationStatus.FAIL ? 1 : 0;
-                                aggregate.JobsCancelled += element.status.status == WSDL.Admin.operationStatus.CANCELED ? 1 : 0;
-                                aggregate.Added += element.status.addedCount;
-                                aggregate.ToBeAdded += element.status.toBeAddedCount;
-                                aggregate.Updated += element.status.updatedCount;
-                                aggregate.ToBeUpdated += element.status.toBeUpdatedCount;
-                                aggregate.Removed += element.status.removedCount;
-                                aggregate.ToBeRemoved += element.status.toBeRemovedCount;
-                                aggregate.Skipped += element.status.skippedCount;
-                                aggregate.Warnings += element.status.warningCount;
-                                aggregate.Errors += element.status.errorCount;
-                                return aggregate;
-                            }
+                            seed: new Internal.IntrospectionProgress(jobsTotalToBeSpawned: jobsToBeSpawned, jobsSpawned: introspectionProgress.Count),
+                            func: (aggregate, element) => aggregate.Add(element)
                         );
 
                     if (overallProgress.Equals(previousProgressState))
