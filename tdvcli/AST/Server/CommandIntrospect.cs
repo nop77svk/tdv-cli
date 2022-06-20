@@ -85,8 +85,80 @@
 
             if (filteredIntrospectables.Length > 0 || resourcesToDrop.Length > 0)
             {
+                Internal.IntrospectionProgress? previousProgressState = null;
+                // char[] hourglass = { '/', '-', '\\', '|' };
+                char[] hourglass = { ' ', '.', 'o', 'O', '\u0001', '\u0002', 'o', '.' };
+                int hourglassState = 0;
+                Dictionary<string, WSDL.Admin.introspectResourcesResultResponse> introspectionProgress = new Dictionary<string, WSDL.Admin.introspectResourcesResultResponse>();
+
+                int jobsToBeSpawned = filteredIntrospectables
+                    .Select(x => x.Item1)
+                    .Union(resourcesToDrop.Select(x => x.Item1))
+                    .Count();
+
                 output.Info($"Introspecting {uniqueDataSourcePaths.Length} data sources...");
-                await RunTheIntrospection(tdvClient, output, filteredIntrospectablesEnumerable, resourcesToDrop, updateExisting: OptionHandleResources.UpdateExisting);
+                await RunTheIntrospection(tdvClient, filteredIntrospectablesEnumerable, resourcesToDrop, updateExisting: OptionHandleResources.UpdateExisting, y =>
+                {
+                    if (introspectionProgress.ContainsKey(y.taskId))
+                        introspectionProgress[y.taskId] = y;
+                    else
+                        introspectionProgress.Add(y.taskId, y);
+
+                    Internal.IntrospectionProgress overallProgress = introspectionProgress
+                        .Where(x => x.Value != null)
+                        .Select(x => x.Value)
+                        .Aggregate(
+                            seed: new Internal.IntrospectionProgress()
+                            {
+                                JobsTotalToBeSpawned = jobsToBeSpawned,
+                                JobsSpawned = introspectionProgress.Count
+                            },
+                            func: (aggregate, element) =>
+                            {
+                                aggregate.JobsDone += element.completed ? 1 : 0;
+                                aggregate.JobsWaiting += element.status.status == WSDL.Admin.operationStatus.WAITING ? 1 : 0;
+                                aggregate.JobsFailed += element.status.status == WSDL.Admin.operationStatus.FAIL ? 1 : 0;
+                                aggregate.JobsCancelled += element.status.status == WSDL.Admin.operationStatus.CANCELED ? 1 : 0;
+                                aggregate.Added += element.status.addedCount;
+                                aggregate.ToBeAdded += element.status.toBeAddedCount;
+                                aggregate.Updated += element.status.updatedCount;
+                                aggregate.ToBeUpdated += element.status.toBeUpdatedCount;
+                                aggregate.Removed += element.status.removedCount;
+                                aggregate.ToBeRemoved += element.status.toBeRemovedCount;
+                                aggregate.Skipped += element.status.skippedCount;
+                                aggregate.Warnings += element.status.warningCount;
+                                aggregate.Errors += element.status.errorCount;
+                                return aggregate;
+                            }
+                        );
+
+                    if (overallProgress.Equals(previousProgressState))
+                    {
+                        output.InfoNoEoln((hourglassState == 0 ? string.Empty : "\b\b") + hourglass[hourglassState % hourglass.Length] + " ");
+                        hourglassState++;
+                    }
+                    else
+                    {
+                        output.InfoCR($"{overallProgress.ProgressPct:#####0%} done ("
+                            + $"{overallProgress.JobsRunning}"
+                            + (overallProgress.JobsWaiting > 0 ? $"(-{overallProgress.JobsWaiting})" : string.Empty)
+                            + $"/{overallProgress.JobsTotalToBeSpawned}(-{overallProgress.JobsDone} ok"
+                            + (overallProgress.JobsCancelled > 0 ? $",{overallProgress.JobsCancelled} cancelled" : string.Empty)
+                            + (overallProgress.JobsFailed > 0 ? $",{overallProgress.JobsFailed} failed" : string.Empty)
+                            + ") jobs"
+                            + (overallProgress.ToBeAdded > 0 ? $", add:{overallProgress.Added}/{overallProgress.ToBeAdded}" : string.Empty)
+                            + (overallProgress.ToBeUpdated > 0 ? $", upd:{overallProgress.Updated}(+{overallProgress.Skipped})/{overallProgress.ToBeUpdated}" : string.Empty)
+                            + (overallProgress.ToBeRemoved > 0 ? $", del:{overallProgress.Removed}/{overallProgress.ToBeRemoved}" : string.Empty)
+                            + (overallProgress.Warnings > 0 ? $", warn:{overallProgress.Warnings}" : string.Empty)
+                            + (overallProgress.Errors > 0 ? $", err:{overallProgress.Errors}" : string.Empty)
+                            + ") "
+                        );
+                        previousProgressState = overallProgress;
+                        hourglassState = 0;
+                    }
+                });
+
+                output.EndCR();
             }
             else
             {
@@ -422,7 +494,13 @@
             }
         }
 
-        private async Task RunTheIntrospection(TdvWebServiceClient tdvClient, IInfoOutput output, IEnumerable<ValueTuple<string, string, string, TdvResourceType, string>> introspectables, IEnumerable<ValueTuple<string, string, string, TdvResourceType, string>> resourcesToDrop, bool updateExisting)
+        private async Task RunTheIntrospection(
+            TdvWebServiceClient tdvClient,
+            IEnumerable<ValueTuple<string, string, string, TdvResourceType, string>> introspectables,
+            IEnumerable<ValueTuple<string, string, string, TdvResourceType, string>> resourcesToDrop,
+            bool updateExisting,
+            Action<WSDL.Admin.introspectResourcesResultResponse>? progressIndicator = null
+        )
         {
             var filteredIntrospectablesByDataSource = introspectables
                 .Select(x => new ValueTuple<string, WSDL.Admin.introspectionPlanEntry>(
@@ -471,11 +549,6 @@
 
             Dictionary<string, WSDL.Admin.introspectResourcesResultResponse> introspectionProgress = new Dictionary<string, WSDL.Admin.introspectResourcesResultResponse>();
 
-            Internal.IntrospectionProgress? previousProgressState = null;
-            // char[] hourglass = { '/', '-', '\\', '|' };
-            char[] hourglass = { ' ', '.', 'o', 'O', '\u0001', '\u0002', 'o', '.' };
-            int hourglassState = 0;
-
             var multiIntrospection = filteredIntrospectablesByDataSource
                 .Select(x => tdvClient.PolledServerTask(
                     new API.PolledServerTasks.IntrospectPolledServerTaskHandler(tdvClient, x.Key, x.AsEnumerable())
@@ -485,73 +558,13 @@
                             UpdateAllIntrospectedResources = updateExisting
                         }
                     },
-                    y =>
-                    {
-                        if (introspectionProgress.ContainsKey(y.taskId))
-                            introspectionProgress[y.taskId] = y;
-                        else
-                            introspectionProgress.Add(y.taskId, y);
-
-                        Internal.IntrospectionProgress overallProgress = introspectionProgress
-                            .Where(x => x.Value != null)
-                            .Select(x => x.Value)
-                            .Aggregate(
-                                seed: new Internal.IntrospectionProgress()
-                                {
-                                    JobsTotalToBeSpawned = filteredIntrospectablesByDataSource.Length,
-                                    JobsSpawned = introspectionProgress.Count
-                                },
-                                func: (aggregate, element) =>
-                                {
-                                    aggregate.JobsDone += element.completed ? 1 : 0;
-                                    aggregate.JobsWaiting += element.status.status == WSDL.Admin.operationStatus.WAITING ? 1 : 0;
-                                    aggregate.JobsFailed += element.status.status == WSDL.Admin.operationStatus.FAIL ? 1 : 0;
-                                    aggregate.JobsCancelled += element.status.status == WSDL.Admin.operationStatus.CANCELED ? 1 : 0;
-                                    aggregate.Added += element.status.addedCount;
-                                    aggregate.ToBeAdded += element.status.toBeAddedCount;
-                                    aggregate.Updated += element.status.updatedCount;
-                                    aggregate.ToBeUpdated += element.status.toBeUpdatedCount;
-                                    aggregate.Removed += element.status.removedCount;
-                                    aggregate.ToBeRemoved += element.status.toBeRemovedCount;
-                                    aggregate.Skipped += element.status.skippedCount;
-                                    aggregate.Warnings += element.status.warningCount;
-                                    aggregate.Errors += element.status.errorCount;
-                                    return aggregate;
-                                }
-                            );
-
-                        if (overallProgress.Equals(previousProgressState))
-                        {
-                            output.InfoNoEoln((hourglassState == 0 ? string.Empty : "\b\b") + hourglass[hourglassState % hourglass.Length] + " ");
-                            hourglassState++;
-                        }
-                        else
-                        {
-                            output.InfoCR($"{overallProgress.ProgressPct:#####0%} done ("
-                                + $"{overallProgress.JobsRunning}"
-                                + (overallProgress.JobsWaiting > 0 ? $"(-{overallProgress.JobsWaiting})" : string.Empty)
-                                + $"/{overallProgress.JobsTotalToBeSpawned}(-{overallProgress.JobsDone} ok"
-                                + (overallProgress.JobsCancelled > 0 ? $",{overallProgress.JobsCancelled} cancelled" : string.Empty)
-                                + (overallProgress.JobsFailed > 0 ? $",{overallProgress.JobsFailed} failed" : string.Empty)
-                                + ") jobs"
-                                + (overallProgress.ToBeAdded > 0 ? $", add:{overallProgress.Added}/{overallProgress.ToBeAdded}" : string.Empty)
-                                + (overallProgress.ToBeUpdated > 0 ? $", upd:{overallProgress.Updated}(+{overallProgress.Skipped})/{overallProgress.ToBeUpdated}" : string.Empty)
-                                + (overallProgress.ToBeRemoved > 0 ? $", del:{overallProgress.Removed}/{overallProgress.ToBeRemoved}" : string.Empty)
-                                + (overallProgress.Warnings > 0 ? $", warn:{overallProgress.Warnings}" : string.Empty)
-                                + (overallProgress.Errors > 0 ? $", err:{overallProgress.Errors}" : string.Empty)
-                                + ") "
-                            );
-                            previousProgressState = overallProgress;
-                            hourglassState = 0;
-                        }
-                    }
+                    progressIndicator
                 ))
                 .ToArray();
 
             try
             {
                 await Task.WhenAll(multiIntrospection);
-                output.EndCR();
             }
             finally
             {
