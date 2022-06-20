@@ -95,62 +95,15 @@
 
                 for (int iteration = 0; true; iteration++)
                 {
-                    Internal.IntrospectionProgress? previousProgressState = null;
-                    // char[] hourglass = { '/', '-', '\\', '|' };
-                    char[] hourglass = { ' ', '.', 'o', 'O', '\u0001', '\u0002', 'o', '.' };
-                    int hourglassState = 0;
-                    Dictionary<string, WSDL.Admin.introspectResourcesResultResponse> introspectionProgress = new Dictionary<string, WSDL.Admin.introspectResourcesResultResponse>();
-
                     int jobsToBeSpawned = filteredIntrospectables
                         .Select(x => x.Item1)
                         .Union(resourcesToDrop.Select(x => x.Item1))
                         .Count();
 
+                    ValueTuple<string, Internal.IntrospectionResultSimplified[]>[] introspectionResult;
                     output.Info($"Introspecting {uniqueDataSourcePaths.Length} data sources...");
-                    ValueTuple<string, Internal.IntrospectionResultSimplified[]>[] introspectionResult = await RunTheIntrospection(tdvClient, filteredIntrospectablesEnumerable, resourcesToDrop, updateExisting: updateExistingResourcesOverride, response =>
-                    {
-                        // 2do! locking needed in this delegate!
-
-                        if (introspectionProgress.ContainsKey(response.taskId))
-                            introspectionProgress[response.taskId] = response;
-                        else
-                            introspectionProgress.Add(response.taskId, response);
-
-                        Internal.IntrospectionProgress overallProgress = introspectionProgress
-                            .Where(x => x.Value != null)
-                            .Select(x => x.Value)
-                            .Aggregate(
-                                seed: new Internal.IntrospectionProgress(jobsTotalToBeSpawned: jobsToBeSpawned, jobsSpawned: introspectionProgress.Count),
-                                func: (aggregate, element) => aggregate.Add(element)
-                            );
-
-                        if (overallProgress.Equals(previousProgressState))
-                        {
-                            output.InfoNoEoln((hourglassState == 0 ? string.Empty : "\b\b") + hourglass[hourglassState % hourglass.Length] + " ");
-                            hourglassState++;
-                        }
-                        else
-                        {
-                            output.InfoCR($"{overallProgress.ProgressPct:#####0%} done ("
-                                + $"{overallProgress.JobsRunning}"
-                                + (overallProgress.JobsWaiting > 0 ? $"({overallProgress.JobsWaiting} waiting)" : string.Empty)
-                                + $"/{overallProgress.JobsTotalToBeSpawned}({overallProgress.JobsDone} done"
-                                + (overallProgress.JobsCancelled > 0 ? $",{overallProgress.JobsCancelled} cancelled" : string.Empty)
-                                + (overallProgress.JobsFailed > 0 ? $",{overallProgress.JobsFailed} failed" : string.Empty)
-                                + ") jobs"
-                                + (overallProgress.ToBeAdded > 0 ? $", add:{overallProgress.Added}/{overallProgress.ToBeAdded}" : string.Empty)
-                                + (overallProgress.ToBeUpdated > 0 ? $", upd:{overallProgress.Updated}(+{overallProgress.Skipped})/{overallProgress.ToBeUpdated}" : string.Empty)
-                                + (overallProgress.ToBeRemoved > 0 ? $", del:{overallProgress.Removed}/{overallProgress.ToBeRemoved}" : string.Empty)
-                                + (overallProgress.Warnings > 0 ? $", warn:{overallProgress.Warnings}" : string.Empty)
-                                + (overallProgress.Errors > 0 ? $", err:{overallProgress.Errors}" : string.Empty)
-                                + ") "
-                            );
-                            previousProgressState = overallProgress;
-                            hourglassState = 0;
-                        }
-                    });
-
-                    output.EndCR();
+                    using (var progressFeedback = new Internal.IntrospectionProgressFeedback(output, jobsToBeSpawned))
+                        introspectionResult = await RunTheIntrospection(tdvClient, filteredIntrospectablesEnumerable, resourcesToDrop, updateExistingResourcesOverride, progressFeedback.Feedback);
 
                     var failedIntrospectionObjects = introspectionResult
                         .Unnest(
@@ -177,7 +130,7 @@
                                 );
                             })
                             .ToArray();
-                        resourcesToDrop = new (string, string, string, TdvResourceType, string)[0];
+                        resourcesToDrop = new ValueTuple<string, string, string, TdvResourceType, string>[0];
                         updateExistingResourcesOverride = true;
                     }
                     else
