@@ -97,12 +97,12 @@
                     .Count();
 
                 output.Info($"Introspecting {uniqueDataSourcePaths.Length} data sources...");
-                ValueTuple<string, WSDL.Admin.introspectionChangeEntry[]>[] introspectionResult = await RunTheIntrospection(tdvClient, filteredIntrospectablesEnumerable, resourcesToDrop, updateExisting: OptionHandleResources.UpdateExisting, y =>
+                ValueTuple<string, WSDL.Admin.introspectionChangeEntry[]>[] introspectionResult = await RunTheIntrospection(tdvClient, filteredIntrospectablesEnumerable, resourcesToDrop, updateExisting: OptionHandleResources.UpdateExisting, response =>
                 {
-                    if (introspectionProgress.ContainsKey(y.taskId))
-                        introspectionProgress[y.taskId] = y;
+                    if (introspectionProgress.ContainsKey(response.taskId))
+                        introspectionProgress[response.taskId] = response;
                     else
-                        introspectionProgress.Add(y.taskId, y);
+                        introspectionProgress.Add(response.taskId, response);
 
                     Internal.IntrospectionProgress overallProgress = introspectionProgress
                         .Where(x => x.Value != null)
