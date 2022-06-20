@@ -133,8 +133,8 @@
                         {
                             output.InfoCR($"{overallProgress.ProgressPct:#####0%} done ("
                                 + $"{overallProgress.JobsRunning}"
-                                + (overallProgress.JobsWaiting > 0 ? $"(-{overallProgress.JobsWaiting})" : string.Empty)
-                                + $"/{overallProgress.JobsTotalToBeSpawned}(-{overallProgress.JobsDone} ok"
+                                + (overallProgress.JobsWaiting > 0 ? $"({overallProgress.JobsWaiting} waiting)" : string.Empty)
+                                + $"/{overallProgress.JobsTotalToBeSpawned}({overallProgress.JobsDone} done"
                                 + (overallProgress.JobsCancelled > 0 ? $",{overallProgress.JobsCancelled} cancelled" : string.Empty)
                                 + (overallProgress.JobsFailed > 0 ? $",{overallProgress.JobsFailed} failed" : string.Empty)
                                 + ") jobs"
