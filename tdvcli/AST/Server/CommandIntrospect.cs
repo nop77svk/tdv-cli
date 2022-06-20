@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Text;
     using System.Text.RegularExpressions;
     using System.Threading.Tasks;
     using log4net;
@@ -89,82 +90,99 @@
 
             if (filteredIntrospectables.Length > 0 || resourcesToDrop.Length > 0)
             {
-                Internal.IntrospectionProgress? previousProgressState = null;
-                // char[] hourglass = { '/', '-', '\\', '|' };
-                char[] hourglass = { ' ', '.', 'o', 'O', '\u0001', '\u0002', 'o', '.' };
-                int hourglassState = 0;
-                Dictionary<string, WSDL.Admin.introspectResourcesResultResponse> introspectionProgress = new Dictionary<string, WSDL.Admin.introspectResourcesResultResponse>();
+                bool updateExistingResourcesOverride = OptionHandleResources.UpdateExisting;
+                List<ValueTuple<string, Internal.IntrospectionResultSimplified>[]> failedIntrospectionIterations = new ();
 
-                int jobsToBeSpawned = filteredIntrospectables
-                    .Select(x => x.Item1)
-                    .Union(resourcesToDrop.Select(x => x.Item1))
-                    .Count();
-
-                output.Info($"Introspecting {uniqueDataSourcePaths.Length} data sources...");
-                ValueTuple<string, WSDL.Admin.introspectionChangeEntry[]>[] introspectionResult = await RunTheIntrospection(tdvClient, filteredIntrospectablesEnumerable, resourcesToDrop, updateExisting: OptionHandleResources.UpdateExisting, response =>
+                for (int iteration = 0; true; iteration++)
                 {
-                    // 2do! locking needed in this delegate!
+                    Internal.IntrospectionProgress? previousProgressState = null;
+                    // char[] hourglass = { '/', '-', '\\', '|' };
+                    char[] hourglass = { ' ', '.', 'o', 'O', '\u0001', '\u0002', 'o', '.' };
+                    int hourglassState = 0;
+                    Dictionary<string, WSDL.Admin.introspectResourcesResultResponse> introspectionProgress = new Dictionary<string, WSDL.Admin.introspectResourcesResultResponse>();
 
-                    if (introspectionProgress.ContainsKey(response.taskId))
-                        introspectionProgress[response.taskId] = response;
-                    else
-                        introspectionProgress.Add(response.taskId, response);
+                    int jobsToBeSpawned = filteredIntrospectables
+                        .Select(x => x.Item1)
+                        .Union(resourcesToDrop.Select(x => x.Item1))
+                        .Count();
 
-                    Internal.IntrospectionProgress overallProgress = introspectionProgress
-                        .Where(x => x.Value != null)
-                        .Select(x => x.Value)
-                        .Aggregate(
-                            seed: new Internal.IntrospectionProgress(jobsTotalToBeSpawned: jobsToBeSpawned, jobsSpawned: introspectionProgress.Count),
-                            func: (aggregate, element) => aggregate.Add(element)
-                        );
-
-                    if (overallProgress.Equals(previousProgressState))
+                    output.Info($"Introspecting {uniqueDataSourcePaths.Length} data sources...");
+                    ValueTuple<string, Internal.IntrospectionResultSimplified[]>[] introspectionResult = await RunTheIntrospection(tdvClient, filteredIntrospectablesEnumerable, resourcesToDrop, updateExisting: updateExistingResourcesOverride, response =>
                     {
-                        output.InfoNoEoln((hourglassState == 0 ? string.Empty : "\b\b") + hourglass[hourglassState % hourglass.Length] + " ");
-                        hourglassState++;
-                    }
-                    else
-                    {
-                        output.InfoCR($"{overallProgress.ProgressPct:#####0%} done ("
-                            + $"{overallProgress.JobsRunning}"
-                            + (overallProgress.JobsWaiting > 0 ? $"(-{overallProgress.JobsWaiting})" : string.Empty)
-                            + $"/{overallProgress.JobsTotalToBeSpawned}(-{overallProgress.JobsDone} ok"
-                            + (overallProgress.JobsCancelled > 0 ? $",{overallProgress.JobsCancelled} cancelled" : string.Empty)
-                            + (overallProgress.JobsFailed > 0 ? $",{overallProgress.JobsFailed} failed" : string.Empty)
-                            + ") jobs"
-                            + (overallProgress.ToBeAdded > 0 ? $", add:{overallProgress.Added}/{overallProgress.ToBeAdded}" : string.Empty)
-                            + (overallProgress.ToBeUpdated > 0 ? $", upd:{overallProgress.Updated}(+{overallProgress.Skipped})/{overallProgress.ToBeUpdated}" : string.Empty)
-                            + (overallProgress.ToBeRemoved > 0 ? $", del:{overallProgress.Removed}/{overallProgress.ToBeRemoved}" : string.Empty)
-                            + (overallProgress.Warnings > 0 ? $", warn:{overallProgress.Warnings}" : string.Empty)
-                            + (overallProgress.Errors > 0 ? $", err:{overallProgress.Errors}" : string.Empty)
-                            + ") "
-                        );
-                        previousProgressState = overallProgress;
-                        hourglassState = 0;
-                    }
-                });
+                        // 2do! locking needed in this delegate!
 
-                output.EndCR();
+                        if (introspectionProgress.ContainsKey(response.taskId))
+                            introspectionProgress[response.taskId] = response;
+                        else
+                            introspectionProgress.Add(response.taskId, response);
 
-                foreach (var ds in introspectionResult)
-                {
-                    Console.WriteLine($"data source {ds.Item1}");
-                    foreach (var res in ds.Item2)
-                    {
-                        // action in {ADD, REMOVE, SKIP, UPDATE}
-                        Console.WriteLine($"  {res.action.ToString().ToLower()}: {res.type.ToString().ToLower()}/{res.subtype.ToString().ToLower()} {res.path}");
-                        if (res.messages?.Length > 0)
+                        Internal.IntrospectionProgress overallProgress = introspectionProgress
+                            .Where(x => x.Value != null)
+                            .Select(x => x.Value)
+                            .Aggregate(
+                                seed: new Internal.IntrospectionProgress(jobsTotalToBeSpawned: jobsToBeSpawned, jobsSpawned: introspectionProgress.Count),
+                                func: (aggregate, element) => aggregate.Add(element)
+                            );
+
+                        if (overallProgress.Equals(previousProgressState))
                         {
-                            for (int i = 0; i < res.messages.Length; i++)
-                            {
-                                var msg = res.messages[i];
-                                Console.WriteLine($"    [{i}] {msg.severity.ToString().ToLower()}");
-                                Console.WriteLine($"      name = \"{msg.name}\"");
-                                Console.WriteLine($"      code = \"{msg.code}\"");
-                                Console.WriteLine($"      detail = \"{msg.detail}\"");
-                                Console.WriteLine($"      message = \"{msg.message}\"");
-                            }
+                            output.InfoNoEoln((hourglassState == 0 ? string.Empty : "\b\b") + hourglass[hourglassState % hourglass.Length] + " ");
+                            hourglassState++;
                         }
+                        else
+                        {
+                            output.InfoCR($"{overallProgress.ProgressPct:#####0%} done ("
+                                + $"{overallProgress.JobsRunning}"
+                                + (overallProgress.JobsWaiting > 0 ? $"(-{overallProgress.JobsWaiting})" : string.Empty)
+                                + $"/{overallProgress.JobsTotalToBeSpawned}(-{overallProgress.JobsDone} ok"
+                                + (overallProgress.JobsCancelled > 0 ? $",{overallProgress.JobsCancelled} cancelled" : string.Empty)
+                                + (overallProgress.JobsFailed > 0 ? $",{overallProgress.JobsFailed} failed" : string.Empty)
+                                + ") jobs"
+                                + (overallProgress.ToBeAdded > 0 ? $", add:{overallProgress.Added}/{overallProgress.ToBeAdded}" : string.Empty)
+                                + (overallProgress.ToBeUpdated > 0 ? $", upd:{overallProgress.Updated}(+{overallProgress.Skipped})/{overallProgress.ToBeUpdated}" : string.Empty)
+                                + (overallProgress.ToBeRemoved > 0 ? $", del:{overallProgress.Removed}/{overallProgress.ToBeRemoved}" : string.Empty)
+                                + (overallProgress.Warnings > 0 ? $", warn:{overallProgress.Warnings}" : string.Empty)
+                                + (overallProgress.Errors > 0 ? $", err:{overallProgress.Errors}" : string.Empty)
+                                + ") "
+                            );
+                            previousProgressState = overallProgress;
+                            hourglassState = 0;
+                        }
+                    });
+
+                    output.EndCR();
+
+                    var failedIntrospectionObjects = introspectionResult
+                        .Unnest(
+                            retrieveNestedCollection: x => x.Item2,
+                            resultSelector: (outer, inner) => new ValueTuple<string, Internal.IntrospectionResultSimplified>(outer.Item1, inner)
+                        )
+                        .Where(x => x.Item2.HasFailedIntrospection)
+                        .ToArray();
+                    failedIntrospectionIterations.Add(failedIntrospectionObjects);
+
+                    if (failedIntrospectionObjects.Length > 0)
+                    {
+                        output.Info($"There are {failedIntrospectionObjects} objects that failed being introspected; reintrospection necessary!");
+                        filteredIntrospectables = failedIntrospectionObjects
+                            .Select(x =>
+                            {
+                                var splitPath = x.Item2.Path.Split('/', 3);
+                                return new ValueTuple<string, string, string, TdvResourceType, string>(
+                                    x.Item1,
+                                    splitPath.Length >= 1 ? splitPath[0] : string.Empty,
+                                    splitPath.Length >= 2 ? splitPath[1] : string.Empty,
+                                    x.Item2.ResourceType,
+                                    splitPath.Length >= 3 ? splitPath[2] : string.Empty
+                                );
+                            })
+                            .ToArray();
+                        resourcesToDrop = new (string, string, string, TdvResourceType, string)[0];
+                        updateExistingResourcesOverride = true;
+                    }
+                    else
+                    {
+                        break;
                     }
                 }
             }
@@ -502,7 +520,7 @@
             }
         }
 
-        private async Task<ValueTuple<string, WSDL.Admin.introspectionChangeEntry[]>[]> RunTheIntrospection(
+        private async Task<ValueTuple<string, Internal.IntrospectionResultSimplified[]>[]> RunTheIntrospection(
             TdvWebServiceClient tdvClient,
             IEnumerable<ValueTuple<string, string, string, TdvResourceType, string>> introspectables,
             IEnumerable<ValueTuple<string, string, string, TdvResourceType, string>> resourcesToDrop,
@@ -555,7 +573,7 @@
                 );
 
             var multiIntrospection = introspectionPlan
-                .Select(x => new NamedTask<WSDL.Admin.introspectionChangeEntry[]>(
+                .Select(x => new NamedTask<Internal.IntrospectionResultSimplified[]>(
                     x.Key,
                     tdvClient.PolledServerTaskEnumerable(
                         new API.PolledServerTasks.IntrospectWithDetailsPolledServerTaskHandler(tdvClient, x.Key, x.AsEnumerable())
@@ -567,18 +585,21 @@
                         },
                         progressIndicator
                     )
-                    .Where(res => res.status is WSDL.Admin.messageSeverity.CRITICAL or WSDL.Admin.messageSeverity.ERROR or WSDL.Admin.messageSeverity.WARNING
-                        || (res.action == WSDL.Admin.introspectionAction.ADD
-                            && !res.messages
+                    .Select(res => new Internal.IntrospectionResultSimplified(res.action, new TdvResourceType(res.type, res.subtype), res.path, res.status)
+                    {
+                        HasAddedColumns = res.action is WSDL.Admin.introspectionAction.ADD or WSDL.Admin.introspectionAction.UPDATE
+                            && res.type == WSDL.Admin.resourceType.TABLE
+                            && res.messages
                                 .Where(msg => msg.severity == WSDL.Admin.messageSeverity.INFO)
                                 .Where(msg => AddedColumnRX.IsMatch(msg.message))
-                                .Any())
-                        || (res.action == WSDL.Admin.introspectionAction.UPDATE
+                                .Any(),
+                        HasDeletedColumns = res.action == WSDL.Admin.introspectionAction.UPDATE
+                            && res.type == WSDL.Admin.resourceType.TABLE
                             && res.messages
                                 .Where(msg => msg.severity == WSDL.Admin.messageSeverity.INFO)
                                 .Where(msg => DeletedColumnRX.IsMatch(msg.message))
-                                .Any())
-                    )
+                                .Any()
+                    })
                     .ToArrayAsync().AsTask()
                 ))
                 .ToArray();
@@ -588,7 +609,7 @@
                 await Task.WhenAll(multiIntrospection.Select(x => x.Task));
 
                 return multiIntrospection
-                    .Select(x => new ValueTuple<string, WSDL.Admin.introspectionChangeEntry[]>(x.Name, x.Task.Result))
+                    .Select(x => new ValueTuple<string, Internal.IntrospectionResultSimplified[]>(x.Name, x.Task.Result))
                     .ToArray();
             }
             finally
