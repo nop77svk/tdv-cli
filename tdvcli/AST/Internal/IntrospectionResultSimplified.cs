@@ -9,11 +9,16 @@ namespace NoP77svk.TibcoDV.CLI.AST.Internal
         internal int Errors { get; init; } = 0;
         internal bool HasAddedColumns { get; init; } = false;
         internal bool HasDeletedColumns { get; init; } = false;
-        internal bool HasFailedIntrospectables
+        internal bool HasNoIntrospectedColumns
         {
             get => ResourceType.WsType == WSDL.Admin.resourceType.TABLE
                 && ((Action is WSDL.Admin.introspectionAction.ADD && !HasAddedColumns)
                     || (Action is WSDL.Admin.introspectionAction.UPDATE && !HasAddedColumns && HasDeletedColumns));
+        }
+
+        internal bool HasIntrospectionProblems
+        {
+            get => HasNoIntrospectedColumns || Warnings > 0 || Errors > 0;
         }
     }
 }

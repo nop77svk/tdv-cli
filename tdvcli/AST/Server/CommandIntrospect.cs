@@ -90,7 +90,7 @@
             if (filteredIntrospectables.Length > 0 || resourcesToDrop.Length > 0)
             {
                 bool updateExistingResourcesOverride = OptionHandleResources.UpdateExisting;
-                List<ValueTuple<string, Internal.IntrospectionResultSimplified>[]> failedIntrospectionIterations = new ();
+                List<ValueTuple<string, Internal.IntrospectionResultSimplified>[]> introspectionIssueIterations = new ();
 
                 for (int iteration = 0; true; iteration++)
                 {
@@ -104,21 +104,23 @@
                     using (var progressFeedback = new Internal.IntrospectionProgressFeedback(output, jobsToBeSpawned))
                         introspectionResult = await RunTheIntrospection(tdvClient, filteredIntrospectablesEnumerable, resourcesToDrop, updateExistingResourcesOverride, progressFeedback.Feedback);
 
-                    var failedIntrospectionObjects = introspectionResult
+                    var introspectionIssues = introspectionResult
                         .Unnest(
                             retrieveNestedCollection: x => x.Item2,
                             resultSelector: (outer, inner) => new ValueTuple<string, Internal.IntrospectionResultSimplified>(outer.Item1, inner)
                         )
-                        .Where(x => x.Item2.HasFailedIntrospectables)
+                        .Where(x => x.Item2.HasIntrospectionProblems)
                         .ToArray();
-                    failedIntrospectionIterations.Add(failedIntrospectionObjects);
+                    LogTheIntrospectionIssues(introspectionIssues);
+                    introspectionIssueIterations.Add(introspectionIssues);
 
-                    if (failedIntrospectionObjects.Length > 0)
+                    var objectsWithNoIntrospectedColumns = introspectionIssues
+                        .Where(x => x.Item2.HasNoIntrospectedColumns);
+
+                    if (objectsWithNoIntrospectedColumns.Any())
                     {
-                        output.Info($"There are {failedIntrospectionObjects.Length} objects that failed being introspected; reintrospection necessary!");
-
                         // drop failed introspectables first
-                        var failedIntrospectablesToBeDropped = failedIntrospectionObjects
+                        var failedIntrospectablesToBeDropped = objectsWithNoIntrospectedColumns
                             .Select(x =>
                             {
                                 var splitPath = x.Item2.Path.Split('/', 3);
@@ -131,8 +133,16 @@
                                 );
                             })
                             .ToArray();
-                        using (var progressFeedback = new Internal.IntrospectionProgressFeedback(output, jobsToBeSpawned))
-                            await RunTheIntrospection(tdvClient, EmptyListOfIntrospectables, failedIntrospectablesToBeDropped, false, progressFeedback.Feedback);
+
+                        output.Info($"There are {failedIntrospectablesToBeDropped.Length} objects that failed being introspected; reintrospection necessary!");
+
+                        int jobsToBeReSpawned = failedIntrospectablesToBeDropped
+                            .Select(x => x.Item1)
+                            .Union(resourcesToDrop.Select(x => x.Item1))
+                            .Count();
+
+                        using (var progressFeedback = new Internal.IntrospectionProgressFeedback(output, jobsToBeReSpawned))
+                            await RunTheIntrospection(tdvClient, EmptyListOfIntrospectables, failedIntrospectablesToBeDropped, updateExisting: false, progressFeedback.Feedback);
 
                         // prepare for reintrospection of the failed ones as the next iteration
                         filteredIntrospectables = failedIntrospectablesToBeDropped;
@@ -322,6 +332,27 @@
                 return catalogJoin.Introspectable.Schemas
                     .Select(x => new Internal.IntrospectionInputsJoinMatch<Internal.IntrospectableSchema, IntrospectTargetSchema>(x, null))
                     .Where(x => x.Introspectable.SchemaName != string.Empty);
+            }
+        }
+
+        private static void LogTheIntrospectionIssues(IEnumerable<(string, Internal.IntrospectionResultSimplified)> introspectionIssues)
+        {
+            foreach (var row in introspectionIssues)
+            {
+                StringBuilder logMsg = new StringBuilder();
+                logMsg.AppendLine("Introspection issue detected!");
+                logMsg.AppendLine($"    data source: {row.Item1}");
+                logMsg.AppendLine($"    resource type: {row.Item2.ResourceType.Type.ToString()} ({row.Item2.ResourceType.WsType.ToString()}/{row.Item2.ResourceType.WsSubType})");
+                logMsg.AppendLine($"    action: {row.Item2.Action} (columns - added: {row.Item2.HasAddedColumns} / deleted: {row.Item2.HasDeletedColumns})");
+                logMsg.AppendLine($"    resource path: {row.Item2.Path}");
+                logMsg.AppendLine($"    counts: {row.Item2.Errors} errors, {row.Item2.Warnings} warnings");
+
+                if (row.Item2.MessageSeverity == WSDL.Admin.messageSeverity.ERROR || row.Item2.Errors > 0)
+                    _log.Error(logMsg.ToString());
+                else if (row.Item2.MessageSeverity == WSDL.Admin.messageSeverity.WARNING || row.Item2.Warnings > 0)
+                    _log.Warn(logMsg.ToString());
+                else
+                    _log.Warn(logMsg.ToString());
             }
         }
 
