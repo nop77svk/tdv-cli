@@ -32,43 +32,45 @@
 
         public void Feedback(WSDL.Admin.introspectResourcesResultResponse response)
         {
-            // 2do! locking needed in this delegate!
-            if (_introspectionProgress.ContainsKey(response.taskId))
-                _introspectionProgress[response.taskId] = response;
-            else
-                _introspectionProgress.Add(response.taskId, response);
-
-            Internal.IntrospectionProgress overallProgress = _introspectionProgress
-                .Where(x => x.Value != null)
-                .Select(x => x.Value)
-                .Aggregate(
-                    seed: new Internal.IntrospectionProgress(jobsTotalToBeSpawned: _jobsToBeSpawned, jobsSpawned: _introspectionProgress.Count),
-                    func: (aggregate, element) => aggregate.Add(element)
-                );
-
-            if (overallProgress.Equals(_previousProgressState))
+            lock (_introspectionProgress)
             {
-                _output.InfoNoEoln((_hourglassState == 0 ? string.Empty : "\b\b") + _hourglass[_hourglassState % _hourglass.Length] + " ");
-                _hourglassState++;
-            }
-            else
-            {
-                _output.InfoCR($"{overallProgress.ProgressPct:#####0%} done ("
-                    + $"{overallProgress.JobsRunning}"
-                    + (overallProgress.JobsWaiting > 0 ? $"({overallProgress.JobsWaiting} waiting)" : string.Empty)
-                    + $"/{overallProgress.JobsTotalToBeSpawned}({overallProgress.JobsDone} done"
-                    + (overallProgress.JobsCancelled > 0 ? $",{overallProgress.JobsCancelled} cancelled" : string.Empty)
-                    + (overallProgress.JobsFailed > 0 ? $",{overallProgress.JobsFailed} failed" : string.Empty)
-                    + ") jobs"
-                    + (overallProgress.ToBeAdded > 0 ? $", add:{overallProgress.Added}/{overallProgress.ToBeAdded}" : string.Empty)
-                    + (overallProgress.ToBeUpdated > 0 ? $", upd:{overallProgress.Updated}(+{overallProgress.Skipped})/{overallProgress.ToBeUpdated}" : string.Empty)
-                    + (overallProgress.ToBeRemoved > 0 ? $", del:{overallProgress.Removed}/{overallProgress.ToBeRemoved}" : string.Empty)
-                    + (overallProgress.Warnings > 0 ? $", warn:{overallProgress.Warnings}" : string.Empty)
-                    + (overallProgress.Errors > 0 ? $", err:{overallProgress.Errors}" : string.Empty)
-                    + ") "
-                );
-                _previousProgressState = overallProgress;
-                _hourglassState = 0;
+                if (_introspectionProgress.ContainsKey(response.taskId))
+                    _introspectionProgress[response.taskId] = response;
+                else
+                    _introspectionProgress.Add(response.taskId, response);
+
+                Internal.IntrospectionProgress overallProgress = _introspectionProgress
+                    .Where(x => x.Value != null)
+                    .Select(x => x.Value)
+                    .Aggregate(
+                        seed: new Internal.IntrospectionProgress(jobsTotalToBeSpawned: _jobsToBeSpawned, jobsSpawned: _introspectionProgress.Count),
+                        func: (aggregate, element) => aggregate.Add(element)
+                    );
+
+                if (overallProgress.Equals(_previousProgressState))
+                {
+                    _output.InfoNoEoln((_hourglassState == 0 ? string.Empty : "\b\b") + _hourglass[_hourglassState % _hourglass.Length] + " ");
+                    _hourglassState++;
+                }
+                else
+                {
+                    _output.InfoCR($"{overallProgress.ProgressPct:#####0%} done ("
+                        + $"{overallProgress.JobsRunning}"
+                        + (overallProgress.JobsWaiting > 0 ? $"({overallProgress.JobsWaiting} waiting)" : string.Empty)
+                        + $"/{overallProgress.JobsTotalToBeSpawned}({overallProgress.JobsDone} done"
+                        + (overallProgress.JobsCancelled > 0 ? $",{overallProgress.JobsCancelled} cancelled" : string.Empty)
+                        + (overallProgress.JobsFailed > 0 ? $",{overallProgress.JobsFailed} failed" : string.Empty)
+                        + ") jobs"
+                        + (overallProgress.ToBeAdded > 0 ? $", add:{overallProgress.Added}/{overallProgress.ToBeAdded}" : string.Empty)
+                        + (overallProgress.ToBeUpdated > 0 ? $", upd:{overallProgress.Updated}(+{overallProgress.Skipped})/{overallProgress.ToBeUpdated}" : string.Empty)
+                        + (overallProgress.ToBeRemoved > 0 ? $", del:{overallProgress.Removed}/{overallProgress.ToBeRemoved}" : string.Empty)
+                        + (overallProgress.Warnings > 0 ? $", warn:{overallProgress.Warnings}" : string.Empty)
+                        + (overallProgress.Errors > 0 ? $", err:{overallProgress.Errors}" : string.Empty)
+                        + ") "
+                    );
+                    _previousProgressState = overallProgress;
+                    _hourglassState = 0;
+                }
             }
         }
     }
