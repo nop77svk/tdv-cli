@@ -23,6 +23,7 @@
 
         private static readonly Regex AddedColumnRX = new Regex(@"^Added\s+column\s+#\d+\s+'");
         private static readonly Regex DeletedColumnRX = new Regex(@"^Deleted\s+column\s+'");
+        private static readonly ValueTuple<string, string, string, TdvResourceType, string>[] EmptyListOfIntrospectables = new ValueTuple<string, string, string, TdvResourceType, string>[0];
 
         public IList<IntrospectTargetDataSource> ScriptInputs { get; }
         public IntrospectionOptionHandleResources OptionHandleResources { get; }
@@ -60,7 +61,7 @@
             }
             else
             {
-                introspectedResources = new ValueTuple<string, string, string, TdvResourceType, string>[0];
+                introspectedResources = EmptyListOfIntrospectables;
             }
 
             var filteredIntrospectablesEnumerable = FilterIntrospectablesByInput(introspectables, ScriptInputs);
@@ -116,8 +117,10 @@
 
                     if (failedIntrospectionObjects.Length > 0)
                     {
-                        output.Info($"There are {failedIntrospectionObjects} objects that failed being introspected; reintrospection necessary!");
-                        filteredIntrospectables = failedIntrospectionObjects
+                        output.Info($"There are {failedIntrospectionObjects.Length} objects that failed being introspected; reintrospection necessary!");
+
+                        // drop failed introspectables first
+                        var failedIntrospectablesToBeDropped = failedIntrospectionObjects
                             .Select(x =>
                             {
                                 var splitPath = x.Item2.Path.Split('/', 3);
@@ -130,8 +133,13 @@
                                 );
                             })
                             .ToArray();
-                        resourcesToDrop = new ValueTuple<string, string, string, TdvResourceType, string>[0];
-                        updateExistingResourcesOverride = true;
+                        using (var progressFeedback = new Internal.IntrospectionProgressFeedback(output, jobsToBeSpawned))
+                            await RunTheIntrospection(tdvClient, EmptyListOfIntrospectables, failedIntrospectablesToBeDropped, false, progressFeedback.Feedback);
+
+                        // prepare for reintrospection of the failed ones as the next iteration
+                        filteredIntrospectables = failedIntrospectablesToBeDropped;
+                        resourcesToDrop = EmptyListOfIntrospectables;
+                        updateExistingResourcesOverride = false;
                     }
                     else
                     {
