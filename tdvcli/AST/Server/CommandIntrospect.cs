@@ -100,7 +100,7 @@
                         .Count();
 
                     ValueTuple<string, Internal.IntrospectionResultSimplified[]>[] introspectionResult;
-                    output.Info($"Introspecting {uniqueDataSourcePaths.Length} data sources...");
+                    output.Info($"Introspecting {jobsToBeSpawned} data sources...");
                     using (var progressFeedback = new Internal.IntrospectionProgressFeedback(output, jobsToBeSpawned))
                         introspectionResult = await RunTheIntrospection(tdvClient, filteredIntrospectablesEnumerable, resourcesToDrop, updateExistingResourcesOverride, progressFeedback.Feedback);
 
@@ -109,7 +109,7 @@
                             retrieveNestedCollection: x => x.Item2,
                             resultSelector: (outer, inner) => new ValueTuple<string, Internal.IntrospectionResultSimplified>(outer.Item1, inner)
                         )
-                        .Where(x => x.Item2.HasFailedIntrospection)
+                        .Where(x => x.Item2.HasFailedIntrospectables)
                         .ToArray();
                     failedIntrospectionIterations.Add(failedIntrospectionObjects);
 
