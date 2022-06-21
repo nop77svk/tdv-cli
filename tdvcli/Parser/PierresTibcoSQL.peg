@@ -251,10 +251,8 @@ describeChoice
 introspectStatement<AST.IAsyncExecutable> = "introspect" __
 	dslist:introspectTargetDataSourceList
 	optHI:optionalIntrospectOptionHandleIntrospectables
-	optLR:optionalIntrospectOptionListResults
-	
 {
-	new AST.Server.CommandIntrospect(dslist, optHI, optLR)
+	new AST.Server.CommandIntrospect(dslist, optHI)
 }
 
 introspectTargetDataSourceList<IList<AST.Server.IntrospectTargetDataSource>> = v:introspectTargetDataSource<1,,_ "," _> { v }
@@ -339,20 +337,6 @@ introspectOptionUpdateExisting<bool> = v:introspectOptionUpdateExistingAction __
 introspectOptionUpdateExistingAction<bool>
 	= "update" { true }
 	/ "skip" { false }
-
-optionalIntrospectOptionListResults<AST.Server.IntrospectionOptionListResults>
-	= __ v:introspectOptionListResults { v }
-	/ "" { AST.Server.IntrospectionOptionListResults.ListNoResources }
-
-introspectOptionListResults<AST.Server.IntrospectionOptionListResults> = "list" __ v:introspectOptionListResultsKind { v }
-
-introspectOptionListResultsKind<AST.Server.IntrospectionOptionListResults>
-	= "no" __ "resources" { AST.Server.IntrospectionOptionListResults.ListNoResources }
-	/ "errors" { AST.Server.IntrospectionOptionListResults.ListErrors }
-	/ "warnings and errors" { AST.Server.IntrospectionOptionListResults.ListWarningsAndErrors }
-	/ "modified" __ "resources" { AST.Server.IntrospectionOptionListResults.ListModifications }
-	/ "all" __ "resources" { AST.Server.IntrospectionOptionListResults.ListAllResources }
-	/ #ERROR{ "What kind of post-introspection results do you intend to show?" }
 
 // ================================================================================================
 // general language elements
