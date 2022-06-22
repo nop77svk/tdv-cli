@@ -99,10 +99,14 @@
                         .Union(resourcesToDrop.Select(x => x.Item1))
                         .Count();
 
+                    if (iteration <= 0)
+                        output.Info($"Introspecting {jobsToBeSpawned} data sources...");
+                    else
+                        output.Info($"Reintrospecting {jobsToBeSpawned} data sources ({iteration + 1}. iteration)...");
+
                     ValueTuple<string, Internal.IntrospectionResultSimplified[]>[] introspectionResult;
-                    output.Info($"Introspecting {jobsToBeSpawned} data sources...");
                     using (var progressFeedback = new Internal.IntrospectionProgressFeedback(output, jobsToBeSpawned))
-                        introspectionResult = await RunTheIntrospection(tdvClient, filteredIntrospectablesEnumerable, resourcesToDrop, updateExistingResourcesOverride, progressFeedback.Feedback);
+                        introspectionResult = await RunTheIntrospection(tdvClient, filteredIntrospectables, resourcesToDrop, updateExistingResourcesOverride, progressFeedback.Feedback);
 
                     var introspectionIssues = introspectionResult
                         .Unnest(
@@ -570,7 +574,12 @@
                         {
                             IntrospectionOptions = new TdvIntrospectionOptions()
                             {
-                                UpdateAllIntrospectedResources = updateExisting
+                                UpdateAllIntrospectedResources = updateExisting,
+                                AutoRollback = false,
+                                RunInBackgroundTransaction = true,
+                                ScanForNewResourcesToAutoAdd = false,
+                                FailFast = false,
+                                CommitOnFailure = true
                             }
                         },
                         progressIndicator
