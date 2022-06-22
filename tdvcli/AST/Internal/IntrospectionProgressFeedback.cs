@@ -32,7 +32,7 @@
 
         public void Feedback(WSDL.Admin.introspectResourcesResultResponse response)
         {
-            lock (_introspectionProgress)
+            lock (_output)
             {
                 if (_introspectionProgress.ContainsKey(response.taskId))
                     _introspectionProgress[response.taskId] = response;
