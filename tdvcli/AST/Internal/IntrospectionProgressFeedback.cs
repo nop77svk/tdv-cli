@@ -10,7 +10,7 @@
 
     internal class IntrospectionProgressFeedback : IDisposable
     {
-        private static readonly char[] _hourglass = { ' ', '.', 'o', 'O', '\u0001', '\u0002', 'o', '.' };
+        private static readonly char[] _hourglass = { ' ', '.', 'o', 'O', 'X', 'O', 'X', 'O', 'o', '.' };
 
         private readonly Dictionary<string, WSDL.Admin.introspectResourcesResultResponse> _introspectionProgress = new Dictionary<string, WSDL.Admin.introspectResourcesResultResponse>();
         private readonly IInfoOutput _output;
