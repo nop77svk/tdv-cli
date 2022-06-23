@@ -1,8 +1,10 @@
 # Tibco Data Virtualization CLI Client
 
-A command-line interface client to Tibco Data Virtualization server since Tibco (says) does not have anything similar.
+A command-line interface client to Tibco Data Virtualization server since Tibco (says it) does not have anything similar.
 
 Run `tdvcli --help` to get the overview on available command line parameters.
+
+Project is frozen FTTB. If you need any further functionality, feel free to contact me or fork it and modify it for yourself.
 
 ## "Pierre's Tibco SQL" Script -- Server-side commands
 
