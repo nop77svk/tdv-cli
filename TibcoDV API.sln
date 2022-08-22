@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.2.32516.85
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "tdvcli", "tdvcli\tdvcli.csproj", "{644FDAE4-07FD-4CDE-88C1-6D5F67EB3BDF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TibcoDV.CLI", "TibcoDV.CLI\tdvcli.csproj", "{644FDAE4-07FD-4CDE-88C1-6D5F67EB3BDF}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TibcoDV.API", "TibcoDV.API\tdv_ws_api.csproj", "{B3BDD7BA-7360-4BF8-B931-E2FDFDFC43EC}"
 EndProject
@@ -16,7 +16,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "tdvcli.test.parser", "tdvcli.test.parser\tdvcli.test.parser.csproj", "{32939FC4-DCEC-4FC7-96FF-3202DF8C58EF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TibcoDV.CLI.Test.Parser", "TibcoDV.CLI.Test.Parser\tdvcli.test.parser.csproj", "{32939FC4-DCEC-4FC7-96FF-3202DF8C58EF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
