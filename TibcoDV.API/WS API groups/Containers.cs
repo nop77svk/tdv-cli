@@ -5,7 +5,7 @@
     using System.Linq;
     using System.Net.Http;
     using System.Threading.Tasks;
-    using NoP77svk.Text.IO;
+    using NoP77svk.Text;
 
     public partial class TdvWebServiceClient
     {

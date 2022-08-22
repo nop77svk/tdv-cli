@@ -3,7 +3,7 @@
     using System;
     using System.Threading.Tasks;
     using log4net;
-    using NoP77svk.IO;
+    using NoP77svk.Text;
     using NoP77svk.TibcoDV.API;
     using NoP77svk.TibcoDV.CLI.Commons;
     using NoP77svk.TibcoDV.CLI.Parser;

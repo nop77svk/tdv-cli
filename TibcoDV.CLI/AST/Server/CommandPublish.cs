@@ -4,8 +4,8 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using NoP77svk.IO;
     using NoP77svk.Linq;
+    using NoP77svk.Text;
     using NoP77svk.TibcoDV.API;
     using NoP77svk.TibcoDV.CLI.Commons;
     using NoP77svk.TibcoDV.CLI.Parser;

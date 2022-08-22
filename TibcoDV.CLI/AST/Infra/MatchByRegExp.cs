@@ -2,7 +2,7 @@
 namespace NoP77svk.TibcoDV.CLI.AST.Infra
 {
     using System.Text.RegularExpressions;
-    using NoP77svk.Text.RegExp;
+    using NoP77svk.Text;
 
     internal record MatchByRegExp(string Value) : MatchBy(Value)
     {

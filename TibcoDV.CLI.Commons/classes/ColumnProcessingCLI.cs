@@ -6,7 +6,7 @@
     using System.Text.RegularExpressions;
     using CommandLine;
     using log4net;
-    using NoP77svk.Text.RegExp;
+    using NoP77svk.Text;
 
     public abstract class ColumnProcessingCLI
         : InputOutputCLI
