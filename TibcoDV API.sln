@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "tdvcli", "tdvcli\tdvcli.csp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "tdv_ws_api", "tdv_ws_api\tdv_ws_api.csproj", "{B3BDD7BA-7360-4BF8-B931-E2FDFDFC43EC}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "tdv_cli_commons", "tdv_cli_commons\tdv_cli_commons.csproj", "{4954641B-F582-4F16-9E4D-F2E1D4BDE9A3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TibcoDV.Commons", "TibcoDV.Commons\tdv_cli_commons.csproj", "{4954641B-F582-4F16-9E4D-F2E1D4BDE9A3}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{27EE7903-0501-4D7D-BFF4-00EE3A7CAB50}"
 	ProjectSection(SolutionItems) = preProject
