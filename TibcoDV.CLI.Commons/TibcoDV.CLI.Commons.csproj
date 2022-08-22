@@ -1,9 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
+	<PropertyGroup>
 		<OutputType>Library</OutputType>
 		<TargetFramework>net6.0</TargetFramework>
-	    <Nullable>enable</Nullable>
+		<Nullable>enable</Nullable>
 		<Authors>Peter Hraško</Authors>
 		<Company>Open source community</Company>
 		<Product>Tibco Data Virtualization Utilities</Product>
@@ -18,11 +18,11 @@
 		<RepositoryType>git</RepositoryType>
 	</PropertyGroup>
 
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-	    <DebugType>none</DebugType>
-	    <DebugSymbols>false</DebugSymbols>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+		<DebugType>none</DebugType>
+		<DebugSymbols>false</DebugSymbols>
 		<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    </PropertyGroup>
+	</PropertyGroup>
 
 	<ItemGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
 		<PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="6.0.0">
@@ -33,21 +33,18 @@
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-	</ItemGroup>
-
-	<ItemGroup>
 		<Compile Include="..\GlobalSuppressions.cs" Link="GlobalSuppressions.cs" />
 	</ItemGroup>
 
 	<ItemGroup>
-    <PackageReference Include="CommandLineParser" Version="2.9.1" />
-    <PackageReference Include="log4net" Version="2.0.14" />
-    <PackageReference Include="NoP77svk.ConnectionStringParsers" Version="2022.6.16" />
-    <PackageReference Include="NoP77svk.MiscellaneousHelpers" Version="2022.6.16" />
-  </ItemGroup>
+		<PackageReference Include="CommandLineParser" Version="2.9.1" />
+		<PackageReference Include="log4net" Version="2.0.14" />
+		<PackageReference Include="NoP77svk.ConnectionStringParsers" Version="2022.6.16" />
+		<PackageReference Include="NoP77svk.MiscellaneousHelpers" Version="2022.6.16" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\TibcoDV.API\TibcoDV.API.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\TibcoDV.API\TibcoDV.API.csproj" />
+	</ItemGroup>
 
 </Project>
