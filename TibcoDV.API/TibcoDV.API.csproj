@@ -4,30 +4,24 @@
 		<OutputType>Library</OutputType>
         <TargetFramework>net6.0</TargetFramework>
         <Nullable>enable</Nullable>
-        <RootNamespace>NoP77svk.TibcoDV.API</RootNamespace>
         <Authors>Peter Hraško</Authors>
         <Company>Open source community</Company>
         <Product>Tibco Data Virtualization Utilities</Product>
         <Copyright>Copyleft</Copyright>
         <Description>Tibco DataVirt WS API</Description>
-        <AssemblyName>nop77svk-tdv-wsapi</AssemblyName>
-        <NoWarn>1701;1702;AD0001;NETSDK1182</NoWarn>
-        <PackageId>NoP77svk.TibcoDV.API</PackageId>
-        <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+		<NoWarn>1701;1702;AD0001;NETSDK1182</NoWarn>
+		<RootNamespace>NoP77svk.TibcoDV.API</RootNamespace>
+		<PackageId>NoP77svk.TibcoDV.API</PackageId>
+		<AssemblyName>NoP77svk.TibcoDV.API</AssemblyName>
+		<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
 		<RepositoryUrl>https://github.com/nop77svk/tdv-cli</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
-		<PackageLicenseExpression>MIT</PackageLicenseExpression>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
         <DebugType>none</DebugType>
         <DebugSymbols>false</DebugSymbols>
         <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    </PropertyGroup>
-
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-        <DebugType>portable</DebugType>
-        <DebugSymbols>true</DebugSymbols>
     </PropertyGroup>
 
 	<ItemGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -39,6 +33,10 @@
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Compile Include="..\GlobalSuppressions.cs" Link="GlobalSuppressions.cs" />
 	</ItemGroup>
 
 	<ItemGroup>
