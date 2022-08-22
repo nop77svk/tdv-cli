@@ -5,7 +5,7 @@ VisualStudioVersion = 17.2.32516.85
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "tdvcli", "tdvcli\tdvcli.csproj", "{644FDAE4-07FD-4CDE-88C1-6D5F67EB3BDF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "tdv_ws_api", "tdv_ws_api\tdv_ws_api.csproj", "{B3BDD7BA-7360-4BF8-B931-E2FDFDFC43EC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TibcoDV.API", "TibcoDV.API\tdv_ws_api.csproj", "{B3BDD7BA-7360-4BF8-B931-E2FDFDFC43EC}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TibcoDV.Commons", "TibcoDV.Commons\tdv_cli_commons.csproj", "{4954641B-F582-4F16-9E4D-F2E1D4BDE9A3}"
 EndProject
