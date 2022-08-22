@@ -39,21 +39,21 @@ jobs:
         mkdir _publish.all
     - name: Windows x64 Build
       run: |
-        dotnet publish tdvcli -c Release -o ./_publish.win-x64 -r win-x64 --self-contained
+        dotnet publish -c Release -o ./_publish.win-x64 -r win-x64 --self-contained
         cd ./_publish.win-x64
         cp ../LICENSE .
         zip -r9v ../_publish.all/tdv-cli.${VERSION}.win.x64.zip .
         cd ..
     - name: Linux x64 Build
       run: |
-        dotnet publish tdvcli -c Release -o ./_publish.linux-x64 -r linux-x64 --self-contained
+        dotnet publish -c Release -o ./_publish.linux-x64 -r linux-x64 --self-contained
         cd ./_publish.linux-x64
         cp ../LICENSE .
         tar cv . | gzip -9c > ../_publish.all/tdv-cli.${VERSION}.linux.x64.tgz
         cd ..
     - name: Portable Build
       run: |
-        dotnet publish tdvcli -c Release -o ./_publish.portable --no-self-contained -p:PublishTrimmed=false
+        dotnet publish -c Release -o ./_publish.portable --no-self-contained -p:PublishTrimmed=false
         cd ./_publish.portable
         cp ../LICENSE .
         zip -r9v ../_publish.all/tdv-cli.${VERSION}.portable.zip .
