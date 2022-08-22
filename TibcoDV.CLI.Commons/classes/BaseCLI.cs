@@ -5,7 +5,7 @@
     using CommandLine;
     using log4net;
     using NoP77svk.Console;
-    using NoP77svk.Data.Utils;
+    using NoP77svk.Text.ConnectionStringParsers;
     using NoP77svk.Web.WS;
 
     public abstract class BaseCLI
@@ -172,7 +172,7 @@
             {
                 Console.Error.Write($"Enter password for {TdvServerUserName}@{TdvServerHost}: ");
                 Random charRandomizer = new ();
-                TdvServerUserPassword = SystemConsoleExt.ReadLineInSecret((x) => Convert.ToChar(charRandomizer.Next(32, 127)), true);
+                TdvServerUserPassword = SecretConsoleExt.ReadLineInSecret((x) => Convert.ToChar(charRandomizer.Next(32, 127)), true);
             }
 
             if (string.IsNullOrEmpty(TdvServerUserPassword))

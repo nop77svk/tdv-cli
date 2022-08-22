@@ -37,11 +37,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="NoP77svk.Linq" Version="2022.6.16" />
-		<PackageReference Include="NoP77svk.MiscellaneousHelpers" Version="2022.6.16" />
-		<PackageReference Include="NoP77svk.WebServiceClient" Version="2022.6.16" />
+		<PackageReference Include="NoP77svk.Text.IO" Version="2022.8.2" />
+		<PackageReference Include="NoP77svk.Web.WS.Client" Version="2022.8.2" />
 		<PackageReference Include="System.Linq.Async" Version="6.0.1" />
-		<PackageReference Include="System.ServiceModel.Http" Version="4.9.0" />
+		<PackageReference Include="System.ServiceModel.Http" Version="4.10.0" />
 	</ItemGroup>
 
 </Project>

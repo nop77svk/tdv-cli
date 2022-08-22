@@ -2,7 +2,7 @@
 namespace NoP77svk.TibcoDV.CLI.AST.Infra
 {
     using System.Text.RegularExpressions;
-    using NoP77svk.Text.RegularExpressions;
+    using NoP77svk.Text.RegExp;
 
     internal record MatchByRegExp(string Value) : MatchBy(Value)
     {
@@ -13,7 +13,7 @@ namespace NoP77svk.TibcoDV.CLI.AST.Infra
             get
             {
                 if (_regexp == null)
-                    _regexp = RegexExt.ParseSlashedRegexp(Value);
+                    _regexp = SlashedRegexpExt.ParseSlashedRegexp(Value);
 
                 return _regexp;
             }

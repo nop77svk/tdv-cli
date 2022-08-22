@@ -7,7 +7,7 @@
     using System.Threading.Tasks;
     using log4net;
     using NoP77svk.Linq;
-    using NoP77svk.Text.RegularExpressions;
+    using NoP77svk.Text.RegExp;
     using NoP77svk.TibcoDV.API;
     using NoP77svk.TibcoDV.API.WSDL.Admin;
     using NoP77svk.TibcoDV.CLI.AST.Infra;
@@ -100,7 +100,7 @@
                 .CrossProduct(PrincipalSpecifiers
                     .Where(principal => principal.Type == userNameType.USER)
                     .Where(principal => principal.MatchingPrincipal is MatchByRegExp)
-                    .Select(principal => new { GranteePrincipal = principal, GranteeWildcard = RegexExt.ParseSlashedRegexp(principal.MatchingPrincipal.Value, RegexOptions.IgnoreCase) })
+                    .Select(principal => new { GranteePrincipal = principal, GranteeWildcard = SlashedRegexpExt.ParseSlashedRegexp(principal.MatchingPrincipal.Value, RegexOptions.IgnoreCase) })
                 )
                 .Where(crossRecord => crossRecord.Item1.ServerDomain.Equals(crossRecord.Item2.GranteePrincipal.Domain)
                     && crossRecord.Item2.GranteeWildcard.IsMatch(crossRecord.Item1.ServerUser)
@@ -124,7 +124,7 @@
                 .CrossProduct(PrincipalSpecifiers
                     .Where(principal => principal.Type == userNameType.GROUP)
                     .Where(principal => principal.MatchingPrincipal is MatchByRegExp)
-                    .Select(principal => new { GranteePrincipal = principal, GranteeWildcard = RegexExt.ParseSlashedRegexp(principal.MatchingPrincipal.Value, RegexOptions.IgnoreCase) })
+                    .Select(principal => new { GranteePrincipal = principal, GranteeWildcard = SlashedRegexpExt.ParseSlashedRegexp(principal.MatchingPrincipal.Value, RegexOptions.IgnoreCase) })
                 )
                 .Where(crossRecord => crossRecord.Item1.ServerDomain.Equals(crossRecord.Item2.GranteePrincipal.Domain)
                     && crossRecord.Item2.GranteeWildcard.IsMatch(crossRecord.Item1.ServerGroup)

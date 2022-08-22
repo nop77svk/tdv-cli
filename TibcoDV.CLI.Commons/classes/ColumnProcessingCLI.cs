@@ -6,7 +6,7 @@
     using System.Text.RegularExpressions;
     using CommandLine;
     using log4net;
-    using NoP77svk.Text.RegularExpressions;
+    using NoP77svk.Text.RegExp;
 
     public abstract class ColumnProcessingCLI
         : InputOutputCLI
@@ -58,14 +58,14 @@
             if (ExcludeColumnsRxStr != null)
             {
                 ExcludeColumnsRx = ExcludeColumnsRxStr
-                    .Select(rxStr => RegexExt.ParseSlashedRegexp(rxStr, RegexOptions.Compiled))
+                    .Select(rxStr => SlashedRegexpExt.ParseSlashedRegexp(rxStr, RegexOptions.Compiled))
                     .ToList();
             }
 
             if (IncludeColumnsRxStr != null)
             {
                 IncludeColumnsRx = IncludeColumnsRxStr
-                    .Select(rxStr => RegexExt.ParseSlashedRegexp(rxStr, RegexOptions.Compiled))
+                    .Select(rxStr => SlashedRegexpExt.ParseSlashedRegexp(rxStr, RegexOptions.Compiled))
                     .ToList();
             }
         }

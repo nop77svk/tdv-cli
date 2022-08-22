@@ -4,7 +4,7 @@
     using System.Collections.Generic;
     using CommandLine;
     using log4net;
-    using NoP77svk.IO;
+    using NoP77svk.Text.IO;
     using NoP77svk.TibcoDV.API;
 
     public class InputOutputCLI
