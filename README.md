@@ -41,7 +41,7 @@ Project is frozen FTTB. If you need any further functionality, feel free to cont
 
 <_exact identifier matching_> = [`equal to `] <_any valid resource identifier_>
 
-<_regexp identifier matching_> = ( `matching ` | `rlike ` | `rxlike ` | `regexlike ` | `regexplike ` ) `/` <_regular expression in .NET Core syntax_> `/`
+<_regexp identifier matching_> = ( `matching ` | `rlike ` | `rxlike ` | `regexlike ` | `regexplike ` ) `/` <_[regular expression in .NET 6 syntax](https://docs.microsoft.com/en-us/dotnet/standard/base-types/regular-expression-language-quick-reference)_> `/`
 
 Run introspection on listed data sources. Each data source listed must exist. At least one data source must be specified.
 
@@ -269,7 +269,7 @@ composite user jose, composite user equal to maria, composite group administrato
 
 ### Principal specifier -- Verbose/liberal
 
-<_principal specifier_> = <_principal domain_> <_principal type_>` `[`rlike|rxlike|regexlike|regexplike|matching`]` `<_regular expression_>`;`
+<_principal specifier_> = <_principal domain_> <_principal type_>` `[`rlike|rxlike|regexlike|regexplike|matching`]` `<_[regular expression in .NET 6 syntax](https://docs.microsoft.com/en-us/dotnet/standard/base-types/regular-expression-language-quick-reference)_>`;`
 
 <_principal type_> is one of
 * `user`, or
